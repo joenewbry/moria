@@ -24,7 +24,7 @@ render_part = "body";  // "body", "lid", "both"
 // ── MAIN DIMENSIONS ──────────────────────────────────────────
 outer_w  = 130;   // [mm] outer width  (X)
 outer_d  = 130;   // [mm] outer depth  (Y / front-to-back)
-outer_h  = 80;    // [mm] outer height (Z)
+outer_h  = 110;   // [mm] outer height (Z) — fits Jetson + Waveshare USB speaker
 wall     = 2.5;   // [mm] shell wall thickness
 corner_r = 4;     // [mm] corner fillet radius
 
