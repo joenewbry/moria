@@ -35,7 +35,19 @@ moria/
 
 ## Usage
 
-### Generate STL files
+### Export printable CUBE enclosure STLs
+
+Requires [OpenSCAD](https://openscad.org/) installed (`brew install --cask openscad@snapshot` on macOS).
+
+```bash
+make all
+```
+
+This exports `stl/cube-body.stl` and `stl/cube-lid.stl` from the parametric OpenSCAD design. Both parts have their bottom face at z=0, ready for slicing with no supports needed.
+
+To clean generated files: `make clean`
+
+### Generate board model STL files
 
 ```bash
 python3 -m venv .venv

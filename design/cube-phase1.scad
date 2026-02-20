@@ -235,8 +235,8 @@ module lid() {
   }
 }
 
-// ── MAIN OUTPUT ──────────────────────────────────────────────
-if (render_part == "body" || render_part == "both") {
+// ── HELPER ───────────────────────────────────────────────────
+module body_assembly() {
   difference() {
     union() {
       shell_body();
@@ -248,12 +248,24 @@ if (render_part == "body" || render_part == "both") {
   }
 }
 
+// ── MAIN OUTPUT ──────────────────────────────────────────────
+// Body: centered geometry spans z = -(outer_h-lid_h)/2 .. +(outer_h-lid_h)/2
+// For printing, shift so floor sits at z=0.
+if (render_part == "body") {
+  translate([0, 0, (outer_h - lid_h)/2])
+    body_assembly();
+}
+
+// Lid: centered geometry spans z = -lid_h/2 .. +lid_h/2
+// For printing, shift so skirt rim sits at z=0 (prints right-side-up).
 if (render_part == "lid") {
-  translate([0, 0, outer_h])
+  translate([0, 0, lid_h/2])
     lid();
 }
 
+// Both: visual preview, unshifted (body centered, lid floating above)
 if (render_part == "both") {
+  body_assembly();
   translate([0, 0, outer_h + 10])
     lid();
 }
