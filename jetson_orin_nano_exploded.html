@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jetson Orin Nano — Exploded View</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    color: #f5f5f7;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+  }
+  #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+  canvas { display: block; }
+
+  /* UI overlay */
+  #ui {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 12px; z-index: 10;
+  }
+  .btn {
+    padding: 10px 28px;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 980px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    color: #f5f5f7;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 0.02em;
+  }
+  .btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
+  .btn.active { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); }
+
+  #title-bar {
+    position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+    text-align: center; z-index: 10;
+  }
+  #title-bar h1 {
+    font-size: 28px; font-weight: 600; letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #76b900, #a3d944);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  #title-bar p { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+
+  /* Labels */
+  .label-3d {
+    position: absolute;
+    pointer-events: none;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 500;
+    color: #f5f5f7;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.15);
+    opacity: 0;
+    transition: opacity 0.3s;
+    transform: translate(-50%, -50%);
+  }
+  .label-3d .spec {
+    display: block;
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    font-weight: 400;
+  }
+
+  #info {
+    position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
+    font-size: 12px; color: rgba(255,255,255,0.35); z-index: 10;
+  }
+</style>
+</head>
+<body>
+
+<div id="title-bar">
+  <h1>NVIDIA Jetson Orin Nano Developer Kit</h1>
+  <p>100 mm × 79 mm × 21 mm &nbsp;·&nbsp; Interactive Exploded View</p>
+</div>
+
+<div id="canvas-container"></div>
+
+<div id="info">Drag to rotate &nbsp;·&nbsp; Scroll to zoom &nbsp;·&nbsp; Right-drag to pan</div>
+
+<div id="ui">
+  <button class="btn" id="btn-explode">Explode</button>
+  <button class="btn" id="btn-assemble">Assemble</button>
+  <button class="btn" id="btn-auto">Auto Rotate</button>
+</div>
+
+<!-- GSAP from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<!-- Three.js via ES module import map -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── Scene setup ──────────────────────────────────────────────────────────
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(140, 100, 180);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+container.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(50, 10, 40);
+controls.update();
+
+// Lighting
+scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+const dir1 = new THREE.DirectionalLight(0xffffff, 0.9);
+dir1.position.set(80, 120, 100);
+scene.add(dir1);
+const dir2 = new THREE.DirectionalLight(0x76b900, 0.3);
+dir2.position.set(-60, 80, -40);
+scene.add(dir2);
+const dir3 = new THREE.DirectionalLight(0x4488ff, 0.2);
+dir3.position.set(0, -40, 80);
+scene.add(dir3);
+
+// ── Materials ────────────────────────────────────────────────────────────
+const mat = {
+  pcb:       new THREE.MeshStandardMaterial({ color: 0x1a472a, roughness: 0.7, metalness: 0.1 }),
+  pcbDark:   new THREE.MeshStandardMaterial({ color: 0x0f2d1a, roughness: 0.6, metalness: 0.15 }),
+  heatsink:  new THREE.MeshStandardMaterial({ color: 0x8a8a8a, roughness: 0.3, metalness: 0.85 }),
+  thermal:   new THREE.MeshStandardMaterial({ color: 0x4a6fa5, roughness: 0.9, metalness: 0.0, transparent: true, opacity: 0.7 }),
+  connector: new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.5, metalness: 0.3 }),
+  usbA:      new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.4, metalness: 0.5 }),
+  usbC:      new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.3, metalness: 0.6 }),
+  dp:        new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.4, metalness: 0.5 }),
+  ethernet:  new THREE.MeshStandardMaterial({ color: 0x606060, roughness: 0.4, metalness: 0.4 }),
+  dcJack:    new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.5, metalness: 0.3 }),
+  gpio:      new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5, metalness: 0.4 }),
+  gpioPin:   new THREE.MeshStandardMaterial({ color: 0xc4a84a, roughness: 0.3, metalness: 0.9 }),
+  som:       new THREE.MeshStandardMaterial({ color: 0x1f5c35, roughness: 0.6, metalness: 0.15 }),
+  chip:      new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.4, metalness: 0.2 }),
+  sdCard:    new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.5, metalness: 0.3 }),
+  rubber:    new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.95, metalness: 0.0 }),
+  m2:        new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.5, metalness: 0.4 }),
+  csi:       new THREE.MeshStandardMaterial({ color: 0xd4c9a8, roughness: 0.5, metalness: 0.2 }),
+  dimm:      new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.4, metalness: 0.5 }),
+};
+
+// ── Component registry ───────────────────────────────────────────────────
+const components = [];
+const labelElements = [];
+
+function addComponent(name, spec, meshOrGroup, assembledPos, explodeOffset) {
+  meshOrGroup.position.copy(assembledPos);
+  scene.add(meshOrGroup);
+
+  const labelEl = document.createElement('div');
+  labelEl.className = 'label-3d';
+  labelEl.innerHTML = name + (spec ? `<span class="spec">${spec}</span>` : '');
+  document.body.appendChild(labelEl);
+
+  components.push({
+    name, spec, mesh: meshOrGroup,
+    assembled: assembledPos.clone(),
+    exploded: assembledPos.clone().add(explodeOffset),
+    label: labelEl,
+    labelOffset: explodeOffset.clone().normalize().multiplyScalar(8),
+  });
+  labelElements.push(labelEl);
+}
+
+// ── Build components ─────────────────────────────────────────────────────
+// Coordinate system: X = width (100mm), Z = depth (79mm), Y = height (21mm)
+// Origin at front-left-bottom of carrier board
+
+// 1. Rubber feet / standoffs (bottom)
+const footPositions = [[5, 5], [95, 5], [5, 74], [95, 74]];
+const feetGroup = new THREE.Group();
+footPositions.forEach(([fx, fz]) => {
+  const foot = new THREE.Mesh(new THREE.CylinderGeometry(3, 3.5, 3, 16), mat.rubber);
+  foot.position.set(fx, 0, fz);
+  feetGroup.add(foot);
+});
+addComponent('Rubber Feet', '4× anti-slip standoffs', feetGroup,
+  new THREE.Vector3(0, -1.5, 0), new THREE.Vector3(0, -35, 0));
+
+// 2. Carrier Board
+const carrierGroup = new THREE.Group();
+const boardBody = new THREE.Mesh(
+  new THREE.BoxGeometry(100, 1.6, 79), mat.pcb);
+carrierGroup.add(boardBody);
+// Silkscreen / trace detail (thin lines)
+const traceGeo = new THREE.BoxGeometry(90, 0.05, 70);
+const trace = new THREE.Mesh(traceGeo, mat.pcbDark);
+trace.position.y = 0.82;
+carrierGroup.add(trace);
+addComponent('Carrier Board', '100 × 79 mm PCB', carrierGroup,
+  new THREE.Vector3(50, 3, 39.5), new THREE.Vector3(0, -20, 0));
+
+// 3. I/O Ports — USB-A ×4 (two stacks of 2)
+for (let i = 0; i < 2; i++) {
+  const stack = new THREE.Group();
+  for (let j = 0; j < 2; j++) {
+    const usb = new THREE.Mesh(new THREE.BoxGeometry(14.5, 7.7, 13), mat.usbA);
+    usb.position.y = j * 7.8;
+    // Inner cavity
+    const cavity = new THREE.Mesh(new THREE.BoxGeometry(12, 5, 9), new THREE.MeshStandardMaterial({color: 0x111111}));
+    cavity.position.set(0, j * 7.8, -2.5);
+    stack.add(usb, cavity);
+  }
+  addComponent(`USB-A ${i*2+1}&${i*2+2}`, 'USB 3.2 Gen 2', stack,
+    new THREE.Vector3(41.5 + i * 17, 7.5, -1), new THREE.Vector3(0, 0, -30 - i * 12));
+}
+
+// 4. USB-C
+const usbcBody = new THREE.Mesh(new THREE.BoxGeometry(9, 3.5, 8), mat.usbC);
+addComponent('USB-C', 'USB 2.0 / Recovery', usbcBody,
+  new THREE.Vector3(26.5, 5.5, -1), new THREE.Vector3(0, 0, -50));
+
+// 5. DisplayPort
+const dpBody = new THREE.Mesh(new THREE.BoxGeometry(17, 5, 10), mat.dp);
+addComponent('DisplayPort', '4K60 output', dpBody,
+  new THREE.Vector3(10.5, 6, -1), new THREE.Vector3(0, 0, -45));
+
+// 6. Gigabit Ethernet
+const ethGroup = new THREE.Group();
+const ethBody = new THREE.Mesh(new THREE.BoxGeometry(16, 13.5, 14), mat.ethernet);
+ethGroup.add(ethBody);
+// LED indicators
+const ledGreen = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 0.5),
+  new THREE.MeshStandardMaterial({color: 0x76b900, emissive: 0x76b900, emissiveIntensity: 0.5}));
+ledGreen.position.set(-5, 5, -7);
+const ledAmber = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 0.5),
+  new THREE.MeshStandardMaterial({color: 0xffaa00, emissive: 0xffaa00, emissiveIntensity: 0.5}));
+ledAmber.position.set(5, 5, -7);
+ethGroup.add(ledGreen, ledAmber);
+addComponent('Gigabit Ethernet', 'RJ-45, 10/100/1000', ethGroup,
+  new THREE.Vector3(76, 9, -1), new THREE.Vector3(0, 0, -35));
+
+// 7. DC Barrel Jack
+const dcGroup = new THREE.Group();
+const dcOuter = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 10, 20), mat.dcJack);
+dcOuter.rotation.x = Math.PI / 2;
+dcGroup.add(dcOuter);
+addComponent('DC Power Jack', '5V 4A / 9–19V', dcGroup,
+  new THREE.Vector3(89.5, 5.5, -1), new THREE.Vector3(0, 0, -40));
+
+// 8. microSD slot
+const sdBody = new THREE.Mesh(new THREE.BoxGeometry(12, 2, 14), mat.sdCard);
+addComponent('microSD Slot', 'UHS-I', sdBody,
+  new THREE.Vector3(-1, 4, 60), new THREE.Vector3(-30, 0, 0));
+
+// 9. M.2 Key E (WiFi)
+const m2e = new THREE.Mesh(new THREE.BoxGeometry(22, 3, 15), mat.m2);
+addComponent('M.2 Key E', 'WiFi / BT module slot', m2e,
+  new THREE.Vector3(25, 5, 65), new THREE.Vector3(-15, 15, 20));
+
+// 10. M.2 Key M (NVMe)
+const m2m = new THREE.Mesh(new THREE.BoxGeometry(22, 3, 18), mat.m2);
+addComponent('M.2 Key M', 'NVMe SSD slot', m2m,
+  new THREE.Vector3(55, 5, 68), new THREE.Vector3(15, 15, 25));
+
+// 11. CSI Camera Connectors ×2
+for (let i = 0; i < 2; i++) {
+  const csi = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 22), mat.csi);
+  addComponent(`CSI Camera ${i+1}`, '15-pin MIPI CSI-2', csi,
+    new THREE.Vector3(90, 5, 30 + i * 25), new THREE.Vector3(25, 10 + i * 8, 0));
+}
+
+// 12. 40-pin GPIO Header
+const gpioGroup = new THREE.Group();
+const gpioHousing = new THREE.Mesh(new THREE.BoxGeometry(3, 8.5, 51), mat.gpio);
+gpioGroup.add(gpioHousing);
+// Pin rows
+for (let row = 0; row < 2; row++) {
+  for (let pin = 0; pin < 20; pin++) {
+    const p = new THREE.Mesh(new THREE.BoxGeometry(0.5, 10, 0.5), mat.gpioPin);
+    p.position.set(-0.6 + row * 1.2, 1, -24 + pin * 2.54);
+    gpioGroup.add(p);
+  }
+}
+addComponent('40-Pin GPIO', 'I2C, SPI, UART, PWM', gpioGroup,
+  new THREE.Vector3(97, 7.5, 45), new THREE.Vector3(30, 12, 0));
+
+// 13. SO-DIMM Connector
+const dimmConn = new THREE.Mesh(new THREE.BoxGeometry(69.6, 4, 6), mat.dimm);
+addComponent('SO-DIMM Connector', '260-pin module socket', dimmConn,
+  new THREE.Vector3(50, 6, 35), new THREE.Vector3(0, 8, 0));
+
+// 14. Jetson Orin Nano Module (SOM)
+const somGroup = new THREE.Group();
+const somBoard = new THREE.Mesh(new THREE.BoxGeometry(69.6, 1.2, 45), mat.som);
+somGroup.add(somBoard);
+// Main SoC (NVIDIA Orin chip)
+const soc = new THREE.Mesh(new THREE.BoxGeometry(16, 2.5, 16), mat.chip);
+soc.position.set(0, 1.8, -5);
+somGroup.add(soc);
+// LPDDR5 memory chips
+for (let i = 0; i < 4; i++) {
+  const mem = new THREE.Mesh(new THREE.BoxGeometry(8, 1, 10), mat.chip);
+  mem.position.set(-20 + i * 14, 1.3, 10);
+  somGroup.add(mem);
+}
+// NVIDIA logo (simplified — small green rectangle)
+const logo = new THREE.Mesh(new THREE.BoxGeometry(8, 0.1, 4),
+  new THREE.MeshStandardMaterial({color: 0x76b900, emissive: 0x76b900, emissiveIntensity: 0.3}));
+logo.position.set(20, 1, -15);
+somGroup.add(logo);
+addComponent('Jetson Orin Nano Module', '6-core Arm A78AE · 8GB LPDDR5', somGroup,
+  new THREE.Vector3(50, 10, 37), new THREE.Vector3(0, 25, 0));
+
+// 15. Thermal Pad
+const thermalPad = new THREE.Mesh(
+  new THREE.BoxGeometry(55, 0.5, 35), mat.thermal);
+addComponent('Thermal Pad', 'Thermal interface material', thermalPad,
+  new THREE.Vector3(50, 13, 35), new THREE.Vector3(0, 40, 0));
+
+// 16. Heatsink
+const hsGroup = new THREE.Group();
+// Base plate
+const hsBase = new THREE.Mesh(new THREE.BoxGeometry(70, 2, 45), mat.heatsink);
+hsGroup.add(hsBase);
+// Fins
+const numFins = 14;
+const finSpacing = 70 / (numFins + 1);
+for (let i = 0; i < numFins; i++) {
+  const fin = new THREE.Mesh(new THREE.BoxGeometry(1.2, 16, 40), mat.heatsink);
+  fin.position.set(-35 + finSpacing * (i + 1), 9, 0);
+  hsGroup.add(fin);
+}
+// Top plate connecting fins
+const hsTop = new THREE.Mesh(new THREE.BoxGeometry(70, 1, 45), mat.heatsink);
+hsTop.position.y = 17;
+hsGroup.add(hsTop);
+addComponent('Heatsink', 'Passive aluminum cooling', hsGroup,
+  new THREE.Vector3(50, 15, 37), new THREE.Vector3(0, 55, 0));
+
+// ── Animation state ──────────────────────────────────────────────────────
+let isExploded = false;
+let autoRotate = false;
+
+function explode() {
+  if (isExploded) return;
+  isExploded = true;
+  document.getElementById('btn-explode').classList.add('active');
+  document.getElementById('btn-assemble').classList.remove('active');
+
+  components.forEach((comp, i) => {
+    gsap.to(comp.mesh.position, {
+      x: comp.exploded.x,
+      y: comp.exploded.y,
+      z: comp.exploded.z,
+      duration: 1.4,
+      delay: i * 0.08,
+      ease: 'power3.out',
+      onUpdate: () => updateLabels(),
+    });
+    // Fade in labels
+    gsap.to(comp.label, {
+      opacity: 1,
+      delay: i * 0.08 + 0.5,
+      duration: 0.5,
+    });
+  });
+}
+
+function assemble() {
+  if (!isExploded) return;
+  isExploded = false;
+  document.getElementById('btn-assemble').classList.add('active');
+  document.getElementById('btn-explode').classList.remove('active');
+
+  // Fade out labels first
+  components.forEach((comp) => {
+    gsap.to(comp.label, { opacity: 0, duration: 0.3 });
+  });
+
+  components.forEach((comp, i) => {
+    gsap.to(comp.mesh.position, {
+      x: comp.assembled.x,
+      y: comp.assembled.y,
+      z: comp.assembled.z,
+      duration: 1.2,
+      delay: (components.length - 1 - i) * 0.06,
+      ease: 'power2.inOut',
+      onUpdate: () => updateLabels(),
+    });
+  });
+
+  setTimeout(() => {
+    document.getElementById('btn-assemble').classList.remove('active');
+  }, 1500);
+}
+
+function toggleAuto() {
+  autoRotate = !autoRotate;
+  controls.autoRotate = autoRotate;
+  controls.autoRotateSpeed = 1.5;
+  document.getElementById('btn-auto').classList.toggle('active', autoRotate);
+}
+
+// ── Label positioning ────────────────────────────────────────────────────
+function updateLabels() {
+  const halfW = window.innerWidth / 2;
+  const halfH = window.innerHeight / 2;
+
+  components.forEach(comp => {
+    if (parseFloat(comp.label.style.opacity || 0) < 0.01) return;
+
+    const pos = comp.mesh.position.clone();
+    // Offset label slightly from the part
+    pos.add(comp.labelOffset);
+    pos.project(camera);
+
+    const x = (pos.x * halfW) + halfW;
+    const y = -(pos.y * halfH) + halfH;
+
+    comp.label.style.left = x + 'px';
+    comp.label.style.top = y + 'px';
+
+    // Hide if behind camera
+    comp.label.style.display = pos.z > 1 ? 'none' : '';
+  });
+}
+
+// ── Render loop ──────────────────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  if (isExploded) updateLabels();
+  renderer.render(scene, camera);
+}
+animate();
+
+// ── Resize handling ──────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ── Button event listeners ───────────────────────────────────────────────
+document.getElementById('btn-explode').addEventListener('click', explode);
+document.getElementById('btn-assemble').addEventListener('click', assemble);
+document.getElementById('btn-auto').addEventListener('click', toggleAuto);
+
+// ── Auto-explode on load ─────────────────────────────────────────────────
+setTimeout(() => explode(), 1200);
+</script>
+</body>
+</html>

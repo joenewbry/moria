@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUBE — Inside the Phase 1 Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0c;
+  --surface: #111114;
+  --border: #252530;
+  --text: #e8e8f0;
+  --text-dim: #8888a0;
+  --text-muted: #555568;
+  --accent: #c0ff54;
+  --accent-dim: #8ab83a;
+  --gradient-accent: linear-gradient(135deg, #c0ff54, #54ffd0);
+  --teal: #54ffd0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP BAR */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.topbar-brand {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.topbar-sep { width: 1px; height: 20px; background: var(--border); }
+
+.topbar-title {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.topbar-back {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.topbar-back:hover {
+  color: var(--accent);
+  border-color: rgba(192,255,84,0.3);
+}
+
+/* CANVAS */
+.canvas-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+canvas { display: block; width: 100%; height: 100%; }
+
+/* TITLE OVERLAY */
+#title-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
+}
+
+#title-overlay h1 {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+#title-overlay p {
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  margin-top: 8px;
+}
+
+/* COMPONENT LABELS */
+.comp-label {
+  position: absolute;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  background: rgba(10,10,12,0.8);
+  backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(192,255,84,0.2);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
+  z-index: 4;
+}
+
+.comp-label .spec {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+/* BOTTOM HUD */
+#bottom-hud {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+#bottom-hud .hud-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 8px 16px;
+  background: rgba(10,10,12,0.85);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+
+#bottom-hud .hud-text span { color: var(--accent); }
+
+/* REPLAY BUTTON */
+#replay-btn {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  padding: 10px 24px;
+  border-radius: 980px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 5;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#replay-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(192,255,84,0.3);
+}
+
+/* NOISE OVERLAY */
+.noise-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+</style>
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">CUBE</div>
+  <div class="topbar-sep"></div>
+  <div class="topbar-title">Inside the Phase 1 Prototype</div>
+  <a href="/" class="topbar-back">&larr; Back</a>
+</div>
+
+<!-- CANVAS -->
+<div class="canvas-wrap" id="canvas-wrap">
+  <canvas id="c"></canvas>
+
+  <!-- Title overlay -->
+  <div id="title-overlay">
+    <h1>CUBE</h1>
+    <p>Phase 1 Prototype &mdash; 130 &times; 130 &times; 80 mm</p>
+  </div>
+
+  <!-- Bottom HUD -->
+  <div id="bottom-hud">
+    <div class="hud-text"><span>130 &times; 130 &times; 80 mm</span> &middot; 9 Components &middot; Drag to explore</div>
+  </div>
+
+  <!-- Replay -->
+  <button id="replay-btn">Replay</button>
+</div>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<!-- Three.js importmap -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── Constants (mm, 1 unit = 1mm) ──────────────────────────────
+const OW = 130, OD = 130, OH = 80;
+const WALL = 2.5, CR = 4, LID_H = 12;
+const BODY_H = OH - LID_H; // 68mm
+
+// ── Scene ─────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0a0c);
+
+const camera = new THREE.PerspectiveCamera(40, 1, 1, 2000);
+camera.position.set(300, 150, 300);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.target.set(0, 0, 0);
+controls.enabled = false; // disabled during animation
+
+// ── Lighting ──────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
+keyLight.position.set(200, 300, 200);
+keyLight.castShadow = true;
+scene.add(keyLight);
+
+const fillLight = new THREE.DirectionalLight(0x8888ff, 0.3);
+fillLight.position.set(-200, 100, -100);
+scene.add(fillLight);
+
+const rimLight = new THREE.DirectionalLight(0xc0ff54, 0.4);
+rimLight.position.set(0, -100, -200);
+scene.add(rimLight);
+
+// Interior light (starts dim, brightens on reveal)
+const interiorLight = new THREE.PointLight(0xffffff, 0, 200);
+interiorLight.position.set(0, 20, 0);
+scene.add(interiorLight);
+
+// Subtle ground grid
+const grid = new THREE.GridHelper(600, 30, 0x1a1a22, 0x1a1a22);
+grid.position.y = -OH / 2 - 2;
+scene.add(grid);
+
+// ── Materials ─────────────────────────────────────────────────
+const matEnclosure = new THREE.MeshPhysicalMaterial({
+  color: 0x1a1a1a, roughness: 0.85, metalness: 0.0,
+  side: THREE.DoubleSide,
+  transparent: true, opacity: 1.0,
+});
+// Clone for each wall so they can fade independently
+function wallMat() {
+  return matEnclosure.clone();
+}
+
+const matPCB = new THREE.MeshStandardMaterial({ color: 0x1a472a, roughness: 0.7, metalness: 0.1 });
+const matHeatsink = new THREE.MeshStandardMaterial({ color: 0x8a8a8a, roughness: 0.3, metalness: 0.85 });
+const matChip = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.4, metalness: 0.2 });
+const matSOM = new THREE.MeshStandardMaterial({ color: 0x1f5c35, roughness: 0.6, metalness: 0.15 });
+const matSSD = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5, metalness: 0.4 });
+const matWiFi = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.5, metalness: 0.3 });
+const matFan = new THREE.MeshStandardMaterial({ color: 0x4a3a2a, roughness: 0.7, metalness: 0.1 });
+const matFanBlade = new THREE.MeshStandardMaterial({ color: 0x3a3028, roughness: 0.6, metalness: 0.05 });
+const matAudio = new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.5, metalness: 0.3 });
+const matSpeaker = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.8, metalness: 0.2 });
+const matSpeakerCone = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9, metalness: 0.0 });
+const matCamera = new THREE.MeshStandardMaterial({ color: 0x1a472a, roughness: 0.6, metalness: 0.1 });
+const matLens = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.1, metalness: 0.0, transparent: true, opacity: 0.85 });
+const matUSBC = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.3, metalness: 0.6 });
+const matLED = new THREE.MeshStandardMaterial({
+  color: 0xc0ff54, roughness: 0.3, emissive: 0xc0ff54, emissiveIntensity: 0.8
+});
+const matStandoff = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.4, metalness: 0.5 });
+const matHighlight = new THREE.MeshStandardMaterial({ color: 0xc0ff54, emissive: 0xc0ff54, emissiveIntensity: 0.5, transparent: true, opacity: 0.0 });
+
+// ── Enclosure Construction ────────────────────────────────────
+// Origin at enclosure center. Y-up.
+// Internal cavity: 125 x 125 x 75 mm
+// Body bottom at Y = -OH/2, body top at Y = OH/2 - LID_H
+// Lid from Y = OH/2 - LID_H to Y = OH/2
+
+const enclosureParts = {};
+const wallEdges = [];
+
+function makeWallShape(w, h) {
+  const s = new THREE.Shape();
+  s.moveTo(-w/2, -h/2);
+  s.lineTo(w/2, -h/2);
+  s.lineTo(w/2, h/2);
+  s.lineTo(-w/2, h/2);
+  s.closePath();
+  return s;
+}
+
+function addCircleHole(shape, cx, cy, r, segs = 32) {
+  const hole = new THREE.Path();
+  hole.absarc(cx, cy, r, 0, Math.PI * 2, true);
+  shape.holes.push(hole);
+}
+
+function addRectHole(shape, cx, cy, w, h) {
+  const hole = new THREE.Path();
+  hole.moveTo(cx - w/2, cy - h/2);
+  hole.lineTo(cx - w/2, cy + h/2);
+  hole.lineTo(cx + w/2, cy + h/2);
+  hole.lineTo(cx + w/2, cy - h/2);
+  hole.closePath();
+  shape.holes.push(hole);
+}
+
+function extrudeWall(shape, depth, mat) {
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth, bevelEnabled: false
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+// Bottom panel
+{
+  const shape = makeWallShape(OW, OD);
+  // Standoff holes (optional visual, skip for simplicity)
+  const m = wallMat();
+  const mesh = extrudeWall(shape, WALL, m);
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.set(0, -OH/2, 0);
+  scene.add(mesh);
+  enclosureParts.bottom = { mesh, mat: m };
+
+  // Standoffs on bottom interior
+  const standoffPositions = [[43,29],[-43,29],[43,-29],[-43,-29]];
+  standoffPositions.forEach(([sx, sz]) => {
+    const geo = new THREE.CylinderGeometry(3, 3, 6, 16);
+    const standoff = new THREE.Mesh(geo, matStandoff);
+    standoff.position.set(sx, -OH/2 + WALL + 3, sz);
+    scene.add(standoff);
+  });
+}
+
+// Front wall (Z = -OD/2 face, normal pointing -Z)
+{
+  const shape = makeWallShape(OW, BODY_H);
+  // Camera aperture: 38mm dia, offset (-15, +10) from center
+  addCircleHole(shape, -15, 10, 19, 48);
+  // LED slot: 60 x 2.5mm at Y offset -25 from center
+  addRectHole(shape, 0, -25, 60, 2.5);
+  const m = wallMat();
+  const mesh = extrudeWall(shape, WALL, m);
+  // ExtrudeGeometry extrudes along +Z by default (inward from front face)
+  mesh.position.set(0, (BODY_H/2 - OH/2), -OD/2);
+  scene.add(mesh);
+  enclosureParts.front = { mesh, mat: m };
+
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(mesh.geometry),
+    new THREE.LineBasicMaterial({ color: 0xc0ff54, transparent: true, opacity: 0 })
+  );
+  edges.position.copy(mesh.position);
+  edges.rotation.copy(mesh.rotation);
+  scene.add(edges);
+  wallEdges.push(edges);
+}
+
+// Back wall (Z = +OD/2 face)
+{
+  const shape = makeWallShape(OW, BODY_H);
+  // USB-C cutout: 12x8mm at Y offset -12
+  addRectHole(shape, -OW/4, -12, 12, 8);
+  // Ethernet cutout: 18x14mm at Y offset +6
+  addRectHole(shape, OW/4, 6, 18, 14);
+  const m = wallMat();
+  const mesh = extrudeWall(shape, WALL, m);
+  mesh.rotation.y = Math.PI;
+  mesh.position.set(0, (BODY_H/2 - OH/2), OD/2);
+  scene.add(mesh);
+  enclosureParts.back = { mesh, mat: m };
+
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(mesh.geometry),
+    new THREE.LineBasicMaterial({ color: 0xc0ff54, transparent: true, opacity: 0 })
+  );
+  edges.position.copy(mesh.position);
+  edges.rotation.copy(mesh.rotation);
+  scene.add(edges);
+  wallEdges.push(edges);
+}
+
+// Left wall (X = -OW/2, speaker grille)
+{
+  const shape = makeWallShape(OD, BODY_H);
+  // Speaker grille: 5x5 grid, 3mm holes, 6mm spacing
+  for (let r = 0; r < 5; r++) {
+    for (let c = 0; c < 5; c++) {
+      const cx = (c - 2) * 6;
+      const cy = (r - 2) * 6;
+      addCircleHole(shape, cx, cy, 1.5, 16);
+    }
+  }
+  const m = wallMat();
+  const mesh = extrudeWall(shape, WALL, m);
+  mesh.rotation.y = Math.PI / 2;
+  mesh.position.set(-OW/2, (BODY_H/2 - OH/2), 0);
+  scene.add(mesh);
+  enclosureParts.left = { mesh, mat: m };
+
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(mesh.geometry),
+    new THREE.LineBasicMaterial({ color: 0xc0ff54, transparent: true, opacity: 0 })
+  );
+  edges.position.copy(mesh.position);
+  edges.rotation.copy(mesh.rotation);
+  scene.add(edges);
+  wallEdges.push(edges);
+}
+
+// Right wall (X = +OW/2, vent slots)
+{
+  const shape = makeWallShape(OD, BODY_H);
+  // 8 vent slots: 2 x 30mm, 4mm spacing
+  for (let i = 0; i < 8; i++) {
+    const cx = (i - 3.5) * 4;
+    addRectHole(shape, cx, 5, 2, 30);
+  }
+  const m = wallMat();
+  const mesh = extrudeWall(shape, WALL, m);
+  mesh.rotation.y = -Math.PI / 2;
+  mesh.position.set(OW/2, (BODY_H/2 - OH/2), 0);
+  scene.add(mesh);
+  enclosureParts.right = { mesh, mat: m };
+
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(mesh.geometry),
+    new THREE.LineBasicMaterial({ color: 0xc0ff54, transparent: true, opacity: 0 })
+  );
+  edges.position.copy(mesh.position);
+  edges.rotation.copy(mesh.rotation);
+  scene.add(edges);
+  wallEdges.push(edges);
+}
+
+// Lid
+{
+  const shape = makeWallShape(OW, OD);
+  // Fan opening: 36mm diameter at center
+  addCircleHole(shape, 0, 0, 18, 48);
+  // 4 screw holes at ±16, ±16 (fan_screw_pitch/2 = 16)
+  for (const dx of [-1, 1]) {
+    for (const dz of [-1, 1]) {
+      addCircleHole(shape, dx * 16, dz * 16, 1.7, 12);
+    }
+  }
+  const m = wallMat();
+  const mesh = extrudeWall(shape, LID_H, m);
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.set(0, OH/2 - LID_H, 0);
+  scene.add(mesh);
+  enclosureParts.lid = { mesh, mat: m, originalY: OH/2 - LID_H };
+
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(mesh.geometry),
+    new THREE.LineBasicMaterial({ color: 0xc0ff54, transparent: true, opacity: 0 })
+  );
+  edges.position.copy(mesh.position);
+  edges.rotation.copy(mesh.rotation);
+  scene.add(edges);
+  wallEdges.push(edges);
+  enclosureParts.lid.edges = edges;
+}
+
+// ── Internal Components ───────────────────────────────────────
+// All positioned within the enclosure. Floor at Y = -OH/2 + WALL = -37.5
+const FLOOR_Y = -OH/2 + WALL;
+const STANDOFF_TOP = FLOOR_Y + 6; // standoffs are 6mm tall
+
+const componentMeshes = [];
+const labelData = [];
+
+function registerComponent(name, spec, mesh, labelPos) {
+  componentMeshes.push(mesh);
+  scene.add(mesh);
+
+  const el = document.createElement('div');
+  el.className = 'comp-label';
+  el.innerHTML = `${name}<span class="spec">${spec}</span>`;
+  document.getElementById('canvas-wrap').appendChild(el);
+
+  labelData.push({ name, el, mesh, worldPos: labelPos.clone() });
+}
+
+// 1. Carrier Board + SOM + Heatsink
+{
+  const group = new THREE.Group();
+
+  // Carrier board: 100x79mm, 1.6mm thick
+  const board = new THREE.Mesh(new THREE.BoxGeometry(100, 1.6, 79), matPCB);
+  board.position.y = 0;
+  group.add(board);
+
+  // SOM module on top
+  const som = new THREE.Mesh(new THREE.BoxGeometry(69.6, 1.2, 45), matSOM);
+  som.position.set(0, 2, -5);
+  group.add(som);
+
+  // SoC chip
+  const soc = new THREE.Mesh(new THREE.BoxGeometry(16, 2.5, 16), matChip);
+  soc.position.set(0, 4, -5);
+  group.add(soc);
+
+  // Memory chips
+  for (let i = 0; i < 4; i++) {
+    const mem = new THREE.Mesh(new THREE.BoxGeometry(8, 1, 10), matChip);
+    mem.position.set(-20 + i * 14, 3.2, 8);
+    group.add(mem);
+  }
+
+  // Heatsink
+  const hsBase = new THREE.Mesh(new THREE.BoxGeometry(70, 2, 45), matHeatsink);
+  hsBase.position.set(0, 6.5, -5);
+  group.add(hsBase);
+  const numFins = 14;
+  for (let i = 0; i < numFins; i++) {
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(1.2, 12, 40), matHeatsink);
+    fin.position.set(-35 + (70 / (numFins + 1)) * (i + 1), 13.5, -5);
+    group.add(fin);
+  }
+
+  group.position.set(0, STANDOFF_TOP + 0.8, -5);
+  registerComponent('Jetson Orin Nano Super',
+    '6-core A78AE &middot; 8GB LPDDR5 &middot; 67 TOPS', group,
+    new THREE.Vector3(0, STANDOFF_TOP + 18, -5));
+}
+
+// 2. NVMe SSD
+{
+  const ssd = new THREE.Mesh(new THREE.BoxGeometry(80, 2.3, 22), matSSD);
+  ssd.position.set(10, STANDOFF_TOP + 2, 25);
+  registerComponent('512GB NVMe SSD', 'M.2 2280', ssd,
+    new THREE.Vector3(10, STANDOFF_TOP + 6, 25));
+}
+
+// 3. WiFi Module
+{
+  const wifi = new THREE.Mesh(new THREE.BoxGeometry(22, 2, 30), matWiFi);
+  wifi.position.set(-30, STANDOFF_TOP + 2, 25);
+  registerComponent('Wi-Fi 6', 'M.2 Key E', wifi,
+    new THREE.Vector3(-30, STANDOFF_TOP + 6, 25));
+}
+
+// 4. Noctua 40mm Fan (above heatsink, under lid)
+{
+  const fanGroup = new THREE.Group();
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(40, 10, 40), matFan);
+  fanGroup.add(frame);
+  // Fan blades (simplified as a cylinder)
+  const bladeGeo = new THREE.CylinderGeometry(16, 16, 3, 6);
+  const blades = new THREE.Mesh(bladeGeo, matFanBlade);
+  blades.position.y = 0;
+  fanGroup.add(blades);
+
+  fanGroup.position.set(0, OH/2 - LID_H - 7, -5);
+  registerComponent('40mm Noctua Fan', 'Active Cooling', fanGroup,
+    new THREE.Vector3(0, OH/2 - LID_H + 5, -5));
+}
+
+// 5. USB Audio Card + MEMS Mics
+{
+  const audioGroup = new THREE.Group();
+  const card = new THREE.Mesh(new THREE.BoxGeometry(30, 5, 20), matAudio);
+  audioGroup.add(card);
+  // Two MEMS mics
+  for (const dx of [-8, 8]) {
+    const mic = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 1.5, 12), matChip);
+    mic.position.set(dx, 3.5, 0);
+    audioGroup.add(mic);
+  }
+  audioGroup.position.set(35, STANDOFF_TOP + 4, -40);
+  registerComponent('SSS1629 USB Audio', 'Dual MEMS Microphones', audioGroup,
+    new THREE.Vector3(35, STANDOFF_TOP + 12, -40));
+}
+
+// 6. Speakers (2x)
+{
+  // Left-facing speaker (near speaker grille)
+  const spk1Group = new THREE.Group();
+  const body1 = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 15, 24), matSpeaker);
+  body1.rotation.z = Math.PI / 2;
+  spk1Group.add(body1);
+  const cone1 = new THREE.Mesh(new THREE.CylinderGeometry(16, 10, 2, 24), matSpeakerCone);
+  cone1.rotation.z = Math.PI / 2;
+  cone1.position.x = -9;
+  spk1Group.add(cone1);
+  spk1Group.position.set(-45, STANDOFF_TOP + 20, 0);
+
+  // Front-facing speaker
+  const spk2Group = new THREE.Group();
+  const body2 = new THREE.Mesh(new THREE.CylinderGeometry(20, 20, 15, 24), matSpeaker);
+  body2.rotation.x = Math.PI / 2;
+  spk2Group.add(body2);
+  const cone2 = new THREE.Mesh(new THREE.CylinderGeometry(16, 10, 2, 24), matSpeakerCone);
+  cone2.rotation.x = Math.PI / 2;
+  cone2.position.z = -9;
+  spk2Group.add(cone2);
+  spk2Group.position.set(20, STANDOFF_TOP + 20, -45);
+
+  const speakerWrapper = new THREE.Group();
+  speakerWrapper.add(spk1Group);
+  speakerWrapper.add(spk2Group);
+
+  registerComponent('2&times; 8&Omega; 5W Speakers', 'Piper TTS Output', speakerWrapper,
+    new THREE.Vector3(-20, STANDOFF_TOP + 25, -20));
+}
+
+// 7. Camera module (behind front wall aperture)
+{
+  const camGroup = new THREE.Group();
+  const pcb = new THREE.Mesh(new THREE.BoxGeometry(25, 1.5, 25), matCamera);
+  camGroup.add(pcb);
+  const lensHousing = new THREE.Mesh(new THREE.CylinderGeometry(10, 10, 8, 32), matChip);
+  lensHousing.rotation.x = Math.PI / 2;
+  lensHousing.position.z = -5;
+  camGroup.add(lensHousing);
+  const lens = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 2, 32), matLens);
+  lens.rotation.x = Math.PI / 2;
+  lens.position.z = -10;
+  camGroup.add(lens);
+
+  camGroup.position.set(-15, STANDOFF_TOP + 20 + 10, -OD/2 + WALL + 12);
+  registerComponent('5MP Camera', '160&deg; FOV', camGroup,
+    new THREE.Vector3(-15, STANDOFF_TOP + 35, -OD/2 + 20));
+}
+
+// 8. USB-C Power Input (at rear wall)
+{
+  const usbc = new THREE.Mesh(new THREE.BoxGeometry(12, 8, 10), matUSBC);
+  usbc.position.set(-OW/4, STANDOFF_TOP + 8 - 12, OD/2 - WALL - 5);
+  registerComponent('USB-C PD', '15&ndash;25W', usbc,
+    new THREE.Vector3(-OW/4, STANDOFF_TOP + 2, OD/2 - 10));
+}
+
+// 9. LED Strip (front bottom, inside LED slot)
+{
+  const led = new THREE.Mesh(new THREE.BoxGeometry(58, 2, 3), matLED);
+  // LED slot at Y offset -25 from front wall center (-6), so Y = -31
+  led.position.set(0, -31, -OD/2 + WALL + 2);
+  registerComponent('Status LED Strip', 'Addressable RGB', led,
+    new THREE.Vector3(0, -25, -OD/2 + 10));
+}
+
+// ── Highlight rings (invisible until component highlight) ─────
+const highlightRings = [];
+componentMeshes.forEach(() => {
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0, 1, 32),
+    matHighlight.clone()
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.visible = false;
+  scene.add(ring);
+  highlightRings.push(ring);
+});
+
+// ── Label projection ──────────────────────────────────────────
+function updateLabels() {
+  const w2 = canvas.clientWidth / 2;
+  const h2 = canvas.clientHeight / 2;
+  labelData.forEach(ld => {
+    if (parseFloat(ld.el.style.opacity || 0) < 0.01) return;
+    const v = ld.worldPos.clone().project(camera);
+    ld.el.style.left = (v.x * w2 + w2) + 'px';
+    ld.el.style.top = (-v.y * h2 + h2) + 'px';
+    ld.el.style.display = v.z > 1 ? 'none' : '';
+  });
+}
+
+// ── Resize ────────────────────────────────────────────────────
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ── Animation Timeline (GSAP) ─────────────────────────────────
+let tl;
+let animationDone = false;
+
+function buildTimeline() {
+  tl = gsap.timeline({
+    onComplete: () => {
+      animationDone = true;
+      controls.enabled = true;
+      // Show HUD and replay
+      gsap.to('#bottom-hud', { opacity: 1, duration: 0.5, onStart: () => {
+        document.getElementById('bottom-hud').style.pointerEvents = 'auto';
+      }});
+      gsap.to('#replay-btn', { opacity: 1, duration: 0.5, onStart: () => {
+        const btn = document.getElementById('replay-btn');
+        btn.style.pointerEvents = 'auto';
+      }});
+      // Fade all labels to reduced opacity
+      labelData.forEach(ld => {
+        gsap.to(ld.el, { opacity: 0.5, duration: 0.5 });
+      });
+    }
+  });
+
+  // ── Phase A: Exterior orbit (0-4s) ────────────────────────
+  // Camera at (300,150,300) slowly dollying in, cube auto-rotating
+  // We animate a rotation object and camera position
+  const cubeGroup = new THREE.Group();
+  // Move all enclosure parts + components into a pivot group would be complex.
+  // Instead, animate camera orbit angle.
+  const camState = { angle: 0, radius: 340, height: 160, lookY: 0 };
+
+  tl.to(camState, {
+    angle: Math.PI * 0.4,
+    radius: 200,
+    height: 100,
+    duration: 4,
+    ease: 'power1.inOut',
+    onUpdate: () => {
+      camera.position.set(
+        Math.sin(camState.angle) * camState.radius,
+        camState.height,
+        Math.cos(camState.angle) * camState.radius
+      );
+      camera.lookAt(0, camState.lookY, 0);
+    }
+  }, 0);
+
+  // LED pulse during exterior phase (handled in render loop)
+
+  // ── Phase B: Approach & Title (4-6s) ──────────────────────
+  tl.to(camState, {
+    angle: Math.PI * 0.5,
+    radius: 180,
+    height: 80,
+    duration: 2,
+    ease: 'power2.out',
+    onUpdate: () => {
+      camera.position.set(
+        Math.sin(camState.angle) * camState.radius,
+        camState.height,
+        Math.cos(camState.angle) * camState.radius
+      );
+      camera.lookAt(0, camState.lookY, 0);
+    }
+  }, 4);
+
+  // Title fade in then out
+  tl.to('#title-overlay', { opacity: 1, duration: 0.8, ease: 'power2.out' }, 4.2);
+  tl.to('#title-overlay', { opacity: 0, duration: 0.6, ease: 'power2.in' }, 5.6);
+
+  // ── Phase C: Lid lift + walls dissolve (6-9s) ─────────────
+  // Lid lifts up 60mm
+  tl.to(enclosureParts.lid.mesh.position, {
+    y: enclosureParts.lid.originalY + 60,
+    duration: 1.5,
+    ease: 'power2.inOut'
+  }, 6);
+  tl.to(enclosureParts.lid.edges.position, {
+    y: enclosureParts.lid.originalY + 60,
+    duration: 1.5,
+    ease: 'power2.inOut'
+  }, 6);
+
+  // Lid fades to 10%
+  tl.to(enclosureParts.lid.mat, {
+    opacity: 0.1,
+    duration: 1.5,
+    ease: 'power2.inOut'
+  }, 6);
+
+  // Walls fade to 8%
+  ['front', 'back', 'left', 'right'].forEach(side => {
+    tl.to(enclosureParts[side].mat, {
+      opacity: 0.08,
+      duration: 2,
+      ease: 'power2.inOut'
+    }, 6.5);
+  });
+
+  // Bottom fade slightly
+  tl.to(enclosureParts.bottom.mat, {
+    opacity: 0.3,
+    duration: 2,
+    ease: 'power2.inOut'
+  }, 6.5);
+
+  // Edge wireframes appear
+  wallEdges.forEach(edge => {
+    tl.to(edge.material, {
+      opacity: 0.4,
+      duration: 1.5,
+      ease: 'power2.out'
+    }, 7);
+  });
+
+  // Interior light fades up
+  tl.to(interiorLight, {
+    intensity: 80,
+    duration: 2,
+    ease: 'power2.out'
+  }, 6.5);
+
+  // Camera rises and looks down
+  tl.to(camState, {
+    angle: Math.PI * 0.6,
+    radius: 200,
+    height: 180,
+    lookY: -10,
+    duration: 3,
+    ease: 'power2.inOut',
+    onUpdate: () => {
+      camera.position.set(
+        Math.sin(camState.angle) * camState.radius,
+        camState.height,
+        Math.cos(camState.angle) * camState.radius
+      );
+      camera.lookAt(0, camState.lookY, 0);
+    }
+  }, 6);
+
+  // ── Phase D: Component highlights (9-18s) ──────────────────
+  const highlights = [
+    { idx: 0, time: 9.0 },   // Carrier Board + Heatsink
+    { idx: 1, time: 10.2 },  // NVMe SSD
+    { idx: 2, time: 11.2 },  // WiFi Module
+    { idx: 3, time: 12.2 },  // Noctua Fan
+    { idx: 4, time: 13.4 },  // Audio Card
+    { idx: 5, time: 14.4 },  // Speakers
+    { idx: 6, time: 15.4 },  // Camera
+    { idx: 7, time: 16.4 },  // USB-C Power
+    { idx: 8, time: 17.4 },  // LED Strip
+  ];
+
+  // Subtle camera pan during highlights
+  tl.to(camState, {
+    angle: Math.PI * 0.9,
+    radius: 220,
+    height: 160,
+    lookY: -5,
+    duration: 9,
+    ease: 'power1.inOut',
+    onUpdate: () => {
+      camera.position.set(
+        Math.sin(camState.angle) * camState.radius,
+        camState.height,
+        Math.cos(camState.angle) * camState.radius
+      );
+      camera.lookAt(0, camState.lookY, 0);
+    }
+  }, 9);
+
+  highlights.forEach(({ idx, time }) => {
+    // Fade in label
+    tl.to(labelData[idx].el, {
+      opacity: 1,
+      duration: 0.4,
+      ease: 'power2.out'
+    }, time);
+
+    // Fade label back to 0.7 after 0.8s
+    tl.to(labelData[idx].el, {
+      opacity: 0.7,
+      duration: 0.4,
+      ease: 'power2.in'
+    }, time + 0.8);
+  });
+
+  // ── Phase E transition at 18s is handled by onComplete ─────
+}
+
+// ── Replay ────────────────────────────────────────────────────
+document.getElementById('replay-btn').addEventListener('click', () => {
+  // Reset state
+  animationDone = false;
+  controls.enabled = false;
+
+  // Reset enclosure
+  enclosureParts.lid.mesh.position.y = enclosureParts.lid.originalY;
+  enclosureParts.lid.edges.position.y = enclosureParts.lid.originalY;
+  enclosureParts.lid.mat.opacity = 1;
+  ['front', 'back', 'left', 'right'].forEach(s => {
+    enclosureParts[s].mat.opacity = 1;
+  });
+  enclosureParts.bottom.mat.opacity = 1;
+  wallEdges.forEach(e => { e.material.opacity = 0; });
+  interiorLight.intensity = 0;
+
+  // Reset labels
+  labelData.forEach(ld => { ld.el.style.opacity = 0; });
+
+  // Hide HUD and replay button
+  gsap.set('#bottom-hud', { opacity: 0 });
+  gsap.set('#replay-btn', { opacity: 0 });
+  document.getElementById('replay-btn').style.pointerEvents = 'none';
+
+  // Kill and rebuild
+  if (tl) tl.kill();
+  buildTimeline();
+});
+
+// ── Render loop ───────────────────────────────────────────────
+let time = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+  time += 0.016;
+
+  // LED pulse
+  matLED.emissiveIntensity = 0.5 + 0.5 * Math.sin(time * 3);
+
+  if (animationDone) {
+    controls.update();
+  }
+
+  updateLabels();
+  renderer.render(scene, camera);
+}
+
+// ── Start ─────────────────────────────────────────────────────
+buildTimeline();
+animate();
+</script>
+</body>
+</html>

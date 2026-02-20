@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUBE — 3D Design Viewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0c;
+  --surface: #111114;
+  --surface2: #18181c;
+  --border: #252530;
+  --border-glow: #3a3a50;
+  --text: #e8e8f0;
+  --text-dim: #8888a0;
+  --text-muted: #555568;
+  --accent: #c0ff54;
+  --accent-dim: #8ab83a;
+  --accent-bg: rgba(192,255,84,0.06);
+  --blue: #54a0ff;
+  --purple: #b388ff;
+  --teal: #54ffd0;
+  --orange: #ffb054;
+  --gradient-accent: linear-gradient(135deg, #c0ff54, #54ffd0);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP BAR */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.topbar-brand {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.topbar-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+}
+
+.topbar-title {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.topbar-back {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.topbar-back:hover {
+  color: var(--accent);
+  border-color: rgba(192,255,84,0.3);
+}
+
+/* MAIN LAYOUT */
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* LEFT PANEL */
+.left-panel {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.panel-section {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* VERSION TOGGLE */
+.version-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  text-align: left;
+  transition: all 0.2s;
+  color: var(--text);
+}
+
+.version-btn:hover {
+  border-color: var(--border-glow);
+}
+
+.version-btn.active {
+  border-color: rgba(192,255,84,0.5);
+  background: rgba(192,255,84,0.04);
+}
+
+.version-btn.active-blue {
+  border-color: rgba(84,160,255,0.5);
+  background: rgba(84,160,255,0.04);
+}
+
+.version-btn.active-steel {
+  border-color: rgba(84,255,208,0.5);
+  background: rgba(84,255,208,0.04);
+}
+
+.version-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.dot-pla    { background: #555568; border: 2px solid #8888a0; }
+.dot-alum   { background: #54a0ff; }
+.dot-steel  { background: #54ffd0; }
+
+.version-btn .vb-name {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.version-btn .vb-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* CONTROLS HINT */
+.controls-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+
+.controls-hint span {
+  color: var(--text-dim);
+}
+
+/* SPEC TABLE (mini) */
+.mini-spec {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mini-spec tr td {
+  padding: 6px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(37,37,48,0.5);
+  vertical-align: top;
+}
+
+.mini-spec tr:last-child td {
+  border-bottom: none;
+}
+
+.mini-spec td:first-child {
+  color: var(--text-muted);
+  width: 45%;
+  padding-right: 8px;
+}
+
+.mini-spec td:last-child {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* DOWNLOAD BUTTONS */
+.dl-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text-dim);
+  font-size: 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.dl-btn:hover {
+  border-color: rgba(192,255,84,0.3);
+  color: var(--accent);
+}
+
+.dl-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.dl-info .dl-name {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.dl-info .dl-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.dl-arrow {
+  margin-left: auto;
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+/* CANVAS AREA */
+.canvas-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* HUD OVERLAY */
+.hud {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.hud-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  padding: 6px 10px;
+  background: rgba(10,10,12,0.85);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  backdrop-filter: blur(8px);
+}
+
+.hud-badge.accent { color: var(--accent); border-color: rgba(192,255,84,0.2); }
+
+.hud-controls {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  padding: 8px 12px;
+  background: rgba(10,10,12,0.7);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  backdrop-filter: blur(8px);
+  line-height: 1.7;
+}
+
+/* BOTTOM INFO BAR */
+.bottom-bar {
+  height: 40px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 24px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'Space Mono', monospace;
+}
+
+.bottom-bar span { color: var(--accent); }
+
+@media (max-width: 700px) {
+  .left-panel { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">CUBE</div>
+  <div class="topbar-sep"></div>
+  <div class="topbar-title">Enclosure Design Viewer</div>
+  <a href="/" class="topbar-back">← Back to Overview</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+
+    <!-- Version Select -->
+    <div class="panel-section">
+      <div class="panel-label">Version</div>
+      <button class="version-btn active" id="btn-pla" onclick="setVersion('pla')">
+        <div class="version-dot dot-pla"></div>
+        <div>
+          <div class="vb-name">PLA Prototype</div>
+          <div class="vb-desc">130×130×80mm · 3D printable · Dev unit</div>
+        </div>
+      </button>
+      <button class="version-btn" id="btn-alum" onclick="setVersion('alum')">
+        <div class="version-dot dot-alum"></div>
+        <div>
+          <div class="vb-name">Aluminum Production</div>
+          <div class="vb-desc">50×50×50mm · CNC 6061-T6 · Phase 2</div>
+        </div>
+      </button>
+      <button class="version-btn" id="btn-steel" onclick="setVersion('steel')">
+        <div class="version-dot dot-steel"></div>
+        <div>
+          <div class="vb-name">Stainless Steel Concept</div>
+          <div class="vb-desc">50×50×50mm · DMLS 316L · Premium</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Specs -->
+    <div class="panel-section" id="spec-panel">
+      <div class="panel-label">Specifications</div>
+      <table class="mini-spec" id="spec-table"></table>
+    </div>
+
+    <!-- Controls -->
+    <div class="panel-section">
+      <div class="panel-label">Controls</div>
+      <div class="controls-hint">
+        <span>Drag</span> — Rotate<br>
+        <span>Scroll</span> — Zoom<br>
+        <span>Right drag</span> — Pan<br>
+        <span>R</span> — Reset view
+      </div>
+    </div>
+
+    <!-- Downloads -->
+    <div class="panel-section">
+      <div class="panel-label">Parametric Files</div>
+      <a href="cube-phase1.scad" download class="dl-btn">
+        <div class="dl-icon">📐</div>
+        <div class="dl-info">
+          <div class="dl-name">cube-phase1.scad</div>
+          <div class="dl-meta">PLA Prototype · OpenSCAD · Printable</div>
+        </div>
+        <div class="dl-arrow">↓</div>
+      </a>
+      <a href="cube-phase2.scad" download class="dl-btn">
+        <div class="dl-icon">⚙️</div>
+        <div class="dl-info">
+          <div class="dl-name">cube-phase2.scad</div>
+          <div class="dl-meta">Aluminum/Steel · OpenSCAD · CNC/DMLS</div>
+        </div>
+        <div class="dl-arrow">↓</div>
+      </a>
+      <div style="font-size:11px; color:var(--text-muted); margin-top:8px; line-height:1.6;">
+        Open in <a href="https://openscad.org" style="color:var(--teal); text-decoration:none;">OpenSCAD</a> (free). Edit parameters at the top of each file. Export STL for printing or STEP for CNC machining.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 3D CANVAS -->
+  <div class="canvas-wrap">
+    <canvas id="c"></canvas>
+
+    <!-- HUD -->
+    <div class="hud">
+      <div class="hud-badge accent" id="hud-version">PLA Prototype</div>
+      <div class="hud-badge" id="hud-dims">130 × 130 × 80 mm</div>
+      <div class="hud-controls">
+        Drag to rotate · Scroll to zoom<br>
+        Right-drag to pan · R to reset
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <span>CUBE</span> Enclosure Design ·
+  Phase 1: PLA Prototype →
+  Phase 2: <span>Aluminum Production</span> →
+  Concept: Stainless Steel DMLS ·
+  All parametric via OpenSCAD
+</div>
+
+<!-- THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── SCENE SETUP ──────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.physicallyCorrectLights = true;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0a0c);
+
+// Subtle grid floor
+const gridHelper = new THREE.GridHelper(10, 20, 0x1a1a22, 0x1a1a22);
+gridHelper.position.y = -1.5;
+scene.add(gridHelper);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+camera.position.set(3, 2.5, 4);
+camera.lookAt(0, 0, 0);
+
+// ── LIGHTING ─────────────────────────────────────────────────────
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+scene.add(ambientLight);
+
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+keyLight.position.set(5, 8, 5);
+keyLight.castShadow = true;
+scene.add(keyLight);
+
+const fillLight = new THREE.DirectionalLight(0x8888ff, 0.4);
+fillLight.position.set(-5, 2, -3);
+scene.add(fillLight);
+
+const rimLight = new THREE.DirectionalLight(0xc0ff54, 0.6);
+rimLight.position.set(0, -3, -5);
+scene.add(rimLight);
+
+// ── ENVIRONMENT MAP (simple gradient) ────────────────────────────
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+pmremGenerator.compileEquirectangularShader();
+const envScene = new THREE.RoomEnvironment();
+const envTexture = pmremGenerator.fromScene(envScene).texture;
+scene.environment = envTexture;
+
+// ── MATERIALS ────────────────────────────────────────────────────
+const materials = {
+  pla: new THREE.MeshStandardMaterial({
+    color: 0x1a1a1a,
+    roughness: 0.9,
+    metalness: 0.0,
+    envMapIntensity: 0.5
+  }),
+  alum: new THREE.MeshStandardMaterial({
+    color: 0xb8b8c8,
+    roughness: 0.15,
+    metalness: 0.9,
+    envMapIntensity: 1.5
+  }),
+  steel: new THREE.MeshStandardMaterial({
+    color: 0xd0d0d8,
+    roughness: 0.05,
+    metalness: 1.0,
+    envMapIntensity: 2.0
+  }),
+  // Lens / camera aperture
+  lens: new THREE.MeshStandardMaterial({
+    color: 0x080808,
+    roughness: 0.1,
+    metalness: 0.0,
+    transparent: true,
+    opacity: 0.85
+  }),
+  lensGlass: new THREE.MeshStandardMaterial({
+    color: 0x113366,
+    roughness: 0.05,
+    metalness: 0.0,
+    transparent: true,
+    opacity: 0.5,
+    envMapIntensity: 2.0
+  }),
+  ledGreen: new THREE.MeshStandardMaterial({
+    color: 0xc0ff54,
+    roughness: 0.3,
+    metalness: 0.0,
+    emissive: 0xc0ff54,
+    emissiveIntensity: 0.8
+  }),
+  ventGrille: new THREE.MeshStandardMaterial({
+    color: 0x0a0a0c,
+    roughness: 0.9,
+    metalness: 0.0
+  })
+};
+
+// ── GEOMETRY HELPERS ─────────────────────────────────────────────
+function chamferedBox(w, h, d, chamfer) {
+  // Approximation: use regular BoxGeometry (chamfer visual via material)
+  return new THREE.BoxGeometry(w, h, d, 2, 2, 2);
+}
+
+// ── BUILD MODELS ─────────────────────────────────────────────────
+const groups = {};
+
+// Scale factor: 1 unit = 10mm
+function buildPLA() {
+  const g = new THREE.Group();
+
+  // Main body: 130×130×80mm → 13×13×8 units
+  const bodyGeo = new THREE.BoxGeometry(13, 8, 13);
+  const body = new THREE.Mesh(bodyGeo, materials.pla);
+  body.castShadow = true;
+  body.receiveShadow = true;
+  g.add(body);
+
+  // Camera lens on front face (z = +6.5)
+  const lensRingGeo = new THREE.CylinderGeometry(1.4, 1.4, 0.3, 32);
+  const lensRing = new THREE.Mesh(lensRingGeo, materials.lens);
+  lensRing.rotation.x = Math.PI / 2;
+  lensRing.position.set(-1.5, 1.0, 6.5);
+  g.add(lensRing);
+
+  const lensGlassGeo = new THREE.CylinderGeometry(1.15, 1.15, 0.15, 32);
+  const lensGlass = new THREE.Mesh(lensGlassGeo, materials.lensGlass);
+  lensGlass.rotation.x = Math.PI / 2;
+  lensGlass.position.set(-1.5, 1.0, 6.62);
+  g.add(lensGlass);
+
+  // LED strip bar at bottom of front face
+  const ledGeo = new THREE.BoxGeometry(5.0, 0.4, 0.1);
+  const led = new THREE.Mesh(ledGeo, materials.ledGreen);
+  led.position.set(0, -3.3, 6.51);
+  g.add(led);
+
+  // Vent grilles on sides (right face x = +6.5)
+  for (let i = 0; i < 5; i++) {
+    const ventGeo = new THREE.BoxGeometry(0.1, 0.4, 7.0);
+    const vent = new THREE.Mesh(ventGeo, materials.ventGrille);
+    vent.position.set(6.51, -1.2 + i * 0.9, 0);
+    g.add(vent);
+  }
+
+  // Speaker dots on left face (x = -6.5)
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 4; col++) {
+      const dotGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.08, 12);
+      const dot = new THREE.Mesh(dotGeo, materials.ventGrille);
+      dot.rotation.z = Math.PI / 2;
+      dot.position.set(-6.51, -0.6 + row * 0.7, -2.4 + col * 0.8);
+      g.add(dot);
+    }
+  }
+
+  g.position.y = 0;
+  return g;
+}
+
+function buildAluminum() {
+  const g = new THREE.Group();
+
+  // Main body: 50×50×50mm → 5×5×5 units
+  const bodyGeo = new THREE.BoxGeometry(5, 5, 5);
+  const body = new THREE.Mesh(bodyGeo, materials.alum);
+  body.castShadow = true;
+  body.receiveShadow = true;
+  g.add(body);
+
+  // Camera aperture (circular, front face z = +2.5)
+  const apertureRingGeo = new THREE.CylinderGeometry(0.65, 0.65, 0.25, 48);
+  const apertureRing = new THREE.Mesh(apertureRingGeo, materials.lens);
+  apertureRing.rotation.x = Math.PI / 2;
+  apertureRing.position.set(-0.4, 0.6, 2.5);
+  g.add(apertureRing);
+
+  const apertureGlassGeo = new THREE.CylinderGeometry(0.52, 0.52, 0.1, 48);
+  const apertureGlass = new THREE.Mesh(apertureGlassGeo, materials.lensGlass);
+  apertureGlass.rotation.x = Math.PI / 2;
+  apertureGlass.position.set(-0.4, 0.6, 2.56);
+  g.add(apertureGlass);
+
+  // LED ring around aperture
+  const ledRingGeo = new THREE.TorusGeometry(0.78, 0.07, 8, 48);
+  const ledRing = new THREE.Mesh(ledRingGeo, materials.ledGreen);
+  ledRing.rotation.x = Math.PI / 2;
+  ledRing.position.set(-0.4, 0.6, 2.48);
+  g.add(ledRing);
+
+  g.position.y = 0;
+  return g;
+}
+
+function buildSteel() {
+  // Same geometry as aluminum, just different material
+  const g = buildAluminum();
+  // Swap material on body mesh
+  g.children.forEach(child => {
+    if (child.material === materials.alum) {
+      child.material = materials.steel;
+    }
+  });
+  return g;
+}
+
+// Build all three, hide two
+groups.pla   = buildPLA();
+groups.alum  = buildAluminum();
+groups.steel = buildSteel();
+
+scene.add(groups.pla);
+scene.add(groups.alum);
+scene.add(groups.steel);
+
+groups.alum.visible  = false;
+groups.steel.visible = false;
+
+// ── SPECS DATA ───────────────────────────────────────────────────
+const specs = {
+  pla: [
+    ['Size', '130 × 130 × 80 mm'],
+    ['Material', 'PLA / PETG'],
+    ['Weight', '~220g printed'],
+    ['Wall', '2mm shell'],
+    ['Cooling', '40mm fan vent'],
+    ['Camera', 'CSI fisheye cutout'],
+    ['Speaker', '4×4 grille dots'],
+    ['LED', 'Strip on front'],
+    ['Fasteners', 'M3 snap-fit lid'],
+    ['File', 'cube-phase1.scad'],
+  ],
+  alum: [
+    ['Size', '50 × 50 × 50 mm'],
+    ['Material', '6061-T6 Aluminum'],
+    ['Process', 'CNC machined'],
+    ['Weight', '~130g'],
+    ['Camera', '12mm aperture + sapphire'],
+    ['LED', '3mm ring channel'],
+    ['PCB mount', '35×35mm M3 pattern'],
+    ['Chamfer', '2mm edges'],
+    ['File', 'cube-phase2.scad'],
+    ['Finish', 'Brushed anodized'],
+  ],
+  steel: [
+    ['Size', '50 × 50 × 50 mm'],
+    ['Material', '316L Stainless Steel'],
+    ['Process', 'DMLS metal printing'],
+    ['Weight', '~350g'],
+    ['Camera', '12mm aperture + sapphire'],
+    ['LED', '3mm ring channel'],
+    ['PCB mount', '35×35mm M3 pattern'],
+    ['Chamfer', '2mm edges'],
+    ['File', 'cube-phase2.scad'],
+    ['Finish', 'Mirror polished'],
+  ]
+};
+
+const hudLabels = {
+  pla:   ['PLA Prototype', '130 × 130 × 80 mm'],
+  alum:  ['Aluminum Production', '50 × 50 × 50 mm'],
+  steel: ['Stainless Steel Concept', '50 × 50 × 50 mm'],
+};
+
+function updateSpecTable(version) {
+  const table = document.getElementById('spec-table');
+  table.innerHTML = specs[version].map(([k,v]) =>
+    `<tr><td>${k}</td><td>${v}</td></tr>`
+  ).join('');
+}
+
+// ── VERSION SWITCHING ─────────────────────────────────────────────
+let currentVersion = 'pla';
+
+function setVersion(v) {
+  currentVersion = v;
+
+  // Show/hide models
+  groups.pla.visible   = v === 'pla';
+  groups.alum.visible  = v === 'alum';
+  groups.steel.visible = v === 'steel';
+
+  // Reset camera for size difference
+  if (v === 'pla') {
+    targetCamPos.set(3, 2.5, 4);
+  } else {
+    targetCamPos.set(1.2, 1.0, 1.6);
+  }
+
+  // Update button states
+  ['pla','alum','steel'].forEach(id => {
+    const btn = document.getElementById('btn-' + id);
+    btn.className = 'version-btn' + (id === v ? (id === 'pla' ? ' active' : id === 'alum' ? ' active-blue' : ' active-steel') : '');
+  });
+
+  // Update HUD
+  document.getElementById('hud-version').textContent = hudLabels[v][0];
+  document.getElementById('hud-dims').textContent = hudLabels[v][1];
+
+  // Update spec table
+  updateSpecTable(v);
+}
+
+// Init specs
+updateSpecTable('pla');
+
+// ── ORBIT CONTROLS (manual implementation) ────────────────────────
+let isDragging = false;
+let isRightDrag = false;
+let prevMouse = { x: 0, y: 0 };
+let spherical = { theta: 0.8, phi: 0.9, radius: 7 };
+let panOffset = new THREE.Vector3();
+let targetCamPos = new THREE.Vector3(3, 2.5, 4);
+let targetSpherical = { theta: 0.8, phi: 0.9, radius: 7 };
+
+function sphericalToCartesian(theta, phi, radius) {
+  return new THREE.Vector3(
+    radius * Math.sin(phi) * Math.sin(theta),
+    radius * Math.cos(phi),
+    radius * Math.sin(phi) * Math.cos(theta)
+  );
+}
+
+canvas.addEventListener('mousedown', e => {
+  isDragging = true;
+  isRightDrag = e.button === 2;
+  prevMouse = { x: e.clientX, y: e.clientY };
+  e.preventDefault();
+});
+
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.clientX - prevMouse.x;
+  const dy = e.clientY - prevMouse.y;
+  prevMouse = { x: e.clientX, y: e.clientY };
+
+  if (isRightDrag) {
+    // Pan
+    panOffset.x -= dx * 0.01;
+    panOffset.y += dy * 0.01;
+  } else {
+    // Rotate
+    targetSpherical.theta -= dx * 0.008;
+    targetSpherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, targetSpherical.phi + dy * 0.008));
+  }
+});
+
+window.addEventListener('mouseup', () => { isDragging = false; });
+
+canvas.addEventListener('wheel', e => {
+  targetSpherical.radius = Math.max(1.5, Math.min(20, targetSpherical.radius + e.deltaY * 0.01));
+  e.preventDefault();
+}, { passive: false });
+
+// Touch support
+let lastTouchDist = 0;
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    isDragging = true;
+    prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  } else if (e.touches.length === 2) {
+    lastTouchDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+  }
+  e.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  if (e.touches.length === 1 && isDragging) {
+    const dx = e.touches[0].clientX - prevMouse.x;
+    const dy = e.touches[0].clientY - prevMouse.y;
+    prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    targetSpherical.theta -= dx * 0.01;
+    targetSpherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, targetSpherical.phi + dy * 0.01));
+  } else if (e.touches.length === 2) {
+    const dist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    targetSpherical.radius = Math.max(1.5, Math.min(20, targetSpherical.radius - (dist - lastTouchDist) * 0.02));
+    lastTouchDist = dist;
+  }
+  e.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => { isDragging = false; });
+
+// Reset on R key
+window.addEventListener('keydown', e => {
+  if (e.key === 'r' || e.key === 'R') {
+    targetSpherical = { theta: 0.8, phi: 0.9, radius: currentVersion === 'pla' ? 7 : 3 };
+    panOffset.set(0, 0, 0);
+  }
+});
+
+// ── AUTO ROTATE ───────────────────────────────────────────────────
+let autoRotate = true;
+canvas.addEventListener('mousedown', () => { autoRotate = false; });
+canvas.addEventListener('touchstart', () => { autoRotate = false; });
+
+// ── RESIZE ────────────────────────────────────────────────────────
+function resize() {
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+
+window.addEventListener('resize', resize);
+resize();
+
+// ── RENDER LOOP ──────────────────────────────────────────────────
+let time = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  time += 0.01;
+
+  if (autoRotate) {
+    targetSpherical.theta += 0.003;
+  }
+
+  // Smooth spherical interpolation
+  spherical.theta += (targetSpherical.theta - spherical.theta) * 0.08;
+  spherical.phi   += (targetSpherical.phi   - spherical.phi)   * 0.08;
+  spherical.radius += (targetSpherical.radius - spherical.radius) * 0.08;
+
+  const pos = sphericalToCartesian(spherical.theta, spherical.phi, spherical.radius);
+  camera.position.copy(pos).add(panOffset);
+  camera.lookAt(panOffset);
+
+  // Animate LED emission pulse
+  const pulse = 0.5 + 0.5 * Math.sin(time * 2);
+  materials.ledGreen.emissiveIntensity = 0.5 + pulse * 0.6;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// THREE.RoomEnvironment polyfill (not in r128)
+// Simple fallback: use neutral color tone
+if (typeof THREE.RoomEnvironment === 'undefined') {
+  scene.environment = null;
+}
+</script>
+</body>
+</html>
