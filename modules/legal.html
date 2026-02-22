@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legal Assistant — CUBE Module</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<!-- BACK NAV -->
+<nav class="back-nav">
+  <div class="back-nav-inner">
+    <a href="../" class="back-link"><span class="arrow">&larr;</span> CUBE Home</a>
+    <span class="nav-module-name">MODULE 03</span>
+  </div>
+</nav>
+
+<!-- MODULE HEADER -->
+<header class="module-header">
+  <div class="module-num">03</div>
+  <div class="module-label">03 — Module</div>
+  <h1 class="module-title">Legal Assistant</h1>
+  <p class="module-desc">An on-device AI legal assistant that drafts dispute letters, tracks deadlines, organizes documents, and explains legal language in plain terms — informed by cutting-edge UK legal AI research and built with safety constraints that prevent hallucinated citations.</p>
+</header>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- INSPIRATION: UK LEGAL AI RESEARCH -->
+  <div class="content-section">
+    <div class="section-label">Research Inspiration</div>
+    <div class="section-title">UK Legal AI Landscape</div>
+    <div class="section-desc">CUBE's legal module draws from the most advanced legal AI research and products in the UK, applying their safety lessons to an on-device architecture.</div>
+
+    <div class="stat-row" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+      <div class="stat-box">
+        <div class="stat-num" style="font-size:18px;">Luminance</div>
+        <div class="stat-label" style="text-transform:none; letter-spacing:0; font-size:12px; color:var(--text-dim); margin-top:8px;">Cambridge-based. "Panel of Judges" multi-model consensus approach for anti-hallucination in legal document review.</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="font-size:18px;">Lawhive</div>
+        <div class="stat-label" style="text-transform:none; letter-spacing:0; font-size:12px; color:var(--text-dim); margin-top:8px;">London-based. AI paralegal "Lawrence" that passed the SQE1 qualification exam. Affordable legal services at scale.</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="font-size:18px;">Robin AI</div>
+        <div class="stat-label" style="text-transform:none; letter-spacing:0; font-size:12px; color:var(--text-dim); margin-top:8px;">London-based. Fine-tuned Claude on 2M+ contracts. Purpose-built LLM for contract review and negotiation.</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="font-size:18px;">Garfield AI</div>
+        <div class="stat-label" style="text-transform:none; letter-spacing:0; font-size:12px; color:var(--text-dim); margin-top:8px;">First SRA-authorized AI-only firm. Notably will NOT propose case law due to hallucination risk.</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="font-size:18px;">UK Lex API</div>
+        <div class="stat-label" style="text-transform:none; letter-spacing:0; font-size:12px; color:var(--text-dim); margin-top:8px;">Open-source UK Government API. 1.5M legislation sections. MCP-compatible. The authoritative source for UK law.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <!-- ARCHITECTURE DIAGRAM -->
+  <div class="content-section">
+    <div class="section-label">System Architecture</div>
+    <div class="section-title">Document-to-Output Pipeline</div>
+    <div class="section-desc">A vertical pipeline that takes uploaded documents through classification, knowledge retrieval, multi-model review, and finally produces safe, citation-checked output.</div>
+
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Legal Assistant Pipeline (Vertical Flow)</div>
+
+      <!-- Layer 1: Document Upload -->
+      <div class="arch-vertical">
+        <div class="arch-node accent" style="max-width:100%;">
+          <div class="node-label">Document Upload</div>
+          <div class="node-sub">User uploads letters, contracts, notices, or legal correspondence</div>
+        </div>
+
+        <div class="arch-arrow down">&darr;</div>
+
+        <div class="arch-node teal" style="max-width:100%;">
+          <div class="node-label">Vision LLM</div>
+          <div class="node-sub">Qwen2.5-VL 3B processes scanned documents, extracts text and structure</div>
+        </div>
+
+        <div class="arch-arrow down">&darr;</div>
+
+        <div class="arch-node blue" style="max-width:100%;">
+          <div class="node-label">Document Classification</div>
+          <div class="node-sub">Categorizes: dispute, contract, notice, court form, correspondence, legislation</div>
+        </div>
+
+        <div class="arch-arrow down">&darr;</div>
+      </div>
+
+      <!-- Layer 2: Knowledge Base (multi-column) -->
+      <div style="background:rgba(192,255,84,0.02); border:1px dashed rgba(192,255,84,0.15); border-radius:12px; padding:20px; margin:8px 0;">
+        <div style="font-family:'Space Mono',monospace; font-size:10px; color:var(--accent); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px; text-align:center;">Legal Knowledge Base</div>
+        <div class="arch-columns" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="arch-node accent">
+            <div class="node-label">UK Lex API</div>
+            <div class="node-sub">MCP server for legislation search across 1.5M sections</div>
+          </div>
+          <div class="arch-node blue">
+            <div class="node-label">Document Embeddings</div>
+            <div class="node-sub">Local ChromaDB with user's uploaded legal documents</div>
+          </div>
+          <div class="arch-node purple">
+            <div class="node-label">Skill Files</div>
+            <div class="node-sub">Markdown templates for common legal tasks</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-vertical">
+        <div class="arch-arrow down">&darr;</div>
+      </div>
+
+      <!-- Layer 3: Multi-Model Review -->
+      <div style="background:rgba(179,136,255,0.02); border:1px dashed rgba(179,136,255,0.15); border-radius:12px; padding:20px; margin:8px 0;">
+        <div style="font-family:'Space Mono',monospace; font-size:10px; color:var(--purple); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px; text-align:center;">Multi-Model Review (Inspired by Luminance's Panel of Judges)</div>
+        <div class="arch-columns" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="arch-node accent">
+            <div class="node-label">Local LLM Draft</div>
+            <div class="node-sub">Llama 3.2 3B generates initial draft response</div>
+          </div>
+          <div class="arch-node orange">
+            <div class="node-label">Validation Pass</div>
+            <div class="node-sub">Second pass checks for hallucinated citations</div>
+          </div>
+          <div class="arch-node warn">
+            <div class="node-label">No Case Law</div>
+            <div class="node-sub">Following Garfield's safety constraint: never generate case citations</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-vertical">
+        <div class="arch-arrow down">&darr;</div>
+
+        <!-- Layer 4: Output -->
+        <div class="arch-node teal" style="max-width:100%;">
+          <div class="node-label">Output</div>
+          <div class="node-sub">Dispute letters &middot; Deadline tracking &middot; Document organization &middot; Plain-language explanations</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <!-- IMPLEMENTATION PHASES -->
+  <div class="content-section">
+    <div class="section-label">Implementation Roadmap</div>
+    <div class="section-title">Four Phases to Full Capability</div>
+    <div class="section-desc">Building the legal assistant incrementally, starting with document understanding and progressing to proactive deadline management.</div>
+
+    <div class="phase-grid">
+      <div class="phase-card current">
+        <div class="phase-num">PHASE 1</div>
+        <h3>Document Upload &amp; Classification</h3>
+        <p>Vision LLM processes scanned and digital documents, classifying them by type and extracting key information.</p>
+        <ul>
+          <li>Vision LLM document ingestion</li>
+          <li>Automatic document type classification</li>
+          <li>Key entity extraction (dates, parties, amounts)</li>
+          <li>Organized document storage with metadata</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 2</div>
+        <h3>Legal Knowledge Base</h3>
+        <p>Connect to authoritative legislation sources and build a searchable local knowledge base from user documents.</p>
+        <ul>
+          <li>UK Lex API integration via MCP server</li>
+          <li>Legislation search and retrieval</li>
+          <li>ChromaDB embeddings for uploaded documents</li>
+          <li>Markdown skill files for common legal tasks</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 3</div>
+        <h3>Multi-Model Review</h3>
+        <p>Draft legal documents with multi-pass validation to catch hallucinations and ensure safety constraints.</p>
+        <ul>
+          <li>Local LLM generates draft letters and responses</li>
+          <li>Validation pass checks for fabricated citations</li>
+          <li>No case law generation (safety constraint)</li>
+          <li>Human review flagging for anything requiring legal citation</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 4</div>
+        <h3>Deadline Tracking &amp; Alerts</h3>
+        <p>Proactive monitoring of legal deadlines with calendar integration and automatic reminders.</p>
+        <ul>
+          <li>Extract deadlines from legal documents</li>
+          <li>Calendar integration for timeline visualization</li>
+          <li>Proactive voice and notification alerts</li>
+          <li>Limitation period awareness and warnings</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <!-- TECH STACK -->
+  <div class="content-section">
+    <div class="section-label">Technology</div>
+    <div class="section-title">Tech Stack</div>
+    <div class="section-desc">Purpose-selected technologies for safe, private, on-device legal document processing.</div>
+
+    <div class="tech-grid">
+      <div class="tech-card">
+        <h4>UK Lex API / MCP</h4>
+        <p>Open-source UK Government legislation API with 1.5M sections. Accessed via an MCP server for structured legislation search — the only authoritative source CUBE uses for statutory references.</p>
+        <div class="tech-chips">
+          <span class="chip accent">UK Lex API</span>
+          <span class="chip accent">MCP Server</span>
+          <span class="chip accent">legislation.gov.uk</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>ChromaDB</h4>
+        <p>Local vector database for semantic search across uploaded legal documents. Embeddings enable finding relevant clauses, precedents, and related correspondence without sending data off-device.</p>
+        <div class="tech-chips">
+          <span class="chip blue">ChromaDB</span>
+          <span class="chip blue">SentenceTransformers</span>
+          <span class="chip blue">Vector Search</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Vision LLM</h4>
+        <p>Qwen2.5-VL 3B for processing scanned documents, photographed letters, and image-based legal correspondence. Runs on-device with the Jetson's GPU for fast document intake.</p>
+        <div class="tech-chips">
+          <span class="chip teal">Qwen2.5-VL 3B</span>
+          <span class="chip teal">Document OCR</span>
+          <span class="chip teal">On-Device</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Multi-Model Consensus</h4>
+        <p>Inspired by Luminance's "Panel of Judges" — multiple validation passes catch hallucinations before output reaches the user. A second model specifically checks for fabricated citations.</p>
+        <div class="tech-chips">
+          <span class="chip purple">Panel of Judges</span>
+          <span class="chip purple">Hallucination Check</span>
+          <span class="chip purple">Llama 3.2 3B</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Markdown Skill Files</h4>
+        <p>Template-driven approach for common legal tasks: dispute letters, Section 75 claims, tenancy notices, small claims forms. Human-readable and editable by the user.</p>
+        <div class="tech-chips">
+          <span class="chip orange">Skill Templates</span>
+          <span class="chip orange">Dispute Letters</span>
+          <span class="chip orange">Human-Editable</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <!-- KEY DECISIONS -->
+  <div class="content-section">
+    <div class="section-label">Design Philosophy</div>
+    <div class="section-title">Key Decisions</div>
+    <div class="section-desc">Safety-first design choices informed by real-world legal AI failures and the hard-won lessons of UK legal technology companies.</div>
+
+    <div class="decision-grid">
+      <div class="decision-card warn">
+        <h4>No Case Law Generation</h4>
+        <p>Following Garfield AI's safety constraint: CUBE will never generate or propose case law citations. Anything requiring legal citation is flagged for human review. This eliminates the most dangerous class of legal AI hallucination — fabricated cases that look authoritative but don't exist.</p>
+      </div>
+      <div class="decision-card purple">
+        <h4>"Panel of Judges" Validation</h4>
+        <p>Inspired by Luminance's multi-model consensus approach. Every draft goes through a validation pass that specifically checks for hallucinated citations, fabricated statute numbers, and invented legal concepts. Multiple models must agree before output is presented.</p>
+      </div>
+      <div class="decision-card blue">
+        <h4>Legislation Search, Not Advice</h4>
+        <p>CUBE searches and explains legislation using the authoritative UK Lex API, but never gives legal advice. It can tell you what the Consumer Rights Act 2015 says about faulty goods, but it won't tell you whether you have a case. That distinction is critical and maintained throughout the system.</p>
+      </div>
+      <div class="decision-card teal">
+        <h4>Human-in-the-Loop</h4>
+        <p>All drafted documents require explicit human review and approval before use. CUBE presents drafts with highlighted areas that need human judgment, explains its reasoning in plain language, and never sends anything on the user's behalf without confirmation.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="module-footer">
+  <div class="footer-brand">CUBE by Digital Surface Labs</div>
+  <div class="footer-right">February 2026 &mdash; Legal Assistant Module &middot; <a href="../">Back to CUBE</a></div>
+</footer>
+
+</body>
+</html>

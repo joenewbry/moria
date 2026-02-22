@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Usefulness &mdash; CUBE Module</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<!-- BACK NAV -->
+<nav class="back-nav">
+  <div class="back-nav-inner">
+    <a href="../" class="back-link">
+      <span class="arrow">&larr;</span> CUBE Home
+    </a>
+    <span class="nav-module-name">DAILY USEFULNESS</span>
+  </div>
+</nav>
+
+<!-- MODULE HEADER -->
+<header class="module-header">
+  <span class="module-num">07</span>
+  <div class="module-label">07 &mdash; Module</div>
+  <h1 class="module-title">Daily Usefulness</h1>
+  <p class="module-desc">Morning briefings, email integration, goal tracking, and task planning &mdash; the features that make CUBE useful every single day. This is the &ldquo;Jarvis&rdquo; mode: wake up, get briefed, stay on top of everything.</p>
+</header>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- MORNING BRIEFING -->
+  <section class="content-section">
+    <div class="section-label">Priority #3 &mdash; &ldquo;Jarvis&rdquo; Mode</div>
+    <div class="section-title">Morning Briefing Architecture</div>
+    <div class="section-desc">Triggered at your configured wake time, the daily briefing pulls from every data source CUBE knows about and speaks a personalized summary. Also saved as a searchable markdown file.</div>
+
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Daily Briefing Flow &mdash; Vertical Pipeline</div>
+      <div class="arch-vertical">
+        <div class="arch-node accent" style="max-width:500px;">
+          <div class="node-label">DAILY BRIEFING</div>
+          <div class="node-sub">triggered at configured wake time</div>
+        </div>
+        <div class="arch-arrow">&darr;</div>
+        <div class="arch-node blue" style="max-width:500px;">
+          <div class="node-label">Calendar</div>
+          <div class="node-sub">&ldquo;You have 3 meetings today. First one at 10am.&rdquo;</div>
+        </div>
+        <div class="arch-arrow">&darr;</div>
+        <div class="arch-node purple" style="max-width:500px;">
+          <div class="node-label">Email</div>
+          <div class="node-sub">&ldquo;12 new emails. 2 need responses: invoice from X, question from Y.&rdquo;</div>
+        </div>
+        <div class="arch-arrow">&darr;</div>
+        <div class="arch-node orange" style="max-width:500px;">
+          <div class="node-label">Health Goals</div>
+          <div class="node-sub">&ldquo;You&rsquo;ve worked out once this week. Try noon today.&rdquo;</div>
+        </div>
+        <div class="arch-arrow">&darr;</div>
+        <div class="arch-node teal" style="max-width:500px;">
+          <div class="node-label">Weather</div>
+          <div class="node-sub">&ldquo;72&deg;F and sunny. Good day for that run.&rdquo;</div>
+        </div>
+        <div class="arch-arrow">&darr;</div>
+        <div class="arch-node accent" style="max-width:500px;">
+          <div class="node-label">Tasks</div>
+          <div class="node-sub">&ldquo;The ramp project needs lumber ordered.&rdquo;</div>
+        </div>
+        <div class="arch-arrow">&darr;</div>
+        <div class="arch-node warn" style="max-width:500px;">
+          <div class="node-label">Reminders</div>
+          <div class="node-sub">&ldquo;Dad&rsquo;s medication refill is due Thursday.&rdquo;</div>
+        </div>
+        <div class="arch-arrow">&darr;</div>
+        <div class="arch-node teal" style="max-width:500px;">
+          <div class="node-label">Piper TTS + Markdown</div>
+          <div class="node-sub">Spoken via Piper TTS, also saved as markdown daily summary</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- EMAIL INTEGRATION -->
+  <section class="content-section">
+    <div class="section-label">Communication</div>
+    <div class="section-title">Email Integration</div>
+    <div class="section-desc">Full Gmail integration via the Google API stack. Read, classify, summarize, and send emails &mdash; all driven by voice commands or automated by the morning briefing.</div>
+
+    <div class="two-col">
+      <div>
+        <div class="priority high">GMAIL API &mdash; GOOGLE STACK</div>
+        <div class="arch-diagram" style="margin-bottom:0;">
+          <div class="arch-diagram-label">How It Works</div>
+          <div style="font-size:14px; color:var(--text-dim); line-height:1.8;">
+            <p style="margin-bottom:12px;"><strong style="color:var(--accent);">Gmail API</strong> via <strong style="color:var(--text);">google-api-python-client</strong> with OAuth2 authentication. Full programmatic access to your inbox without scraping or IMAP polling.</p>
+            <p style="margin-bottom:12px;"><strong style="color:var(--blue);">Read:</strong> Monitor inbox, classify emails by urgency using the LLM, and generate concise summaries for the morning briefing. Flag emails that need responses.</p>
+            <p style="margin-bottom:12px;"><strong style="color:var(--teal);">Send:</strong> Compose and send emails on voice command. &ldquo;Email the contractor about the ramp measurements&rdquo; &rarr; CUBE drafts, reads it back, sends on confirmation.</p>
+            <p><strong style="color:var(--purple);">Dedicated address:</strong> Forward emails to <strong style="color:var(--text);">cube@digitalsurfacelabs.com</strong> for automatic processing &mdash; invoices, receipts, notifications.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="priority medium">REAL-TIME MONITORING</div>
+        <div class="arch-diagram" style="margin-bottom:0;">
+          <div class="arch-diagram-label">IMAP Watch via Gmail Pub/Sub</div>
+          <div style="font-size:14px; color:var(--text-dim); line-height:1.8;">
+            <p style="margin-bottom:12px;"><strong style="color:var(--text);">Gmail Pub/Sub</strong> pushes notifications to CUBE in real time when new emails arrive. No polling, no wasted compute.</p>
+            <p style="margin-bottom:12px;">CUBE classifies incoming emails as they arrive:</p>
+            <ul style="list-style:none; margin-bottom:12px;">
+              <li style="padding:4px 0; padding-left:16px; position:relative;"><span style="position:absolute; left:0; color:var(--accent);">&rarr;</span> <strong style="color:var(--warn);">Urgent:</strong> Spoken alert immediately</li>
+              <li style="padding:4px 0; padding-left:16px; position:relative;"><span style="position:absolute; left:0; color:var(--accent);">&rarr;</span> <strong style="color:var(--orange);">Action needed:</strong> Queued for next briefing</li>
+              <li style="padding:4px 0; padding-left:16px; position:relative;"><span style="position:absolute; left:0; color:var(--accent);">&rarr;</span> <strong style="color:var(--text-muted);">Informational:</strong> Logged silently</li>
+            </ul>
+            <p>All email summaries stored as markdown for future retrieval.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- TASK PLANNING -->
+  <section class="content-section">
+    <div class="section-label">Productivity</div>
+    <div class="section-title">Task Planning System</div>
+    <div class="section-desc">Voice-driven task creation with LLM-powered decomposition. Tell CUBE what you want to accomplish and it breaks it down into actionable steps.</div>
+
+    <div class="phase-grid">
+      <div class="phase-card">
+        <div class="phase-num">VOICE TASK</div>
+        <h3>Natural Language Projects</h3>
+        <p>&ldquo;I want to build a ramp for the front porch.&rdquo; CUBE uses the LLM to break this into steps, generate a materials list, estimate timeline, and track progress.</p>
+        <ul>
+          <li>LLM decomposes goal into subtasks</li>
+          <li>Materials list with estimated costs</li>
+          <li>Timeline with dependencies</li>
+          <li>Progress tracked via voice check-ins</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">SPECIFIC ACTION</div>
+        <h3>Directed Commands</h3>
+        <p>&ldquo;Pull my data from Stanford MyHealth.&rdquo; CUBE recognizes this as a specific pipeline trigger and executes the FHIR integration directly.</p>
+        <ul>
+          <li>Triggers specific pipelines (FHIR, email, etc.)</li>
+          <li>Maps voice commands to tool registry</li>
+          <li>Confirms action before execution</li>
+          <li>Logs outcome to task history</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">EMAIL FORWARDING</div>
+        <h3>Email-Triggered Tasks</h3>
+        <p>&ldquo;Handle this invoice.&rdquo; Forward an email to CUBE and it extracts the relevant data, schedules payment reminders, and files the document.</p>
+        <ul>
+          <li>Extracts structured data from emails</li>
+          <li>Schedules payment reminders</li>
+          <li>Files documents in knowledge store</li>
+          <li>Links to financial tracking goals</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- GOALS & TRACKING -->
+  <section class="content-section">
+    <div class="section-label">Tracking</div>
+    <div class="section-title">Goals &amp; Tracking</div>
+    <div class="section-desc">All goals stored as markdown files, reviewed automatically in the morning briefing, with proactive suggestions based on your patterns.</div>
+
+    <div class="decision-grid">
+      <div class="decision-card">
+        <h4>Health Goals</h4>
+        <p>Workout frequency targets, nutrition goals, sleep tracking. CUBE correlates with Apple Health data and nudges you in the morning briefing. &ldquo;You&rsquo;ve worked out once this week &mdash; your goal is three. Try noon today, it&rsquo;s 72&deg;F and sunny.&rdquo;</p>
+      </div>
+      <div class="decision-card blue">
+        <h4>Project Goals</h4>
+        <p>Active projects with tasks, deadlines, and dependencies. Each project is a markdown file with structured subtasks. CUBE surfaces the next action in the morning briefing and tracks completion over time.</p>
+      </div>
+      <div class="decision-card teal">
+        <h4>Financial Goals</h4>
+        <p>Budget tracking, bill reminders, and spending patterns. Forward receipts and invoices to CUBE for automatic categorization. Monthly summaries generated as markdown reports.</p>
+      </div>
+      <div class="decision-card purple">
+        <h4>Habit Building</h4>
+        <p>All goals feed into a proactive suggestion engine. CUBE learns your patterns over time and adjusts its briefings to be more relevant. Context-aware: weather, schedule, and energy level all factor in.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- IMPLEMENTATION PHASES -->
+  <section class="content-section">
+    <div class="section-label">Roadmap</div>
+    <div class="section-title">Implementation Phases</div>
+    <div class="section-desc">Four phases from basic morning briefing to full proactive daily assistant.</div>
+
+    <div class="phase-grid">
+      <div class="phase-card current">
+        <div class="phase-num">PHASE 1</div>
+        <h3>Morning Briefing</h3>
+        <p>Calendar and weather integration with Piper TTS output at configured wake time.</p>
+        <ul>
+          <li>Google Calendar API integration</li>
+          <li>Open-Meteo weather API (free, no key)</li>
+          <li>Piper TTS spoken briefing</li>
+          <li>Markdown daily summary saved</li>
+          <li>Configurable wake time trigger</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 2</div>
+        <h3>Gmail API Integration</h3>
+        <p>Email summaries added to morning briefing with send capability via voice.</p>
+        <ul>
+          <li>Gmail API OAuth2 setup</li>
+          <li>Inbox classification by urgency</li>
+          <li>Email summaries in briefing</li>
+          <li>Voice-driven email composition</li>
+          <li>Gmail Pub/Sub real-time monitoring</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 3</div>
+        <h3>Task Planning</h3>
+        <p>Voice-driven task creation with LLM decomposition and progress tracking.</p>
+        <ul>
+          <li>Natural language task creation</li>
+          <li>LLM task decomposition</li>
+          <li>Materials lists and timelines</li>
+          <li>Email forwarding to task pipeline</li>
+          <li>Voice check-in progress updates</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 4</div>
+        <h3>Goals &amp; Proactive Suggestions</h3>
+        <p>Full goals tracking with context-aware proactive suggestions and habit building.</p>
+        <ul>
+          <li>Health, project, and financial goals</li>
+          <li>Pattern learning over time</li>
+          <li>Context-aware suggestions</li>
+          <li>Habit streak tracking</li>
+          <li>Monthly summary reports</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- TECH STACK -->
+  <section class="content-section">
+    <div class="section-label">Stack</div>
+    <div class="section-title">Tech Stack</div>
+    <div class="section-desc">All components selected for daily-driver reliability on the Jetson Orin Nano.</div>
+
+    <div class="tech-grid">
+      <div class="tech-card">
+        <h4>Gmail API</h4>
+        <p>Full email integration via google-api-python-client. OAuth2 authentication, inbox monitoring, classification, and send capability. Gmail Pub/Sub for real-time notifications.</p>
+        <div class="tech-chips">
+          <span class="chip accent">Gmail API</span>
+          <span class="chip accent">OAuth2</span>
+          <span class="chip accent">Pub/Sub</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Google Calendar API</h4>
+        <p>Calendar access for morning briefing. Pulls today's events, upcoming deadlines, and recurring appointments. Same OAuth2 flow as Gmail.</p>
+        <div class="tech-chips">
+          <span class="chip blue">Calendar API</span>
+          <span class="chip blue">Events</span>
+          <span class="chip blue">OAuth2</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Piper TTS</h4>
+        <p>On-device text-to-speech for all spoken briefings. Natural-sounding voice output with low latency. The voice of your morning briefing.</p>
+        <div class="tech-chips">
+          <span class="chip teal">Piper</span>
+          <span class="chip teal">On-Device</span>
+          <span class="chip teal">Low Latency</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Weather API</h4>
+        <p>Open-Meteo provides free weather data with no API key required. Current conditions, forecasts, and alerts for context-aware suggestions.</p>
+        <div class="tech-chips">
+          <span class="chip purple">Open-Meteo</span>
+          <span class="chip purple">Free</span>
+          <span class="chip purple">No API Key</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Ollama / LLM</h4>
+        <p>Local LLM for task decomposition, email classification, and generating briefing narratives. Llama 3.2 3B handles all reasoning on-device.</p>
+        <div class="tech-chips">
+          <span class="chip orange">Ollama</span>
+          <span class="chip orange">Llama 3.2 3B</span>
+          <span class="chip orange">Local Inference</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Markdown Summaries</h4>
+        <p>Every briefing, task, and goal saved as structured markdown. Searchable via ChromaDB, human-readable, and version-controlled over time.</p>
+        <div class="tech-chips">
+          <span class="chip accent">Markdown</span>
+          <span class="chip accent">ChromaDB</span>
+          <span class="chip accent">Searchable</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- KEY DECISIONS -->
+  <section class="content-section">
+    <div class="section-label">Decisions</div>
+    <div class="section-title">Key Decisions</div>
+    <div class="section-desc">The architectural choices that shaped this module and the reasoning behind them.</div>
+
+    <div class="decision-grid">
+      <div class="decision-card">
+        <h4>Morning Briefing First</h4>
+        <p>The morning briefing is the highest daily-utility feature and proves the CUBE concept immediately. If CUBE can wake you up with a useful spoken summary of your day, everything else follows. This is the &ldquo;wow&rdquo; moment.</p>
+      </div>
+      <div class="decision-card blue">
+        <h4>Gmail API, Not IMAP</h4>
+        <p>Gmail API provides better OAuth2 integration, richer metadata (labels, threads, importance markers), and push notifications via Pub/Sub. IMAP is a legacy protocol with polling overhead and limited classification data.</p>
+      </div>
+      <div class="decision-card teal">
+        <h4>Voice-First Design</h4>
+        <p>All daily usefulness interactions can be fully voice-driven with no screen required. Morning briefing is spoken. Tasks are created by voice. Email is dictated and confirmed verbally. The screen is optional, not primary.</p>
+      </div>
+      <div class="decision-card purple">
+        <h4>Markdown Summaries</h4>
+        <p>Every briefing is saved as a searchable markdown record. Ask CUBE &ldquo;what did you tell me last Tuesday?&rdquo; and it can retrieve the exact briefing. This creates a personal journal that grows over time &mdash; your life, indexed.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="module-footer">
+  <div class="footer-brand">CUBE by Digital Surface Labs</div>
+  <div class="footer-right">February 2026 &mdash; Daily Usefulness Module &middot; <a href="../">Back to CUBE</a></div>
+</footer>
+
+</body>
+</html>

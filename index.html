@@ -655,7 +655,7 @@ body {
 /* VISION SECTION */
 .vision-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 2px;
   margin-top: 48px;
 }
@@ -665,6 +665,34 @@ body {
   padding: 28px;
   border: 1px solid var(--border);
   position: relative;
+  transition: all 0.3s;
+}
+
+a.vision-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+a.vision-link .vision-cell:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 24px rgba(192,255,84,0.08);
+}
+
+a.vision-link .vision-cell::after {
+  content: '→';
+  position: absolute;
+  bottom: 16px;
+  right: 20px;
+  color: var(--text-muted);
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+a.vision-link .vision-cell:hover::after {
+  color: var(--accent);
+  transform: translateX(4px);
 }
 
 .vision-cell .num {
@@ -689,7 +717,11 @@ body {
   line-height: 1.6;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
+  .vision-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
   .vision-grid { grid-template-columns: 1fr; }
 }
 
@@ -1004,36 +1036,62 @@ body {
   </div>
 
   <div class="vision-grid">
-    <div class="vision-cell">
-      <span class="num">01</span>
-      <h4>Healthcare Advocate</h4>
-      <p>Places calls on your behalf to collect health records, schedules appointments, sends medication reminders, and tracks health metrics over time.</p>
-    </div>
-    <div class="vision-cell">
-      <span class="num">02</span>
-      <h4>Financial Copilot</h4>
-      <p>Organizes receipts, prepares tax documents, monitors bills, flags unusual charges, and helps with budgeting — all data stays local.</p>
-    </div>
-    <div class="vision-cell">
-      <span class="num">03</span>
-      <h4>Legal Assistant</h4>
-      <p>Drafts dispute letters, tracks deadlines for legal claims, organizes documents, and explains legal language in plain terms.</p>
-    </div>
-    <div class="vision-cell">
-      <span class="num">04</span>
-      <h4>Family Memory</h4>
-      <p>Stores and organizes photos, documents, notes, and conversations. Searchable family knowledge base that grows over years.</p>
-    </div>
-    <div class="vision-cell">
-      <span class="num">05</span>
-      <h4>Home Intelligence</h4>
-      <p>Fisheye camera for room awareness, voice interaction through built-in mic and speakers, contextual understanding of your space.</p>
-    </div>
-    <div class="vision-cell">
-      <span class="num">06</span>
-      <h4>Continuous Learning</h4>
-      <p>Gets better at working with you over time. Can explain its reasoning, justify decisions, and adapt to your family's unique patterns.</p>
-    </div>
+    <a href="modules/healthcare.html" class="vision-link">
+      <div class="vision-cell">
+        <span class="num">01</span>
+        <h4>Healthcare Advocate</h4>
+        <p>Places calls on your behalf to collect health records, schedules appointments, sends medication reminders, and tracks health metrics over time.</p>
+      </div>
+    </a>
+    <a href="modules/financial.html" class="vision-link">
+      <div class="vision-cell">
+        <span class="num">02</span>
+        <h4>Financial Copilot</h4>
+        <p>Organizes receipts, prepares tax documents, monitors bills, flags unusual charges, and helps with budgeting — all data stays local.</p>
+      </div>
+    </a>
+    <a href="modules/legal.html" class="vision-link">
+      <div class="vision-cell">
+        <span class="num">03</span>
+        <h4>Legal Assistant</h4>
+        <p>Drafts dispute letters, tracks deadlines for legal claims, organizes documents, and explains legal language in plain terms.</p>
+      </div>
+    </a>
+    <a href="modules/family-memory.html" class="vision-link">
+      <div class="vision-cell">
+        <span class="num">04</span>
+        <h4>Family Memory</h4>
+        <p>Stores and organizes photos, documents, notes, and conversations. Searchable family knowledge base that grows over years.</p>
+      </div>
+    </a>
+    <a href="modules/home-intelligence.html" class="vision-link">
+      <div class="vision-cell">
+        <span class="num">05</span>
+        <h4>Home Intelligence</h4>
+        <p>Fisheye camera for room awareness, voice interaction through built-in mic and speakers, contextual understanding of your space.</p>
+      </div>
+    </a>
+    <a href="modules/learning.html" class="vision-link">
+      <div class="vision-cell">
+        <span class="num">06</span>
+        <h4>Continuous Learning</h4>
+        <p>Gets better at working with you over time. Can explain its reasoning, justify decisions, and adapt to your family's unique patterns.</p>
+      </div>
+    </a>
+    <a href="modules/daily.html" class="vision-link">
+      <div class="vision-cell">
+        <span class="num">07</span>
+        <h4>Daily Usefulness</h4>
+        <p>Morning briefings, email summaries, task planning, and goal tracking. Your personal Jarvis — speaks your agenda, handles your inbox, decomposes projects into steps.</p>
+      </div>
+    </a>
+    <a href="modules/manufacturing.html" class="vision-link">
+      <div class="vision-cell">
+        <span class="num">08</span>
+        <h4>Manufacturing &amp; Scale</h4>
+        <p>From 3D-printed prototype to injection-molded production. Supply chain roadmap, certification path, and the economics of sub-$100 personal AI hardware.</p>
+      </div>
+    </a>
   </div>
 </section>
 
@@ -1054,7 +1112,7 @@ body {
         <table class="spec-table">
           <tr>
             <td>Form Factor</td>
-            <td>~130mm × 130mm × 80mm (3D printed PLA/PETG)</td>
+            <td>~130mm × 130mm × 110mm (3D printed PLA/PETG)</td>
           </tr>
           <tr>
             <td>Compute</td>

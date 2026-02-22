@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUBE — Continuous Learning + Memory Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* Page-specific styles for the flagship learning module */
+
+/* Memory tier cards — large side-by-side */
+.memory-tiers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.memory-tier {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.memory-tier:hover {
+  border-color: var(--border-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+}
+
+.memory-tier.short-term {
+  border-top: 3px solid var(--accent);
+}
+
+.memory-tier.long-term {
+  border-top: 3px solid var(--teal);
+}
+
+.memory-tier .tier-badge {
+  display: inline-block;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.memory-tier.short-term .tier-badge {
+  background: rgba(192,255,84,0.12);
+  color: var(--accent);
+}
+
+.memory-tier.long-term .tier-badge {
+  background: rgba(84,255,208,0.12);
+  color: var(--teal);
+}
+
+.memory-tier h3 {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.memory-tier .tree-line {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 2;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+}
+
+.memory-tier .tree-line .hl {
+  color: var(--accent);
+}
+
+.memory-tier.long-term .tree-line .hl {
+  color: var(--teal);
+}
+
+.memory-tier .tree-line .comment {
+  color: var(--text-muted);
+}
+
+/* Sleep consolidation vertical flow */
+.sleep-flow {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.sleep-header {
+  background: var(--surface);
+  border: 2px solid rgba(179,136,255,0.4);
+  border-radius: 16px;
+  padding: 24px 40px;
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  z-index: 2;
+}
+
+.sleep-header h4 {
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--purple);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.sleep-header .sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.sleep-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  color: var(--purple);
+  font-size: 14px;
+  padding: 4px 0;
+  opacity: 0.6;
+}
+
+.sleep-stage {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 32px;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: all 0.3s;
+}
+
+.sleep-stage:hover {
+  border-color: var(--border-glow);
+}
+
+.sleep-stage .stage-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--purple);
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
+.sleep-stage .stage-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.sleep-stage .stage-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.sleep-footer {
+  background: var(--surface);
+  border: 1px solid rgba(192,255,84,0.3);
+  border-radius: 12px;
+  padding: 16px 32px;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.sleep-footer span {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Analogy cards */
+.analogy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.analogy-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.analogy-card:hover {
+  border-color: var(--border-glow);
+  transform: translateY(-2px);
+}
+
+.analogy-card .human-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.analogy-card h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.analogy-card .mapping-arrow {
+  display: block;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  margin: 10px 0;
+  letter-spacing: 0.05em;
+}
+
+.analogy-card .cube-mapping {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  background: rgba(192,255,84,0.03);
+  border: 1px solid rgba(192,255,84,0.08);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+/* Interaction log detail */
+.log-detail {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-top: 24px;
+}
+
+.log-detail h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.log-detail ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.log-detail ul li {
+  font-size: 13px;
+  color: var(--text-dim);
+  padding: 6px 0;
+  padding-left: 20px;
+  position: relative;
+  line-height: 1.6;
+}
+
+.log-detail ul li::before {
+  content: '\2192';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-size: 12px;
+}
+
+/* Responsive overrides */
+@media (max-width: 900px) {
+  .memory-tiers {
+    grid-template-columns: 1fr;
+  }
+  .sleep-header,
+  .sleep-stage,
+  .sleep-footer {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .analogy-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<!-- BACK NAV -->
+<nav class="back-nav">
+  <div class="back-nav-inner">
+    <a href="../" class="back-link"><span class="arrow">&larr;</span> CUBE Home</a>
+    <span class="nav-module-name">MODULE 06 &mdash; LEARNING</span>
+  </div>
+</nav>
+
+<!-- MODULE HEADER -->
+<header class="module-header">
+  <span class="module-num">06</span>
+  <div class="module-label">06 &mdash; Module</div>
+  <h1 class="module-title">Continuous Learning</h1>
+  <p class="module-desc">
+    How CUBE gets smarter over time. A two-tier memory system modeled on human cognition &mdash; short-term daily logs that capture everything, long-term curated knowledge that persists forever, and a nightly sleep consolidation cycle that promotes patterns into durable memory. Every decision is stored in markdown so you can always inspect exactly what your CUBE has learned and why.
+  </p>
+</header>
+
+<!-- STAT ROW -->
+<div class="content">
+  <div class="stat-row">
+    <div class="stat-box">
+      <div class="stat-num">2</div>
+      <div class="stat-label">Memory Tiers</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">3AM</div>
+      <div class="stat-label">Nightly Synthesis</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">0.7</div>
+      <div class="stat-label">MMR Lambda</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">30d</div>
+      <div class="stat-label">Decay Half-Life</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Human-Readable</div>
+    </div>
+  </div>
+
+  <!-- =========================================== -->
+  <!-- TWO-TIER MEMORY SYSTEM -->
+  <!-- =========================================== -->
+  <div class="content-section">
+    <div class="section-label">Memory Architecture</div>
+    <div class="section-title">Two-Tier Memory System</div>
+    <div class="section-desc">
+      Modeled on the <strong>OpenClaw</strong> architecture: a fast, append-only short-term memory for daily interactions, and a curated long-term memory that accumulates durable knowledge. The two tiers work together &mdash; short-term memory feeds into long-term through nightly consolidation, just like the human brain.
+    </div>
+
+    <div class="memory-tiers">
+      <!-- Short-Term Memory -->
+      <div class="memory-tier short-term">
+        <div class="tier-badge">Short-Term Memory</div>
+        <h3>Daily Interaction Logs</h3>
+        <div class="tree-line"><span class="hl">memory/YYYY-MM-DD.md</span> <span class="comment">&mdash; append-only daily logs</span>
+<span class="hl">Read at session start</span> <span class="comment">&mdash; today + yesterday</span>
+<span class="hl">Contains:</span> <span class="comment">conversations, decisions, observations</span>
+<span class="hl">Searchable</span> <span class="comment">&mdash; via memory_search (vector + BM25 hybrid)</span></div>
+        <div class="tech-chips" style="margin-top:16px;">
+          <span class="chip accent">Append-Only</span>
+          <span class="chip blue">Daily Files</span>
+          <span class="chip">Hybrid Search</span>
+        </div>
+      </div>
+
+      <!-- Long-Term Memory -->
+      <div class="memory-tier long-term">
+        <div class="tier-badge">Long-Term Memory</div>
+        <h3>Curated Durable Knowledge</h3>
+        <div class="tree-line"><span class="hl">MEMORY.md</span> <span class="comment">&mdash; curated durable facts, preferences</span>
+<span class="hl">Knowledge profiles</span> <span class="comment">&mdash; per family member</span>
+<span class="hl">Decision journals</span> <span class="comment">&mdash; reasoning chains preserved</span>
+<span class="hl">Never decays</span> <span class="comment">&mdash; only reinforced or pruned</span></div>
+        <div class="tech-chips" style="margin-top:16px;">
+          <span class="chip teal">Permanent</span>
+          <span class="chip purple">Curated</span>
+          <span class="chip">Reinforced</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="padding:0;"><hr></div>
+
+  <!-- =========================================== -->
+  <!-- SLEEP CONSOLIDATION CYCLE -->
+  <!-- =========================================== -->
+  <div class="content-section" style="margin-top:64px;">
+    <div class="section-label">Consolidation</div>
+    <div class="section-title">Sleep Consolidation Cycle</div>
+    <div class="section-desc">
+      Inspired by how the human brain consolidates memories during sleep. Every night at 3AM, CUBE runs a four-stage synthesis pipeline that compresses the day's raw interactions into durable knowledge. This is the mechanism by which CUBE <em>actually learns</em> &mdash; not fine-tuning, but structured memory promotion through reasoning.
+    </div>
+
+    <div class="sleep-flow">
+      <div class="sleep-header">
+        <h4>NIGHTLY SYNTHESIS</h4>
+        <div class="sub">Inspired by OpenClaw + human sleep &mdash; runs at 3AM</div>
+      </div>
+
+      <div class="sleep-arrow">&darr;</div>
+
+      <div class="sleep-stage">
+        <div class="stage-num">Stage 1</div>
+        <div>
+          <div class="stage-title">Summarize</div>
+          <div class="stage-desc">Compress daily interactions into key points. Raw conversation logs are distilled into structured summaries preserving intent, outcomes, and emotional context. The LLM reads the full day's markdown and produces a tight digest.</div>
+        </div>
+      </div>
+
+      <div class="sleep-arrow">&darr;</div>
+
+      <div class="sleep-stage">
+        <div class="stage-num">Stage 2</div>
+        <div>
+          <div class="stage-title">Pattern</div>
+          <div class="stage-desc">Identify recurring themes across recent days. The synthesis engine compares the last 7 days of summaries, looking for repeated requests, evolving preferences, and behavioral trends that suggest durable knowledge worth promoting.</div>
+        </div>
+      </div>
+
+      <div class="sleep-arrow">&darr;</div>
+
+      <div class="sleep-stage">
+        <div class="stage-num">Stage 3</div>
+        <div>
+          <div class="stage-title">Promote</div>
+          <div class="stage-desc">Move confirmed patterns to long-term MEMORY.md. Only patterns that recur across multiple days get promoted. Each promotion includes the reasoning chain &mdash; <em>why</em> the system decided this fact is durable, with source references back to the original conversations.</div>
+        </div>
+      </div>
+
+      <div class="sleep-arrow">&darr;</div>
+
+      <div class="sleep-stage">
+        <div class="stage-num">Stage 4</div>
+        <div>
+          <div class="stage-title">Prune</div>
+          <div class="stage-desc">Remove outdated or contradicted information. If a user corrects a preference or a fact changes, the prune stage detects the contradiction and removes or updates the stale entry. Pruning is logged &mdash; you can see what was removed and why.</div>
+        </div>
+      </div>
+
+      <div class="sleep-arrow">&darr;</div>
+
+      <div class="sleep-footer">
+        All stored as <span>Markdown</span> &mdash; human-readable reasoning trails, fully inspectable
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="padding:0;"><hr></div>
+
+  <!-- =========================================== -->
+  <!-- HYBRID SEARCH -->
+  <!-- =========================================== -->
+  <div class="content-section" style="margin-top:64px;">
+    <div class="section-label">Retrieval</div>
+    <div class="section-title">Hybrid Search Pipeline</div>
+    <div class="section-desc">
+      Memory is only useful if you can find the right thing at the right time. CUBE uses a hybrid retrieval pipeline that combines vector similarity search with keyword matching, then re-ranks for diversity and recency. This catches both semantic paraphrases and exact-match terms that vector search alone would miss.
+    </div>
+
+    <div class="tech-grid">
+      <div class="tech-card" style="border-top:3px solid var(--accent);">
+        <h4 style="color:var(--accent);">Vector Search</h4>
+        <p>Cosine similarity via ChromaDB. All memory documents are embedded using SentenceTransformers. Queries are embedded at runtime and matched against the full corpus. Catches paraphrases, synonyms, and conceptual similarity even when exact words differ.</p>
+        <div class="tech-chips">
+          <span class="chip accent">ChromaDB</span>
+          <span class="chip accent">Cosine Similarity</span>
+          <span class="chip">SentenceTransformers</span>
+        </div>
+      </div>
+
+      <div class="tech-card" style="border-top:3px solid var(--blue);">
+        <h4 style="color:var(--blue);">BM25 Keyword Search</h4>
+        <p>SQLite FTS5 full-text search for exact term matching. Catches proper nouns, dates, medication names, dollar amounts &mdash; things that vector search tends to miss because they're semantically opaque. Runs in parallel with vector search.</p>
+        <div class="tech-chips">
+          <span class="chip blue">SQLite FTS5</span>
+          <span class="chip blue">BM25 Scoring</span>
+          <span class="chip">Exact Match</span>
+        </div>
+      </div>
+
+      <div class="tech-card" style="border-top:3px solid var(--purple);">
+        <h4 style="color:var(--purple);">MMR Re-Ranking</h4>
+        <p>Maximal Marginal Relevance with lambda 0.7 (favoring relevance slightly over diversity). After both search results are merged, MMR ensures the final context window contains diverse, non-redundant information rather than five variations of the same memory.</p>
+        <div class="tech-chips">
+          <span class="chip purple">Lambda 0.7</span>
+          <span class="chip purple">Diversity Filter</span>
+          <span class="chip">Result Fusion</span>
+        </div>
+      </div>
+
+      <div class="tech-card" style="border-top:3px solid var(--orange);">
+        <h4 style="color:var(--orange);">Temporal Decay</h4>
+        <p>30-day half-life for search relevance scoring. Recent memories rank higher than old ones, all else being equal. Evergreen files (MEMORY.md, profiles) are exempt from decay &mdash; core knowledge never fades. Reinforced memories get their timestamp refreshed.</p>
+        <div class="tech-chips">
+          <span class="chip orange">30-Day Half-Life</span>
+          <span class="chip orange">Evergreen Exempt</span>
+          <span class="chip">Reinforcement</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search pipeline diagram -->
+    <div class="arch-diagram" style="margin-top:24px;">
+      <div class="arch-diagram-label">Search Pipeline</div>
+      <div class="arch-flow">
+        <div class="arch-node accent">
+          <div class="node-label">Query</div>
+          <div class="node-sub">user input</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node blue">
+          <div class="node-label">Embed</div>
+          <div class="node-sub">SentenceTransformers</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node">
+          <div class="node-label">Vector + BM25</div>
+          <div class="node-sub">parallel search</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node purple">
+          <div class="node-label">MMR Re-Rank</div>
+          <div class="node-sub">&lambda; = 0.7</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node orange">
+          <div class="node-label">Temporal Decay</div>
+          <div class="node-sub">30d half-life</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node teal">
+          <div class="node-label">Context</div>
+          <div class="node-sub">injected to LLM</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="padding:0;"><hr></div>
+
+  <!-- =========================================== -->
+  <!-- HUMAN MEMORY ANALOGY -->
+  <!-- =========================================== -->
+  <div class="content-section" style="margin-top:64px;">
+    <div class="section-label">Design Philosophy</div>
+    <div class="section-title">Modeled on Human Memory</div>
+    <div class="section-desc">
+      CUBE's memory system is deliberately designed to mirror how human cognition works. Each tier maps to a well-understood cognitive process. This isn't a metaphor &mdash; it's a design constraint that keeps the system intuitive and debuggable.
+    </div>
+
+    <div class="analogy-grid">
+      <div class="analogy-card" style="border-top:3px solid var(--orange);">
+        <div class="human-label">Human Cognition</div>
+        <h4>Working Memory</h4>
+        <div class="mapping-arrow">&darr; maps to</div>
+        <div class="cube-mapping">
+          <strong>Current conversation context</strong> &mdash; the last 10 messages in the active session. Volatile, discarded when the conversation ends. This is what the LLM "sees" right now.
+        </div>
+      </div>
+
+      <div class="analogy-card" style="border-top:3px solid var(--accent);">
+        <div class="human-label">Human Cognition</div>
+        <h4>Short-Term Memory</h4>
+        <div class="mapping-arrow">&darr; maps to</div>
+        <div class="cube-mapping">
+          <strong>Today's interactions, yesterday's for continuity</strong> &mdash; the daily markdown logs. Read at session start to provide immediate context. Fades via temporal decay unless promoted.
+        </div>
+      </div>
+
+      <div class="analogy-card" style="border-top:3px solid var(--teal);">
+        <div class="human-label">Human Cognition</div>
+        <h4>Long-Term Memory</h4>
+        <div class="mapping-arrow">&darr; maps to</div>
+        <div class="cube-mapping">
+          <strong>Curated facts promoted through sleep cycles</strong> &mdash; MEMORY.md and profile files. Only patterns that prove durable across multiple days get promoted here. Persistent, never subject to temporal decay.
+        </div>
+      </div>
+
+      <div class="analogy-card" style="border-top:3px solid var(--purple);">
+        <div class="human-label">Human Cognition</div>
+        <h4>Core Memories</h4>
+        <div class="mapping-arrow">&darr; maps to</div>
+        <div class="cube-mapping">
+          <strong>Identity-defining preferences, never deleted</strong> &mdash; family member identities, fundamental preferences, safety boundaries. These are protected from pruning and form the bedrock of CUBE's understanding of your family.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="padding:0;"><hr></div>
+
+  <!-- =========================================== -->
+  <!-- DIRECTORY STRUCTURE -->
+  <!-- =========================================== -->
+  <div class="content-section" style="margin-top:64px;">
+    <div class="section-label">File System</div>
+    <div class="section-title">Directory Structure</div>
+    <div class="section-desc">
+      Everything is a file. Every memory, every log, every profile &mdash; stored as markdown on disk, version-controllable with git, readable by any text editor. No proprietary database formats, no opaque binary blobs.
+    </div>
+
+    <div class="code-block"><span class="accent">/ssd/cube/</span>
+<span class="blue">├── memory/</span>
+│   ├── MEMORY.md          <span class="comment">&mdash; long-term curated knowledge</span>
+│   ├── 2026-02-21.md      <span class="comment">&mdash; today's daily log</span>
+│   └── ...
+<span class="blue">├── logs/</span>
+│   ├── 2026-02-21-09-30-morning-briefing.md
+│   └── ...
+<span class="teal">├── profiles/</span>
+│   └── joe.md             <span class="comment">&mdash; personal preferences, goals</span>
+<span class="purple">├── skills/</span>
+│   ├── morning-briefing.md
+│   ├── tax-prep.md
+│   └── ...
+<span class="orange">└── knowledge/</span>
+    ├── health/
+    ├── financial/
+    ├── legal/
+    └── family/</div>
+  </div>
+
+  <!-- =========================================== -->
+  <!-- INTERACTION LOGS -->
+  <!-- =========================================== -->
+  <div class="content-section">
+    <div class="section-label">Transparency</div>
+    <div class="section-title">Interaction Logs in Markdown</div>
+    <div class="section-desc">
+      Every conversation CUBE has is saved as a structured markdown file. No black box. No hidden reasoning. Every decision, every tool call, every outcome &mdash; written in plain text that any human can read, review, and question.
+    </div>
+
+    <div class="code-block"><span class="accent">logs/2026-02-21-09-30-morning-briefing.md</span>
+
+<span class="comment"># Morning Briefing &mdash; Feb 21, 2026 09:30</span>
+
+<span class="blue">## User Input</span>
+"Give me a rundown of today"
+
+<span class="teal">## System Reasoning</span>
+- Checked calendar: 2 events today
+- Searched memory for pending tasks: 1 follow-up from yesterday
+- Retrieved weather data via tool call
+
+<span class="purple">## Tool Calls</span>
+1. calendar_read() &rarr; {dentist 2pm, team standup 4pm}
+2. weather_fetch(zip=10001) &rarr; {72&deg;F, partly cloudy}
+
+<span class="orange">## Response Delivered</span>
+"Good morning. You have a dentist appointment at 2pm
+and your team standup at 4. It's 72 degrees and partly
+cloudy. Also &mdash; yesterday you asked me to follow up
+on the pharmacy refill. Want me to call them?"
+
+<span class="accent">## Outcome</span>
+User confirmed pharmacy call &rarr; task queued</div>
+
+    <div class="log-detail">
+      <h4>What Gets Logged</h4>
+      <ul>
+        <li>User input &mdash; exact transcript of what was said or typed</li>
+        <li>System reasoning &mdash; the chain of thought before responding</li>
+        <li>Tool calls &mdash; every external action with parameters and return values</li>
+        <li>Decisions &mdash; what CUBE chose to do and why it chose that path</li>
+        <li>Outcomes &mdash; the result of the interaction, including user feedback</li>
+        <li>Timestamps &mdash; precise timing for every step in the pipeline</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider" style="padding:0;"><hr></div>
+
+  <!-- =========================================== -->
+  <!-- IMPLEMENTATION PHASES -->
+  <!-- =========================================== -->
+  <div class="content-section" style="margin-top:64px;">
+    <div class="section-label">Implementation</div>
+    <div class="section-title">Build Phases</div>
+    <div class="section-desc">
+      The memory system is built incrementally, each phase adding a layer of sophistication. Phase 1 ships a functional memory system; Phase 4 achieves the full vision with temporal decay and core memory protection.
+    </div>
+
+    <div class="phase-grid">
+      <div class="phase-card current">
+        <div class="phase-num">Phase 1</div>
+        <h3>Foundation</h3>
+        <p>Daily markdown logging with basic memory search. Every conversation appended to today's log. Simple keyword search across memory files.</p>
+        <ul>
+          <li>Append-only daily markdown logs</li>
+          <li>Read today + yesterday at session start</li>
+          <li>Basic text search across memory/</li>
+          <li>Manual MEMORY.md curation</li>
+        </ul>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-num">Phase 2</div>
+        <h3>Vector Memory</h3>
+        <p>ChromaDB vector embeddings enable semantic search. Memory files are automatically embedded and indexed. Hybrid search combines vector + BM25.</p>
+        <ul>
+          <li>ChromaDB vector embeddings</li>
+          <li>SentenceTransformers encoding</li>
+          <li>Hybrid vector + BM25 search</li>
+          <li>MMR re-ranking (lambda 0.7)</li>
+        </ul>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-num">Phase 3</div>
+        <h3>Sleep Consolidation</h3>
+        <p>Nightly synthesis cron job runs the four-stage pipeline: summarize, pattern, promote, prune. CUBE starts learning autonomously overnight.</p>
+        <ul>
+          <li>3AM cron job synthesis pipeline</li>
+          <li>Cross-day pattern detection</li>
+          <li>Automatic MEMORY.md promotion</li>
+          <li>Contradiction detection + pruning</li>
+        </ul>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-num">Phase 4</div>
+        <h3>Full Memory System</h3>
+        <p>Core memory protection, family profiles, temporal decay with evergreen exemptions. The complete cognitive architecture running autonomously.</p>
+        <ul>
+          <li>Core memory system (never-delete)</li>
+          <li>Per-family-member profiles</li>
+          <li>30-day temporal decay</li>
+          <li>Evergreen file exemptions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="padding:0;"><hr></div>
+
+  <!-- =========================================== -->
+  <!-- KEY DECISIONS -->
+  <!-- =========================================== -->
+  <div class="content-section" style="margin-top:64px;">
+    <div class="section-label">Architecture Decisions</div>
+    <div class="section-title">Key Decisions</div>
+    <div class="section-desc">
+      Every major architectural choice in the memory system was made deliberately, with tradeoffs considered. These decisions define how CUBE thinks about knowledge and learning.
+    </div>
+
+    <div class="decision-grid">
+      <div class="decision-card">
+        <h4>"Markdown All The Way"</h4>
+        <p>Human-readable, git-friendly, inspectable. No proprietary formats, no binary databases for knowledge storage. A user can open any memory file in a text editor and understand exactly what CUBE knows. This is the single most important decision in the entire architecture &mdash; it makes transparency a structural guarantee, not a feature toggle.</p>
+      </div>
+
+      <div class="decision-card blue">
+        <h4>"Sleep Consolidation"</h4>
+        <p>Modeled on how human brains consolidate memories during sleep. Rather than trying to learn in real-time (which is computationally expensive and error-prone), CUBE batches its learning into a nightly cycle when the system is idle. This mirrors the neuroscience of memory formation and keeps the system predictable.</p>
+      </div>
+
+      <div class="decision-card teal">
+        <h4>"Hybrid Search"</h4>
+        <p>Vector + BM25 catches both semantic and exact matches. Pure vector search misses proper nouns and exact terms. Pure keyword search misses paraphrases and context. The hybrid approach, proven in production retrieval systems, gives the best of both worlds with minimal complexity overhead.</p>
+      </div>
+
+      <div class="decision-card purple">
+        <h4>"OpenClaw Architecture"</h4>
+        <p>Proven two-tier memory model adapted for personal use. OpenClaw demonstrated that a simple short-term / long-term split with explicit promotion logic outperforms more complex memory architectures. We adapted their approach, replacing their cloud storage with local markdown files.</p>
+      </div>
+
+      <div class="decision-card orange">
+        <h4>"Temporal Decay"</h4>
+        <p>Old memories fade unless reinforced, just like humans. Without decay, the memory system would accumulate irrelevant context that dilutes search quality. The 30-day half-life ensures recent interactions are weighted appropriately while still allowing old memories to surface when directly relevant.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="module-footer">
+  <div class="footer-brand">CUBE by Digital Surface Labs</div>
+  <div class="footer-right">February 2026 &mdash; Continuous Learning Module &middot; <a href="../">Back to CUBE</a></div>
+</footer>
+
+</body>
+</html>

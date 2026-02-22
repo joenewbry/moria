@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manufacturing &amp; Scale — CUBE Module</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<!-- BACK NAV -->
+<nav class="back-nav">
+  <div class="back-nav-inner">
+    <a href="../" class="back-link">
+      <span class="arrow">&larr;</span> CUBE Home
+    </a>
+    <span class="nav-module-name">MANUFACTURING &amp; SCALE</span>
+  </div>
+</nav>
+
+<!-- MODULE HEADER -->
+<header class="module-header">
+  <span class="module-num">08</span>
+  <div class="module-label">08 &mdash; Module</div>
+  <h1 class="module-title">Manufacturing &amp; Scale</h1>
+  <p class="module-desc">Supply chain strategy and production roadmap &mdash; from 3D-printed prototypes on your desk to injection-molded units shipping at scale. Every phase is designed to be fundable by the previous one.</p>
+</header>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- PHASE ROADMAP -->
+  <section class="content-section">
+    <div class="section-label">Roadmap</div>
+    <div class="section-title">Production Phases</div>
+    <div class="section-desc">Four phases from single prototype to volume production. Each phase is self-funding &mdash; revenue from the current phase funds tooling for the next.</div>
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">4</div>
+        <div class="stat-label">Production Phases</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">$400</div>
+        <div class="stat-label">Phase 1 BOM</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">$89</div>
+        <div class="stat-label">Phase 4 Target</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">10K+</div>
+        <div class="stat-label">Scale Target</div>
+      </div>
+    </div>
+
+    <div class="phase-grid">
+      <div class="phase-card current">
+        <div class="phase-num">PHASE 1 &mdash; PROTOTYPE</div>
+        <h3>Now &mdash; 10 Units</h3>
+        <ul>
+          <li>3D-printed PLA enclosure (your printer)</li>
+          <li>Jetson Orin Nano Super Dev Kit ($249)</li>
+          <li>Hand assembly, $400&ndash;500/unit BOM</li>
+          <li>No certification needed (personal use / dev kits)</li>
+          <li>Target: Prove the concept, dogfood daily</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 2 &mdash; SMALL BATCH</div>
+        <h3>10&ndash;100 Units</h3>
+        <ul>
+          <li>MJF/SLS 3D printing ($40&ndash;50/enclosure, production nylon)</li>
+          <li>FCC SDoC ($400&ndash;600, using pre-certified WiFi module)</li>
+          <li>Domestic contract assembler ($20&ndash;40/unit labor)</li>
+          <li>Mender Community Edition for OTA updates</li>
+          <li>$418&ndash;670/unit total, retail at $799</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 3 &mdash; MEDIUM SCALE</div>
+        <h3>100&ndash;1,000 Units</h3>
+        <ul>
+          <li>Injection molding ($6&ndash;12K tooling, $2&ndash;5/enclosure)</li>
+          <li>Optional: Custom carrier board ($15&ndash;50K design)</li>
+          <li>Full FCC + CE certification ($5&ndash;20K)</li>
+          <li>Domestic CM for assembly</li>
+          <li>$270&ndash;360/unit total, retail at $599&ndash;699</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 4 &mdash; SCALE</div>
+        <h3>1,000+ Units</h3>
+        <ul>
+          <li>Steel injection mold tooling ($30&ndash;50K)</li>
+          <li>Volume Jetson pricing (5&ndash;15% discount)</li>
+          <li>$89&ndash;149/unit target at 10K volume</li>
+          <li>Fleet management (Mender Enterprise / Allxon)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- SOFTWARE DELIVERY -->
+  <section class="content-section">
+    <div class="section-label">Delivery</div>
+    <div class="section-title">Software Delivery Model</div>
+    <div class="section-desc">Ship new capabilities without firmware updates. Skills are markdown files, system updates use A/B partitions, and the device never depends on a cloud service to function.</div>
+
+    <div class="tech-grid">
+      <div class="tech-card">
+        <h4>Skills as Markdown</h4>
+        <p>New capabilities ship as markdown files via Git. A lightweight agent on-device checks a manifest and pulls updates &mdash; no firmware flash, no downtime, no risk of bricking.</p>
+        <div class="tech-chips">
+          <span class="chip accent">Git</span>
+          <span class="chip accent">Markdown</span>
+          <span class="chip accent">Manifest</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Lightweight Update Agent</h4>
+        <p>Agent on the device periodically checks the skill manifest, pulls new or updated markdown files, and makes them available to the LLM. Zero-touch deployment for new capabilities.</p>
+        <div class="tech-chips">
+          <span class="chip blue">On-Device Agent</span>
+          <span class="chip blue">Manifest Check</span>
+          <span class="chip blue">Auto-Pull</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>OTA System Updates</h4>
+        <p>Mender handles full system updates via A/B partition switching. If an update fails, the device automatically rolls back to the previous working partition. Industry-standard reliability.</p>
+        <div class="tech-chips">
+          <span class="chip teal">Mender</span>
+          <span class="chip teal">A/B Partitions</span>
+          <span class="chip teal">Rollback</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>No Cloud Dependency</h4>
+        <p>Core function runs entirely on-device. No cloud API calls for inference, no subscription required. The device works offline, updates are pulled when connectivity is available.</p>
+        <div class="tech-chips">
+          <span class="chip purple">Offline-First</span>
+          <span class="chip purple">Local Inference</span>
+          <span class="chip purple">Self-Contained</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- BUSINESS MODEL -->
+  <section class="content-section">
+    <div class="section-label">Model</div>
+    <div class="section-title">Pay Once, Value Forever</div>
+    <div class="section-desc">No subscription model. Hardware margin funds development. Viable because inference runs locally &mdash; there are no per-query cloud API costs to recoup.</div>
+
+    <div class="decision-grid">
+      <div class="decision-card">
+        <h4>Local Inference = No Cloud Costs</h4>
+        <p>The entire business model is viable because inference runs on the Jetson GPU. No cloud API calls means no per-query costs, no usage-based pricing pressure, and no reason to charge a subscription.</p>
+      </div>
+      <div class="decision-card blue">
+        <h4>Hardware Margin Funds Development</h4>
+        <p>2x BOM pricing gives healthy margin to fund ongoing software development. At Phase 2 pricing ($418&ndash;670 BOM, $799 retail), that's $129&ndash;381 per unit toward R&amp;D, support, and new skills.</p>
+      </div>
+      <div class="decision-card teal">
+        <h4>Hardware Generations Drive Revenue</h4>
+        <p>New NVIDIA Jetson generations every 18&ndash;24 months create natural upgrade cycles. Each generation brings more compute, better efficiency, and new capabilities that drive repeat purchases.</p>
+      </div>
+      <div class="decision-card purple">
+        <h4>Optional Premium Revenue</h4>
+        <p>Two optional revenue streams for users who want more: a premium skills marketplace for specialized capabilities, and a cloud sync subscription for multi-device coordination.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- MEMORY BUDGET -->
+  <section class="content-section">
+    <div class="section-label">Resources</div>
+    <div class="section-title">Memory Budget &mdash; Concurrent Services</div>
+    <div class="section-desc">How 7.4 GB of unified memory is allocated across always-on services, wake-triggered models, and on-demand tools.</div>
+
+    <div class="spec-wrap">
+      <table class="spec-table">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>RAM</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Linux OS + system</td>
+            <td>800 MB</td>
+            <td>Always</td>
+          </tr>
+          <tr>
+            <td>ChromaDB</td>
+            <td>300 MB</td>
+            <td>Always</td>
+          </tr>
+          <tr>
+            <td>OpenWakeWord</td>
+            <td>50 MB</td>
+            <td>Always</td>
+          </tr>
+          <tr>
+            <td>Piper TTS</td>
+            <td>100 MB</td>
+            <td>Always</td>
+          </tr>
+          <tr>
+            <td>Gmail monitor</td>
+            <td>30 MB</td>
+            <td>Always</td>
+          </tr>
+          <tr>
+            <td>Whisper base.en</td>
+            <td>200 MB</td>
+            <td>On wake</td>
+          </tr>
+          <tr>
+            <td>LLM 3B Q4</td>
+            <td>2.5 GB</td>
+            <td>On wake</td>
+          </tr>
+          <tr>
+            <td>YOLO nano (vision)</td>
+            <td>300 MB</td>
+            <td>On demand</td>
+          </tr>
+          <tr>
+            <td>Playwright (browser)</td>
+            <td>300 MB</td>
+            <td>On demand</td>
+          </tr>
+          <tr>
+            <td class="spec-highlight">Total</td>
+            <td class="spec-highlight">~4.6 GB</td>
+            <td class="spec-highlight">Fits in 7.4 GB</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- KEY DECISIONS -->
+  <section class="content-section">
+    <div class="section-label">Decisions</div>
+    <div class="section-title">Key Decisions</div>
+    <div class="section-desc">The strategic choices that shape the manufacturing and scale-up roadmap.</div>
+
+    <div class="decision-grid">
+      <div class="decision-card">
+        <h4>Start With Dev Kit</h4>
+        <p>No custom hardware risk at prototype stage. The Jetson Orin Nano Super Dev Kit ($249) is a production-ready board with all the compute we need. Custom carrier boards are a Phase 3 optimization, not a Phase 1 requirement.</p>
+      </div>
+      <div class="decision-card blue">
+        <h4>Mender for OTA</h4>
+        <p>Industry-standard A/B partition updates with automatic rollback. Open-source Community Edition for early phases, Enterprise for fleet management at scale. No proprietary lock-in, battle-tested on millions of embedded Linux devices.</p>
+      </div>
+      <div class="decision-card teal">
+        <h4>Pay Once</h4>
+        <p>No subscription model. Hardware margin funds development. This is only possible because inference runs locally &mdash; there are no cloud API costs that would force recurring revenue. Users own their device, period.</p>
+      </div>
+      <div class="decision-card purple">
+        <h4>Skills as Markdown</h4>
+        <p>Ship new capabilities without firmware updates. Markdown skill files are pulled via Git, interpreted by the on-device LLM. New skills deploy in minutes, not hours. No risk of bricking devices with bad firmware.</p>
+      </div>
+      <div class="decision-card orange">
+        <h4>Domestic Assembly</h4>
+        <p>Keep supply chain simple and local through Phase 3. Domestic contract manufacturers mean shorter lead times, easier quality control, and no international shipping complexity. Offshore only when volume justifies it.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="module-footer">
+  <div class="footer-brand">CUBE by Digital Surface Labs</div>
+  <div class="footer-right">February 2026 &mdash; Manufacturing &amp; Scale Module &middot; <a href="../">Back to CUBE</a></div>
+</footer>
+
+</body>
+</html>

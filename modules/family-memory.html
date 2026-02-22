@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family Memory — CUBE Module</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<!-- BACK NAV -->
+<nav class="back-nav">
+  <div class="back-nav-inner">
+    <a href="../" class="back-link"><span class="arrow">&larr;</span> CUBE Home</a>
+    <span class="nav-module-name">FAMILY MEMORY</span>
+  </div>
+</nav>
+
+<!-- MODULE HEADER -->
+<header class="module-header">
+  <span class="module-num">04</span>
+  <div class="module-label">04 &mdash; Module</div>
+  <h1 class="module-title">Family Memory</h1>
+  <p class="module-desc">
+    A persistent, searchable knowledge base for your family. Every conversation, photo, document, and decision is stored locally, indexed semantically, and retrievable in natural language. Your family's collective memory &mdash; always on, always private, always growing.
+  </p>
+</header>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- ARCHITECTURE -->
+  <section class="content-section">
+    <div class="section-label">Architecture</div>
+    <h2 class="section-title">How Data Flows Into Memory</h2>
+    <p class="section-desc">
+      Three input streams converge into a unified storage layer that supports semantic search, structured queries, and human-readable browsing.
+    </p>
+
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Input Sources</div>
+
+      <div class="arch-flow">
+        <div class="arch-node">
+          <div class="node-label">Voice Conversations</div>
+          <div class="node-sub">natural speech</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node blue">
+          <div class="node-label">Whisper STT</div>
+          <div class="node-sub">transcription</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node accent">
+          <div class="node-label">Markdown Logs</div>
+          <div class="node-sub">timestamped text</div>
+        </div>
+      </div>
+
+      <div class="arch-flow">
+        <div class="arch-node">
+          <div class="node-label">Photos / Documents</div>
+          <div class="node-sub">images, scans, PDFs</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node teal">
+          <div class="node-label">Vision LLM</div>
+          <div class="node-sub">analysis</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node accent">
+          <div class="node-label">Descriptions + Tags</div>
+          <div class="node-sub">structured metadata</div>
+        </div>
+      </div>
+
+      <div class="arch-flow">
+        <div class="arch-node">
+          <div class="node-label">Calendar Events</div>
+          <div class="node-sub">appointments, reminders</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node purple">
+          <div class="node-label">Structured Data</div>
+          <div class="node-sub">dates, people, types</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node accent">
+          <div class="node-label">Indexed Records</div>
+          <div class="node-sub">queryable entries</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Storage Layer</div>
+      <div class="arch-columns">
+        <div class="arch-node accent">
+          <div class="node-label">ChromaDB</div>
+          <div class="node-sub">vector store &mdash; semantic search across all family data</div>
+        </div>
+        <div class="arch-node purple">
+          <div class="node-label">SQLite</div>
+          <div class="node-sub">structured queries &mdash; dates, people, events</div>
+        </div>
+        <div class="arch-node orange">
+          <div class="node-label">Markdown Files</div>
+          <div class="node-sub">human-readable knowledge base</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Query Interface</div>
+      <div class="arch-vertical">
+        <div class="arch-node accent" style="max-width:100%;">
+          <div class="node-label" style="text-align:left; font-size:13px;">"When was Dad's last doctor appointment?"</div>
+          <div class="node-sub" style="text-align:left;">SQLite date lookup + ChromaDB context retrieval</div>
+        </div>
+        <div class="arch-arrow">&darr;</div>
+        <div class="arch-node blue" style="max-width:100%;">
+          <div class="node-label" style="text-align:left; font-size:13px;">"What did we decide about the kitchen renovation?"</div>
+          <div class="node-sub" style="text-align:left;">Semantic search across conversation logs and decision records</div>
+        </div>
+        <div class="arch-arrow">&darr;</div>
+        <div class="arch-node teal" style="max-width:100%;">
+          <div class="node-label" style="text-align:left; font-size:13px;">"Show me photos from Thanksgiving 2025"</div>
+          <div class="node-sub" style="text-align:left;">Date filter + event tag match + Vision LLM descriptions</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATA TYPES -->
+  <section class="content-section">
+    <div class="section-label">Data Types</div>
+    <h2 class="section-title">What Gets Remembered</h2>
+    <p class="section-desc">
+      Six categories of family data, each ingested and indexed differently but all searchable through a single natural-language interface.
+    </p>
+
+    <div class="tech-grid">
+      <div class="tech-card">
+        <h4>Voice Conversations</h4>
+        <p>Every spoken interaction is auto-transcribed via Whisper and saved as timestamped markdown. Speaker identification tags who said what. Full-text and semantic search across all conversations.</p>
+        <div class="tech-chips">
+          <span class="chip accent">auto-transcribed</span>
+          <span class="chip blue">indexed</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Photos</h4>
+        <p>Images are analyzed by the Vision LLM to generate descriptions, identify faces, detect objects, and tag events and dates. Original files stored locally with rich, searchable metadata.</p>
+        <div class="tech-chips">
+          <span class="chip teal">face detection</span>
+          <span class="chip purple">object tags</span>
+          <span class="chip orange">event dates</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Documents</h4>
+        <p>Paper documents are scanned, OCR'd, and classified automatically. Medical records, receipts, contracts, school papers &mdash; all digitized, tagged by type, and full-text searchable.</p>
+        <div class="tech-chips">
+          <span class="chip accent">scanned</span>
+          <span class="chip blue">OCR'd</span>
+          <span class="chip purple">classified</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Calendar Events</h4>
+        <p>Appointments, birthdays, deadlines, and reminders stored as structured data. Queryable by date range, person, or event type. Integrated with voice reminders and proactive alerts.</p>
+        <div class="tech-chips">
+          <span class="chip orange">structured</span>
+          <span class="chip accent">queryable</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Notes</h4>
+        <p>Freeform text captured via voice or typed input. Automatically linked to relevant people, topics, and time periods. Supports both quick capture and long-form journaling.</p>
+        <div class="tech-chips">
+          <span class="chip blue">freeform</span>
+          <span class="chip teal">linked</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Decisions</h4>
+        <p>Family decisions recorded with full context and rationale. Why did we choose this school? What contractor did we pick and why? Searchable decision history with reasoning chains preserved.</p>
+        <div class="tech-chips">
+          <span class="chip purple">context</span>
+          <span class="chip orange">rationale</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMPLEMENTATION PHASES -->
+  <section class="content-section">
+    <div class="section-label">Implementation</div>
+    <h2 class="section-title">Phased Rollout</h2>
+    <p class="section-desc">
+      Family Memory is built incrementally. Each phase adds a new data modality while deepening the search and retrieval capabilities of previous phases.
+    </p>
+
+    <div class="phase-grid">
+      <div class="phase-card current">
+        <div class="phase-num">Phase 1</div>
+        <h3>Voice Conversation Logging &amp; Search</h3>
+        <p>The foundation. Every voice interaction is transcribed, timestamped, and indexed. Semantic search lets you ask natural-language questions about past conversations.</p>
+        <ul>
+          <li>Whisper STT pipeline integration</li>
+          <li>Markdown conversation logs</li>
+          <li>ChromaDB vector indexing</li>
+          <li>Natural-language query interface</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">Phase 2</div>
+        <h3>Photo Import with Vision LLM Tagging</h3>
+        <p>Import photos from phones and cameras. The Vision LLM analyzes each image, generating descriptions, face tags, and event labels automatically.</p>
+        <ul>
+          <li>Bulk photo import pipeline</li>
+          <li>Vision LLM analysis per image</li>
+          <li>Face recognition profiles</li>
+          <li>Event and date extraction</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">Phase 3</div>
+        <h3>Document Scanning &amp; Classification</h3>
+        <p>Point the camera at a document or drop a PDF. OCR extracts text, the LLM classifies the document type, and everything is filed and indexed automatically.</p>
+        <ul>
+          <li>Camera-based document capture</li>
+          <li>OCR text extraction</li>
+          <li>Auto-classification by type</li>
+          <li>Structured metadata extraction</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">Phase 4</div>
+        <h3>Cross-Modal Search</h3>
+        <p>The ultimate goal: search across all data types simultaneously. "Find the photo from when we discussed the renovation" connects voice logs to photo timestamps.</p>
+        <ul>
+          <li>Unified search across all modalities</li>
+          <li>Temporal correlation engine</li>
+          <li>Cross-reference linking</li>
+          <li>Contextual result ranking</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- TECH STACK -->
+  <section class="content-section">
+    <div class="section-label">Tech Stack</div>
+    <h2 class="section-title">What Powers Family Memory</h2>
+    <p class="section-desc">
+      All open-source, all running locally on the Jetson Orin Nano. Zero cloud dependency for any memory operation.
+    </p>
+
+    <div class="tech-grid">
+      <div class="tech-card">
+        <h4>ChromaDB</h4>
+        <p>Vector database for semantic search. Every piece of family data is embedded and stored for natural-language retrieval. The backbone of "just ask" queries.</p>
+        <div class="tech-chips">
+          <span class="chip accent">vector search</span>
+          <span class="chip accent">embeddings</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Whisper STT</h4>
+        <p>OpenAI's open-source speech-to-text model running locally. Converts voice conversations to text with high accuracy. Tiny and Small variants for speed vs. quality tradeoff.</p>
+        <div class="tech-chips">
+          <span class="chip blue">voice transcription</span>
+          <span class="chip blue">on-device</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Vision LLM</h4>
+        <p>Qwen2.5-VL or similar multimodal model for analyzing photos and documents. Generates descriptions, identifies objects and faces, reads text from images.</p>
+        <div class="tech-chips">
+          <span class="chip teal">photo analysis</span>
+          <span class="chip teal">document OCR</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>SQLite FTS5</h4>
+        <p>Full-text search extension for structured queries. Handles date ranges, person filters, and keyword matching. Complements ChromaDB's semantic search with exact lookups.</p>
+        <div class="tech-chips">
+          <span class="chip purple">full-text search</span>
+          <span class="chip purple">structured queries</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Markdown</h4>
+        <p>The universal storage format. Every piece of data ultimately lives as a human-readable markdown file. Browse your family's memory with any text editor. No vendor lock-in, ever.</p>
+        <div class="tech-chips">
+          <span class="chip orange">human-readable</span>
+          <span class="chip orange">portable</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEY DECISIONS -->
+  <section class="content-section">
+    <div class="section-label">Key Decisions</div>
+    <h2 class="section-title">Design Philosophy</h2>
+    <p class="section-desc">
+      The architectural choices that define how Family Memory works and why it works that way.
+    </p>
+
+    <div class="decision-grid">
+      <div class="decision-card">
+        <h4>"Markdown First"</h4>
+        <p>All data is stored as human-readable markdown files, never locked in proprietary formats. If CUBE disappears tomorrow, your family's memory is still a folder of text files you can read with anything. Data portability is non-negotiable.</p>
+      </div>
+      <div class="decision-card blue">
+        <h4>"Hybrid Search"</h4>
+        <p>Vector search (semantic / ChromaDB) plus keyword search (BM25 / SQLite FTS5) combined for best recall. Semantic search finds conceptually related results; keyword search catches exact names, dates, and terms that embeddings might miss.</p>
+      </div>
+      <div class="decision-card teal">
+        <h4>"Per-Person Profiles"</h4>
+        <p>Each family member has a dedicated profile with their preferences, health information, goals, and history. The system tailors responses and proactive alerts per person. Profiles are editable markdown files &mdash; no hidden data.</p>
+      </div>
+      <div class="decision-card orange">
+        <h4>"Year-Zero Problem"</h4>
+        <p>The hardest part is starting. Family Memory has no value on day one. But the value compounds exponentially over time &mdash; a year of indexed conversations and photos creates a resource that cannot be recreated. Start collecting now; future you will thank present you.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="module-footer">
+  <div class="footer-brand">CUBE by Digital Surface Labs</div>
+  <div class="footer-right">February 2026 &mdash; Family Memory Module &middot; <a href="../">Back to CUBE</a></div>
+</footer>
+
+</body>
+</html>

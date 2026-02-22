@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healthcare Advocate — CUBE Module</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<!-- BACK NAV -->
+<nav class="back-nav">
+  <div class="back-nav-inner">
+    <a href="../" class="back-link">
+      <span class="arrow">&larr;</span> CUBE Home
+    </a>
+    <span class="nav-module-name">HEALTHCARE ADVOCATE</span>
+  </div>
+</nav>
+
+<!-- MODULE HEADER -->
+<header class="module-header">
+  <span class="module-num">01</span>
+  <div class="module-label">01 &mdash; Module</div>
+  <h1 class="module-title">Healthcare Advocate</h1>
+  <p class="module-desc">Places calls on your behalf, pulls your health records from Stanford MyHealth, processes Apple Health exports, and keeps your medical data organized and searchable &mdash; all running locally on your CUBE.</p>
+</header>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- CORE CAPABILITIES -->
+  <section class="content-section">
+    <div class="section-label">Capabilities</div>
+    <div class="section-title">What It Does</div>
+    <div class="section-desc">Five core capabilities that turn CUBE into a proactive healthcare assistant for your household.</div>
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">$0.014</div>
+        <div class="stat-label">Per Minute Call Cost</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">FHIR R4</div>
+        <div class="stat-label">Health Record Standard</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Local Processing</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">Your #</div>
+        <div class="stat-label">Caller ID Shown</div>
+      </div>
+    </div>
+
+    <div class="phase-grid">
+      <div class="phase-card">
+        <div class="phase-num">CALLING</div>
+        <h3>Place Calls On Your Behalf</h3>
+        <p>CUBE places real phone calls using your verified phone number via Twilio. Schedule appointments, follow up on referrals, or check on prescription status &mdash; hands-free.</p>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">SCHEDULING</div>
+        <h3>Appointments &amp; Reminders</h3>
+        <p>Schedule appointments, send medication reminders, and track upcoming health events. Proactive alerts when prescriptions are due for refill.</p>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">RECORDS</div>
+        <h3>Pull Health Records</h3>
+        <p>Connect to Stanford MyHealth via SMART on FHIR (Epic's patient-facing FHIR R4 API). Labs, medications, conditions, and allergies pulled directly into your local store.</p>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">APPLE HEALTH</div>
+        <h3>Process Health Exports</h3>
+        <p>Export your Apple Health data as XML, upload to CUBE, and it parses every metric &mdash; heart rate, steps, sleep, workouts &mdash; into ChromaDB for semantic search.</p>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">DOCUMENTS</div>
+        <h3>Document Upload Portal</h3>
+        <p>Scan or photograph medical documents. Vision LLM (Claude or local Qwen2.5-VL) extracts structured data and indexes it in ChromaDB for instant retrieval.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- ARCHITECTURE DIAGRAM -->
+  <section class="content-section">
+    <div class="section-label">Architecture</div>
+    <div class="section-title">System Data Flows</div>
+    <div class="section-desc">Four primary data pipelines feed health information into CUBE's local knowledge store.</div>
+
+    <!-- Flow 1: Document Upload -->
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Flow 1 &mdash; Document Upload Pipeline</div>
+      <div class="arch-flow">
+        <div class="arch-node accent">
+          <div class="node-label">Document Upload</div>
+          <div class="node-sub">scan / photo</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node blue">
+          <div class="node-label">OCR / Parse</div>
+          <div class="node-sub">Qwen2.5-VL</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node teal">
+          <div class="node-label">Local FHIR Store</div>
+          <div class="node-sub">ChromaDB</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flow 2: Stanford MyHealth -->
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Flow 2 &mdash; Stanford MyHealth Integration</div>
+      <div class="arch-flow">
+        <div class="arch-node purple">
+          <div class="node-label">Stanford MyHealth</div>
+          <div class="node-sub">Epic EHR</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node blue">
+          <div class="node-label">SMART on FHIR</div>
+          <div class="node-sub">OAuth2 flow</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node accent">
+          <div class="node-label">FHIR R4 JSON</div>
+          <div class="node-sub">labs / meds / conditions</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node teal">
+          <div class="node-label">ChromaDB</div>
+          <div class="node-sub">vector store</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flow 3: Apple Health -->
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Flow 3 &mdash; Apple Health Import</div>
+      <div class="arch-flow">
+        <div class="arch-node orange">
+          <div class="node-label">Apple Health Export</div>
+          <div class="node-sub">XML archive</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node blue">
+          <div class="node-label">XML Parser</div>
+          <div class="node-sub">extract metrics</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node teal">
+          <div class="node-label">Metrics DB</div>
+          <div class="node-sub">ChromaDB</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flow 4: Voice Calling -->
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Flow 4 &mdash; Voice Call Pipeline</div>
+      <div class="arch-flow">
+        <div class="arch-node accent">
+          <div class="node-label">User Voice Command</div>
+          <div class="node-sub">"Call Dr. Smith"</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node blue">
+          <div class="node-label">Twilio API</div>
+          <div class="node-sub">verified caller ID</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node purple">
+          <div class="node-label">Phone Call</div>
+          <div class="node-sub">Media Streams</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node teal">
+          <div class="node-label">Whisper STT</div>
+          <div class="node-sub">local transcription</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node orange">
+          <div class="node-label">Piper TTS</div>
+          <div class="node-sub">local synthesis</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- PHONE CALLING APPROACH -->
+  <section class="content-section">
+    <div class="section-label">Priority #1</div>
+    <div class="section-title">Phone Calling Approach</div>
+    <div class="section-desc">Two-phase strategy: Twilio for fast MVP, self-hosted SIP for zero-cloud future.</div>
+
+    <div class="two-col">
+      <div>
+        <div class="priority high">PRIMARY &mdash; TWILIO VERIFIED CALLER ID</div>
+        <div class="arch-diagram" style="margin-bottom:0;">
+          <div class="arch-diagram-label">How It Works</div>
+          <div style="font-size:14px; color:var(--text-dim); line-height:1.8;">
+            <p style="margin-bottom:12px;">Verify your cell number once via OTP &mdash; Twilio then places calls showing <strong style="color:var(--text);">your real phone number</strong> as the caller ID. No new phone number needed.</p>
+            <p style="margin-bottom:12px;"><strong style="color:var(--accent);">Twilio Media Streams</strong> provides a bidirectional WebSocket for full audio control. Raw audio flows between the phone call and your Jetson in real time.</p>
+            <p style="margin-bottom:12px;">On-device pipeline: <strong style="color:var(--blue);">Whisper</strong> (local STT) &rarr; <strong style="color:var(--purple);">LLM</strong> (conversation logic) &rarr; <strong style="color:var(--teal);">Piper</strong> (local TTS).</p>
+            <p>Cost: <strong style="color:var(--accent);">~$0.014/min</strong> for outbound calls. No per-seat fees, no monthly minimums.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="priority medium">FUTURE &mdash; SELF-HOSTED SIP</div>
+        <div class="arch-diagram" style="margin-bottom:0;">
+          <div class="arch-diagram-label">Zero Cloud Dependency</div>
+          <div style="font-size:14px; color:var(--text-dim); line-height:1.8;">
+            <p style="margin-bottom:12px;"><strong style="color:var(--text);">PJSIP / PJSUA2</strong> running directly on the Jetson with Python bindings (ARM64 native). Full SIP stack, no cloud intermediary.</p>
+            <p style="margin-bottom:12px;">SIP trunk providers for PSTN connectivity:</p>
+            <ul style="list-style:none; margin-bottom:12px;">
+              <li style="padding:4px 0; padding-left:16px; position:relative;"><span style="position:absolute; left:0; color:var(--accent);">&rarr;</span> Telnyx: ~$0.005/min</li>
+              <li style="padding:4px 0; padding-left:16px; position:relative;"><span style="position:absolute; left:0; color:var(--accent);">&rarr;</span> Voip.ms: ~$0.01/min</li>
+            </ul>
+            <p>Ultimate goal: CUBE handles phone calls with no cloud services beyond a SIP trunk for PSTN bridging.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- HEALTH DATA INTEGRATION -->
+  <section class="content-section">
+    <div class="section-label">Data Sources</div>
+    <div class="section-title">Health Data Integration</div>
+    <div class="section-desc">Structured health data from three sources, all stored locally and searchable via semantic search.</div>
+
+    <div class="decision-grid">
+      <div class="decision-card purple">
+        <h4>SMART on FHIR (Stanford MyHealth)</h4>
+        <p>Register at <strong style="color:var(--text);">open.epic.com</strong> for a SMART on FHIR application. Standalone launch flow: user authenticates via MyChart OAuth2. Pull FHIR resources &mdash; labs, medications, conditions, allergies &mdash; and store locally in ChromaDB for semantic search.</p>
+      </div>
+      <div class="decision-card orange">
+        <h4>Apple Health Export</h4>
+        <p>Supplementary data source. Export from iPhone as XML archive, upload to CUBE. Parser extracts heart rate, steps, sleep analysis, workouts, and other metrics. Indexed in ChromaDB alongside clinical data for a complete health picture.</p>
+      </div>
+      <div class="decision-card teal">
+        <h4>Document Upload Portal</h4>
+        <p>Web interface for scanning or uploading medical documents &mdash; lab results, insurance EOBs, prescription labels. Vision LLM (Claude API or local Qwen2.5-VL) processes each document for understanding. Extracted data indexed in ChromaDB for instant retrieval.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- IMPLEMENTATION PHASES -->
+  <section class="content-section">
+    <div class="section-label">Roadmap</div>
+    <div class="section-title">Implementation Phases</div>
+    <div class="section-desc">Four phases from MVP phone calling to proactive health monitoring.</div>
+
+    <div class="phase-grid">
+      <div class="phase-card current">
+        <div class="phase-num">PHASE 1</div>
+        <h3>Twilio Phone Calling</h3>
+        <p>Basic voice pipeline for placing and managing phone calls on the user's behalf.</p>
+        <ul>
+          <li>Twilio Verified Caller ID setup</li>
+          <li>Media Streams WebSocket integration</li>
+          <li>Whisper STT + Piper TTS pipeline</li>
+          <li>LLM-driven conversation logic</li>
+          <li>Call transcript logging to markdown</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 2</div>
+        <h3>SMART on FHIR Integration</h3>
+        <p>Connect to Stanford MyHealth and pull structured health records.</p>
+        <ul>
+          <li>Register SMART on FHIR app at open.epic.com</li>
+          <li>OAuth2 standalone launch flow</li>
+          <li>FHIR R4 resource retrieval (labs, meds, conditions)</li>
+          <li>ChromaDB indexing with semantic embeddings</li>
+          <li>Natural language health record queries</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 3</div>
+        <h3>Apple Health &amp; Documents</h3>
+        <p>Import Apple Health exports and build the document upload portal.</p>
+        <ul>
+          <li>Apple Health XML parser</li>
+          <li>Metrics extraction and time-series storage</li>
+          <li>Web-based document upload interface</li>
+          <li>Vision LLM document understanding</li>
+          <li>Unified health data search across all sources</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 4</div>
+        <h3>Proactive Monitoring</h3>
+        <p>CUBE becomes a proactive health advocate, not just a passive tool.</p>
+        <ul>
+          <li>Medication tracking and refill reminders</li>
+          <li>Appointment scheduling automation</li>
+          <li>Health trend analysis and anomaly detection</li>
+          <li>Proactive alerts for preventive care</li>
+          <li>Family health dashboard</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- TECH STACK -->
+  <section class="content-section">
+    <div class="section-label">Stack</div>
+    <div class="section-title">Tech Stack</div>
+    <div class="section-desc">All components selected for local-first operation on the Jetson Orin Nano.</div>
+
+    <div class="tech-grid">
+      <div class="tech-card">
+        <h4>Twilio Programmable Voice</h4>
+        <p>Outbound calling with Verified Caller ID. Media Streams for bidirectional audio via WebSocket. Pay-per-minute, no subscriptions.</p>
+        <div class="tech-chips">
+          <span class="chip accent">Twilio Voice</span>
+          <span class="chip accent">Media Streams</span>
+          <span class="chip accent">Verified Caller ID</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Whisper STT</h4>
+        <p>OpenAI's Whisper model running locally on the Jetson GPU. Real-time speech-to-text for both voice commands and phone call transcription.</p>
+        <div class="tech-chips">
+          <span class="chip blue">Whisper</span>
+          <span class="chip blue">Local Inference</span>
+          <span class="chip blue">CUDA Accelerated</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Piper TTS</h4>
+        <p>Fast, high-quality text-to-speech running on-device. Natural-sounding voices with low latency, perfect for real-time phone conversations.</p>
+        <div class="tech-chips">
+          <span class="chip teal">Piper</span>
+          <span class="chip teal">On-Device</span>
+          <span class="chip teal">Low Latency</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>SMART on FHIR / Epic API</h4>
+        <p>Epic's patient-facing FHIR R4 API for pulling health records from Stanford MyHealth. Standards-based, OAuth2-secured access to clinical data.</p>
+        <div class="tech-chips">
+          <span class="chip purple">FHIR R4</span>
+          <span class="chip purple">Epic API</span>
+          <span class="chip purple">OAuth2</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>ChromaDB</h4>
+        <p>Local vector database for semantic search across all health data &mdash; records, transcripts, documents, and Apple Health metrics.</p>
+        <div class="tech-chips">
+          <span class="chip accent">ChromaDB</span>
+          <span class="chip accent">Vector Search</span>
+          <span class="chip accent">Embeddings</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Qwen2.5-VL</h4>
+        <p>Vision-language model running locally for document OCR and understanding. Processes scanned medical documents without sending data to the cloud.</p>
+        <div class="tech-chips">
+          <span class="chip orange">Qwen2.5-VL</span>
+          <span class="chip orange">Vision LLM</span>
+          <span class="chip orange">Local OCR</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- KEY DECISIONS -->
+  <section class="content-section">
+    <div class="section-label">Decisions</div>
+    <div class="section-title">Key Decisions</div>
+    <div class="section-desc">The architectural choices that shaped this module and the reasoning behind them.</div>
+
+    <div class="decision-grid">
+      <div class="decision-card">
+        <h4>Twilio First, SIP Later</h4>
+        <p>Twilio gives us a working phone calling MVP in days, not weeks. Verified Caller ID means calls show your real number. Self-hosted SIP (PJSIP on Jetson) is the zero-cloud endgame, but Twilio gets us to a demo faster.</p>
+      </div>
+      <div class="decision-card blue">
+        <h4>FHIR API, Not Scraping</h4>
+        <p>Epic's official SMART on FHIR API is the clean path to health records. No brittle web scraping, no reverse-engineering MyChart. Standards-based, OAuth2-secured, and designed for exactly this use case.</p>
+      </div>
+      <div class="decision-card teal">
+        <h4>No Case Law Pattern</h4>
+        <p>CUBE will never generate medical advice, diagnose conditions, or recommend treatments. It only organizes, retrieves, and presents your existing health data. The user and their doctor make the decisions.</p>
+      </div>
+      <div class="decision-card purple">
+        <h4>Local OCR</h4>
+        <p>Vision LLM runs on-device (Qwen2.5-VL on Jetson GPU) for document processing. No medical documents are ever uploaded to cloud services. Your health data stays physically inside the CUBE on your shelf.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="module-footer">
+  <div class="footer-brand">CUBE by Digital Surface Labs</div>
+  <div class="footer-right">February 2026 &mdash; Healthcare Advocate Module &middot; <a href="../">Back to CUBE</a></div>
+</footer>
+
+</body>
+</html>

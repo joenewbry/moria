@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CUBE — Home Intelligence Module</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<!-- BACK NAV -->
+<nav class="back-nav">
+  <div class="back-nav-inner">
+    <a href="../" class="back-link">
+      <span class="arrow">&larr;</span> CUBE Home
+    </a>
+    <span class="nav-module-name">HOME INTELLIGENCE</span>
+  </div>
+</nav>
+
+<!-- MODULE HEADER -->
+<header class="module-header">
+  <div class="module-num">05</div>
+  <div class="module-label">05 &mdash; Module</div>
+  <h1 class="module-title">Home Intelligence</h1>
+  <p class="module-desc">
+    Room-aware presence detection, face recognition, and scene understanding &mdash; all running on-device. Leverages the existing Buddy project's fisheye camera pipeline and trigger engine to give CUBE spatial awareness of your home without any cloud dependency.
+  </p>
+</header>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- ARCHITECTURE DIAGRAM -->
+  <div class="content-section">
+    <div class="section-label">Architecture</div>
+    <div class="section-title">Vision Pipeline</div>
+    <div class="section-desc">
+      A fisheye camera feeds three parallel detection paths &mdash; object detection, face recognition, and on-demand scene understanding &mdash; which converge into the trigger engine for action execution.
+    </div>
+
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Perception Layer</div>
+      <div class="arch-flow">
+        <div class="arch-node accent">
+          <div class="node-label">Fisheye Camera</div>
+          <div class="node-sub">CSI / USB &middot; 160&deg; FOV</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node">
+          <div class="node-label">YOLO nano</div>
+          <div class="node-sub">TensorRT &middot; Object Detection</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node blue">
+          <div class="node-label">Object Detection</div>
+          <div class="node-sub">People, pets, packages</div>
+        </div>
+      </div>
+      <div class="arch-flow">
+        <div class="arch-node" style="visibility:hidden;">
+          <div class="node-label">spacer</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node teal">
+          <div class="node-label">InsightFace</div>
+          <div class="node-sub">ArcFace embeddings</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node teal">
+          <div class="node-label">Person Identity</div>
+          <div class="node-sub">Face recognition &middot; local DB</div>
+        </div>
+      </div>
+      <div class="arch-flow">
+        <div class="arch-node" style="visibility:hidden;">
+          <div class="node-label">spacer</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node purple">
+          <div class="node-label">Moondream VLM</div>
+          <div class="node-sub">On-demand scene analysis</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-node purple">
+          <div class="node-label">Scene Understanding</div>
+          <div class="node-sub">Natural language descriptions</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Trigger &amp; Action Layer</div>
+      <div class="arch-vertical">
+        <div class="arch-node accent" style="max-width:500px;">
+          <div class="node-label">Trigger Engine</div>
+          <div class="node-sub">From Buddy's proven trigger system</div>
+        </div>
+        <div class="arch-arrow down">&darr;</div>
+      </div>
+      <div class="arch-columns">
+        <div class="arch-node">
+          <div class="node-label">Face-detected</div>
+          <div class="node-sub">Person-specific triggers</div>
+        </div>
+        <div class="arch-node blue">
+          <div class="node-label">Watch-for</div>
+          <div class="node-sub">Scene matching triggers</div>
+        </div>
+        <div class="arch-node teal">
+          <div class="node-label">Time-based</div>
+          <div class="node-sub">Cron schedule triggers</div>
+        </div>
+      </div>
+      <div class="arch-vertical" style="margin-top:16px;">
+        <div class="arch-arrow down">&darr;</div>
+        <div class="arch-node orange" style="max-width:500px;">
+          <div class="node-label">Action Execution</div>
+          <div class="node-sub">Speak &middot; Speak &amp; listen &middot; Queue research &middot; Send notification</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <!-- TRIGGER TYPES -->
+  <div class="content-section">
+    <div class="section-label">Trigger Types</div>
+    <div class="section-title">Five Ways CUBE Responds to Your Home</div>
+    <div class="section-desc">
+      The trigger engine watches for specific conditions and fires actions when they match. Each trigger type maps to real-world situations that make CUBE contextually aware.
+    </div>
+
+    <div class="phase-grid">
+      <div class="phase-card">
+        <div class="phase-num">FACE-DETECTED</div>
+        <h3>Person Recognition</h3>
+        <p>Recognizes known faces via InsightFace embeddings and fires person-specific triggers.</p>
+        <ul>
+          <li>"Joe arrived home" &rarr; personalized greeting</li>
+          <li>Per-person preferences and context</li>
+          <li>ArcFace embeddings stored locally</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">WATCH-FOR</div>
+        <h3>Scene Matching</h3>
+        <p>Moondream VLM analyzes the scene on demand, matching against user-defined watch conditions.</p>
+        <ul>
+          <li>"Someone at the door" &rarr; announce and describe</li>
+          <li>"When someone drops off food, say thanks"</li>
+          <li>Natural language condition matching</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">TIME-BASED</div>
+        <h3>Scheduled Events</h3>
+        <p>Cron-style scheduling for time-triggered routines that combine with presence data.</p>
+        <ul>
+          <li>"7am" &rarr; morning briefing</li>
+          <li>Daily, weekly, or custom schedules</li>
+          <li>Context-aware: skips if no one is home</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PRESENCE</div>
+        <h3>First Seen Today</h3>
+        <p>Detects the transition from empty room to occupied, triggering daily startup routines.</p>
+        <ul>
+          <li>"First person seen today" &rarr; start daily routine</li>
+          <li>Arrived, returned after absence</li>
+          <li>Tracks presence state across the day</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">ABSENCE</div>
+        <h3>No One Home</h3>
+        <p>Detects sustained absence to trigger low-power or security modes.</p>
+        <ul>
+          <li>"No one detected for 2 hours" &rarr; enter low-power mode</li>
+          <li>Reduce inference frequency</li>
+          <li>Optional: arm motion alerts</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <!-- IMPLEMENTATION PHASES -->
+  <div class="content-section">
+    <div class="section-label">Implementation</div>
+    <div class="section-title">Phased Rollout</div>
+    <div class="section-desc">
+      Each phase builds on the previous, adding capabilities incrementally. Phase 1 is functional today via the existing Buddy project.
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item active">
+        <div class="timeline-phase">Phase 1</div>
+        <div class="timeline-title">Object Detection + Motion Triggers</div>
+        <div class="timeline-desc">YOLO nano running via TensorRT for real-time object detection. Basic motion-triggered events fire when people, pets, or objects enter the camera's field of view. Foundation layer that everything else builds on.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 2</div>
+        <div class="timeline-title">Face Recognition + Person-Specific Triggers</div>
+        <div class="timeline-desc">InsightFace with ArcFace embeddings identifies household members. Triggers become person-aware &mdash; different greetings, different context, different automation per person. Face embeddings stored entirely on-device.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 3</div>
+        <div class="timeline-title">Scene Understanding + Watch-For Triggers</div>
+        <div class="timeline-desc">Moondream VLM analyzes scenes on demand (triggered by motion, not continuous). Users define natural-language watch-for conditions like "when someone leaves a package at the door." The VLM describes scenes and matches against trigger conditions.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Phase 4</div>
+        <div class="timeline-title">Multi-Room Awareness + Automation Rules</div>
+        <div class="timeline-desc">Multiple cameras across rooms feed a unified presence graph. Room-to-room movement tracking, multi-zone automation rules, and cross-room context for the conversation engine. Full spatial awareness of the home.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <!-- TECH STACK -->
+  <div class="content-section">
+    <div class="section-label">Tech Stack</div>
+    <div class="section-title">What Powers Home Intelligence</div>
+    <div class="section-desc">
+      Every component runs on-device on the Jetson Orin Nano. No cloud APIs, no subscriptions, no data leaving your network.
+    </div>
+
+    <div class="tech-grid">
+      <div class="tech-card">
+        <h4>YOLO nano</h4>
+        <p>Ultra-fast object detection optimized for edge deployment. Runs via TensorRT on the Orin's 1024-core Ampere GPU for real-time inference at 30+ FPS.</p>
+        <div class="tech-chips">
+          <span class="chip accent">TensorRT</span>
+          <span class="chip">Object Detection</span>
+          <span class="chip">30+ FPS</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>InsightFace / ArcFace</h4>
+        <p>State-of-the-art face recognition using ArcFace angular margin loss. Generates compact embeddings for each face, enabling reliable identification of household members.</p>
+        <div class="tech-chips">
+          <span class="chip blue">Face Recognition</span>
+          <span class="chip">512-d Embeddings</span>
+          <span class="chip">Local DB</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Moondream VLM</h4>
+        <p>Compact vision-language model for scene understanding. Called on demand when motion or presence triggers require deeper scene analysis beyond object bounding boxes.</p>
+        <div class="tech-chips">
+          <span class="chip teal">Scene Understanding</span>
+          <span class="chip">On-Demand</span>
+          <span class="chip">Natural Language</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Piper TTS</h4>
+        <p>Local text-to-speech engine for voice output. Converts trigger responses into natural-sounding speech delivered through CUBE's built-in speakers.</p>
+        <div class="tech-chips">
+          <span class="chip purple">Voice Output</span>
+          <span class="chip">Low Latency</span>
+          <span class="chip">On-Device</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Buddy Framework</h4>
+        <p>The existing Buddy project provides the proven trigger engine, presence tracking, and action execution system. Home Intelligence is built as a CUBE integration of Buddy's core capabilities.</p>
+        <div class="tech-chips">
+          <span class="chip orange">Trigger Engine</span>
+          <span class="chip">Proven System</span>
+          <span class="chip">Extensible</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <!-- KEY DECISIONS -->
+  <div class="content-section">
+    <div class="section-label">Key Decisions</div>
+    <div class="section-title">Why We Built It This Way</div>
+    <div class="section-desc">
+      Every architectural choice prioritizes privacy, efficiency, and practical usefulness over theoretical capabilities.
+    </div>
+
+    <div class="decision-grid">
+      <div class="decision-card">
+        <h4>Edge-Only Processing</h4>
+        <p>All vision processing happens on-device. No frames leave the Jetson. No cloud cameras, no third-party vision APIs. The camera feed never touches the network &mdash; it exists only in local GPU memory during inference.</p>
+      </div>
+      <div class="decision-card blue">
+        <h4>Trigger-Based, Not Always-On</h4>
+        <p>The system does not continuously analyze every frame with expensive models. YOLO nano runs lightweight detection, and deeper analysis (VLM, face recognition) only fires when motion or a person is detected. This keeps power and GPU usage practical.</p>
+      </div>
+      <div class="decision-card teal">
+        <h4>Buddy Integration</h4>
+        <p>Rather than building a trigger system from scratch, Home Intelligence builds directly on the existing Buddy project's proven trigger engine. Face triggers, watch-for triggers, and presence tracking are battle-tested patterns that map cleanly onto CUBE's architecture.</p>
+      </div>
+      <div class="decision-card purple">
+        <h4>Privacy First</h4>
+        <p>Face embeddings are stored locally in a SQLite database on the NVMe drive. No cloud face databases, no facial recognition APIs, no biometric data leaving the device. Users can delete their face data at any time by clearing the local embedding store.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="module-footer">
+  <div class="footer-brand">CUBE by Digital Surface Labs</div>
+  <div class="footer-right">February 2026 &mdash; Home Intelligence Module &middot; <a href="../">Back to CUBE</a></div>
+</footer>
+
+</body>
+</html>

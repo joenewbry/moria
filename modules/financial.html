@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Copilot — CUBE Module</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* Workflow steps */
+.workflow-steps {
+  counter-reset: step;
+}
+
+.workflow-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px 20px 60px;
+  margin-bottom: 12px;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.workflow-step:hover {
+  border-color: var(--border-glow);
+}
+
+.workflow-step::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(192,255,84,0.1);
+  border: 1px solid rgba(192,255,84,0.3);
+  color: var(--accent);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.workflow-step h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.workflow-step p {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* Capabilities list */
+.capability-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.capability-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.3s;
+}
+
+.capability-item:hover {
+  border-color: var(--border-glow);
+}
+
+.capability-item h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.capability-item p {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.capability-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+.capability-tag.high { background: rgba(192,255,84,0.15); color: var(--accent); }
+.capability-tag.medium { background: rgba(84,160,255,0.15); color: var(--blue); }
+.capability-tag.low { background: rgba(179,136,255,0.15); color: var(--purple); }
+
+/* Vertical architecture flow — sub annotation */
+.arch-node-annotation {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* No-efile callout */
+.callout-box {
+  background: rgba(255,107,74,0.04);
+  border: 1px solid rgba(255,107,74,0.2);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-top: 24px;
+}
+
+.callout-box .callout-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--warn);
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+
+.callout-box p {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<!-- BACK NAV -->
+<nav class="back-nav">
+  <div class="back-nav-inner">
+    <a href="../" class="back-link">
+      <span class="arrow">&larr;</span> CUBE Home
+    </a>
+    <span class="nav-module-name">FINANCIAL COPILOT</span>
+  </div>
+</nav>
+
+<!-- MODULE HEADER -->
+<header class="module-header">
+  <span class="module-num">02</span>
+  <div class="module-label">02 &mdash; Module</div>
+  <h1 class="module-title">Financial Copilot</h1>
+  <p class="module-desc">
+    Your on-device financial assistant. Handles tax preparation from W-2 scanning through form filling, monitors bills for unusual charges, organizes receipts, and helps with budgeting &mdash; all running locally, all data stays on your CUBE.
+  </p>
+</header>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- CORE CAPABILITIES -->
+  <section class="content-section">
+    <div class="section-label">Capabilities</div>
+    <div class="section-title">What Financial Copilot Does</div>
+    <div class="section-desc">
+      Four core capabilities, prioritized by complexity and value. Tax preparation is the flagship feature &mdash; turning a dreaded annual chore into a guided, private, on-device workflow.
+    </div>
+
+    <div class="capability-list">
+      <div class="capability-item">
+        <div class="capability-tag high">PRIORITY #1</div>
+        <h4>Tax Preparation</h4>
+        <p>End-to-end tax workflow: scan W-2s and 1099s with Vision LLM, conduct an AI-guided tax interview for deductions and credits, calculate with OpenTaxSolver, and fill official IRS PDF forms ready to print and mail.</p>
+      </div>
+      <div class="capability-item">
+        <div class="capability-tag medium">PRIORITY #2</div>
+        <h4>Bill Monitoring</h4>
+        <p>Watches recurring bills for unusual charges, rate increases, and hidden fees. Alerts you when something looks off so you can dispute before the payment window closes.</p>
+      </div>
+      <div class="capability-item">
+        <div class="capability-tag medium">PRIORITY #3</div>
+        <h4>Receipt Organization</h4>
+        <p>Photograph receipts and the Vision LLM extracts vendor, amount, date, and category. Builds a searchable archive of spending, automatically tagged and stored locally.</p>
+      </div>
+      <div class="capability-item">
+        <div class="capability-tag low">PRIORITY #4</div>
+        <h4>Budgeting Dashboard</h4>
+        <p>Aggregates spending data from receipts and bills into a simple budget view. Tracks categories over time, shows trends, and flags when you're approaching limits you've set.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- TAX PREPARATION ARCHITECTURE -->
+  <section class="content-section">
+    <div class="section-label">Architecture</div>
+    <div class="section-title">Tax Preparation Pipeline</div>
+    <div class="section-desc">
+      The tax pipeline flows from document intake through AI-powered OCR, a guided interview, open-source tax calculation, and IRS-compliant PDF form filling. Every step runs on-device.
+    </div>
+
+    <div class="arch-diagram">
+      <div class="arch-diagram-label">Document Intake &rarr; Calculation &rarr; Output</div>
+
+      <!-- Input sources row -->
+      <div class="arch-flow" style="justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px;">
+        <div class="arch-node accent" style="flex: 0 1 180px;">
+          <div class="node-label">W-2 Photo/Scan</div>
+          <div class="node-sub">wage statements</div>
+        </div>
+        <div class="arch-node blue" style="flex: 0 1 180px;">
+          <div class="node-label">1099 PDFs</div>
+          <div class="node-sub">freelance, interest, dividends</div>
+        </div>
+        <div class="arch-node teal" style="flex: 0 1 180px;">
+          <div class="node-label">Brokerage CSV</div>
+          <div class="node-sub">capital gains/losses</div>
+        </div>
+      </div>
+
+      <div class="arch-arrow down">&darr;</div>
+
+      <!-- OCR layer -->
+      <div class="arch-flow" style="justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px;">
+        <div class="arch-node accent" style="flex: 0 1 180px;">
+          <div class="node-label">Vision LLM OCR</div>
+          <div class="node-sub">Qwen2.5-VL</div>
+        </div>
+        <div class="arch-node accent" style="flex: 0 1 180px;">
+          <div class="node-label">Vision LLM OCR</div>
+          <div class="node-sub">Qwen2.5-VL</div>
+        </div>
+        <div class="arch-node teal" style="flex: 0 1 180px;">
+          <div class="node-label">Direct Parse</div>
+          <div class="node-sub">CSV/structured data</div>
+        </div>
+      </div>
+
+      <div class="arch-arrow down">&darr;</div>
+
+      <!-- Structured JSON -->
+      <div style="display: flex; justify-content: center;">
+        <div class="arch-node accent" style="max-width: 400px; width: 100%;">
+          <div class="node-label">Structured JSON</div>
+          <div class="node-sub">all extracted financial data normalized</div>
+        </div>
+      </div>
+
+      <div class="arch-arrow down">&darr;</div>
+
+      <!-- Tax Data Store -->
+      <div style="display: flex; justify-content: center;">
+        <div class="arch-node blue" style="max-width: 400px; width: 100%;">
+          <div class="node-label">Tax Data Store</div>
+          <div class="node-sub">all extracted financial data, locally persisted</div>
+        </div>
+      </div>
+
+      <div class="arch-arrow down">&darr;</div>
+
+      <!-- AI Interview -->
+      <div style="display: flex; justify-content: center;">
+        <div class="arch-node purple" style="max-width: 500px; width: 100%;">
+          <div class="node-label">AI Interview</div>
+          <div class="node-sub">LLM asks: deductions, credits, life events, dependents</div>
+        </div>
+      </div>
+
+      <div class="arch-arrow down">&darr;</div>
+
+      <!-- OpenTaxSolver -->
+      <div style="display: flex; justify-content: center;">
+        <div class="arch-node accent" style="max-width: 500px; width: 100%;">
+          <div class="node-label">OpenTaxSolver</div>
+          <div class="node-sub">C-based open source tax engine</div>
+          <div class="arch-node-annotation">
+            Supports: Federal 1040, Schedules A/B/C/D, Forms 8889, 8812, 8995<br>
+            State: CA, NY, NJ, MA, VA, NC, OH, PA, AZ, MI
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-arrow down">&darr;</div>
+
+      <!-- PDF Output -->
+      <div style="display: flex; justify-content: center;">
+        <div class="arch-node orange" style="max-width: 500px; width: 100%;">
+          <div class="node-label">IRS Fillable PDF</div>
+          <div class="node-sub">pdftk / pypdf fill fields &rarr; print-ready forms</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No e-filing callout -->
+    <div class="callout-box">
+      <div class="callout-label">NO E-FILING</div>
+      <p>E-filing requires IRS Electronic Return Originator (ERO) registration, which is restricted to authorized tax professionals. Instead, CUBE generates print-ready IRS forms you can mail, or you can use the completed data with a free e-filing service like IRS Free File.</p>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- TAX WORKFLOW -->
+  <section class="content-section">
+    <div class="section-label">Workflow</div>
+    <div class="section-title">Tax Filing Step by Step</div>
+    <div class="section-desc">
+      Seven steps from document upload to printed forms. The entire flow runs locally on your CUBE with no data leaving the device.
+    </div>
+
+    <div class="workflow-steps">
+      <div class="workflow-step">
+        <h4>Upload or Photograph Documents</h4>
+        <p>User uploads or photographs W-2s and 1099s using CUBE's camera or the web interface. Brokerage CSVs can be imported directly from downloaded files.</p>
+      </div>
+      <div class="workflow-step">
+        <h4>Vision LLM Extracts Data</h4>
+        <p>Qwen2.5-VL processes each document image, extracting all box values (wages, withholding, employer EIN, etc.) into structured JSON. Results are displayed for user verification.</p>
+      </div>
+      <div class="workflow-step">
+        <h4>AI Tax Interview</h4>
+        <p>The LLM conducts a conversational tax interview &mdash; asking about deductions, credits, life events (marriage, home purchase, children), and other tax-relevant circumstances.</p>
+      </div>
+      <div class="workflow-step">
+        <h4>Calculate with OpenTaxSolver</h4>
+        <p>All data is fed to OpenTaxSolver via the tenforty Python wrapper. The C-based engine performs the actual tax calculations using current-year tax law, supporting federal and 10 state returns.</p>
+      </div>
+      <div class="workflow-step">
+        <h4>Fill IRS PDF Forms</h4>
+        <p>Calculated values are mapped to official IRS fillable PDF form fields using pdftk or pypdf. Each form field is populated automatically, producing complete, print-ready tax documents.</p>
+      </div>
+      <div class="workflow-step">
+        <h4>Review and Verify</h4>
+        <p>User reviews the completed forms in the CUBE web interface. Every calculated value can be traced back to its source document and the specific line of tax logic that produced it.</p>
+      </div>
+      <div class="workflow-step">
+        <h4>Print and File</h4>
+        <p>No e-filing (requires ERO registration). User prints the forms and mails to the IRS, or uses the extracted data with a free e-filing service like IRS Free File for electronic submission.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- IMPLEMENTATION PHASES -->
+  <section class="content-section">
+    <div class="section-label">Implementation</div>
+    <div class="section-title">Build Phases</div>
+    <div class="section-desc">
+      Four phases, starting with document scanning and ending with a full budgeting dashboard. Each phase is independently useful.
+    </div>
+
+    <div class="phase-grid">
+      <div class="phase-card current">
+        <div class="phase-num">PHASE 1</div>
+        <h3>Document Scanning</h3>
+        <p>Vision LLM OCR pipeline for W-2 and 1099 documents. Extract box values into structured JSON with user verification UI.</p>
+        <ul>
+          <li>Camera and upload intake</li>
+          <li>Qwen2.5-VL document processing</li>
+          <li>Structured JSON extraction</li>
+          <li>Verification interface</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 2</div>
+        <h3>Tax Calculation</h3>
+        <p>OpenTaxSolver integration and AI-guided tax interview flow. Federal and state return calculation.</p>
+        <ul>
+          <li>OpenTaxSolver + tenforty wrapper</li>
+          <li>Conversational tax interview</li>
+          <li>Deduction and credit detection</li>
+          <li>Multi-state support</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 3</div>
+        <h3>Form Filling</h3>
+        <p>IRS PDF form filling and review interface. Print-ready output with full audit trail.</p>
+        <ul>
+          <li>pdftk / pypdf form population</li>
+          <li>Print-ready PDF generation</li>
+          <li>Value traceability UI</li>
+          <li>Year-over-year comparison</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">PHASE 4</div>
+        <h3>Bills, Receipts, Budget</h3>
+        <p>Bill monitoring, receipt organization, and budgeting dashboard using the same Vision LLM infrastructure.</p>
+        <ul>
+          <li>Unusual charge detection</li>
+          <li>Receipt OCR and categorization</li>
+          <li>Spending trends and budget tracking</li>
+          <li>Alerts and notifications</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- TECH STACK -->
+  <section class="content-section">
+    <div class="section-label">Stack</div>
+    <div class="section-title">Technology</div>
+    <div class="section-desc">
+      All open-source tools running locally on the Jetson Orin Nano. No cloud APIs, no subscriptions.
+    </div>
+
+    <div class="tech-grid">
+      <div class="tech-card">
+        <h4>OpenTaxSolver</h4>
+        <p>Open source, C-based federal and state tax calculation engine. Battle-tested, supports 1040, Schedules A/B/C/D, and 10 state returns. Updated annually by the community.</p>
+        <div class="tech-chips">
+          <span class="chip accent">C-based engine</span>
+          <span class="chip accent">Federal + 10 states</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>tenforty</h4>
+        <p>Python wrapper for OpenTaxSolver that provides a clean API for feeding structured data into the tax engine and retrieving calculated results programmatically.</p>
+        <div class="tech-chips">
+          <span class="chip blue">Python wrapper</span>
+          <span class="chip blue">API layer</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>Vision LLM / Qwen2.5-VL</h4>
+        <p>Local on-device document OCR using the Qwen2.5-VL vision-language model. Extracts structured data from photographs of W-2s, 1099s, receipts, and bills without any cloud processing.</p>
+        <div class="tech-chips">
+          <span class="chip teal">Document OCR</span>
+          <span class="chip teal">On-device</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>pdftk / pypdf</h4>
+        <p>PDF form filling tools for populating official IRS fillable PDF forms with calculated tax values. Produces print-ready documents that match IRS specifications exactly.</p>
+        <div class="tech-chips">
+          <span class="chip purple">PDF form filling</span>
+          <span class="chip purple">IRS-compliant</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>ChromaDB</h4>
+        <p>Vector database for semantic search across financial documents. Enables natural language queries like "what did I spend on medical expenses last year?" across all stored financial data.</p>
+        <div class="tech-chips">
+          <span class="chip accent">Financial document search</span>
+          <span class="chip accent">Vector embeddings</span>
+        </div>
+      </div>
+      <div class="tech-card">
+        <h4>SQLite</h4>
+        <p>Structured storage for financial data: extracted document fields, tax calculations, receipt metadata, bill history, and budget categories. Fast, local, zero-configuration.</p>
+        <div class="tech-chips">
+          <span class="chip orange">Structured data</span>
+          <span class="chip orange">Local storage</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- KEY DECISIONS -->
+  <section class="content-section">
+    <div class="section-label">Decisions</div>
+    <div class="section-title">Key Design Decisions</div>
+    <div class="section-desc">
+      Important architectural and product choices that shape how the Financial Copilot works and what it deliberately does not do.
+    </div>
+
+    <div class="decision-grid">
+      <div class="decision-card warn">
+        <h4>No E-Filing</h4>
+        <p>E-filing requires IRS Electronic Return Originator (ERO) registration, restricted to authorized tax professionals. CUBE generates print-and-mail forms instead, or users can transfer data to a free e-file service.</p>
+      </div>
+      <div class="decision-card">
+        <h4>OpenTaxSolver</h4>
+        <p>Open source and battle-tested since 2002. Supports federal 1040 plus 10 state returns. Updated annually by the community. No licensing fees, no cloud dependency, no vendor lock-in.</p>
+      </div>
+      <div class="decision-card blue">
+        <h4>Personal Use Only</h4>
+        <p>This is a personal tax calculator, equivalent to working through IRS instructions by hand. It is not tax advice, not a tax preparation service, and not a substitute for a CPA. Same legal standing as a spreadsheet.</p>
+      </div>
+      <div class="decision-card teal">
+        <h4>Vision LLM for OCR</h4>
+        <p>Local on-device document processing using Qwen2.5-VL. No cloud OCR services, no document uploads to third parties. Your W-2s and financial documents never leave your network.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="module-footer">
+  <div class="footer-brand">CUBE by Digital Surface Labs</div>
+  <div class="footer-right">February 2026 &mdash; Financial Copilot Module &middot; <a href="../">Back to CUBE</a></div>
+</footer>
+</body>
+</html>
