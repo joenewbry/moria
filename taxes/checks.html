@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Checks — Tax Prep 2025</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../modules/shared.css">
+  <link rel="stylesheet" href="taxes.css">
+  <link rel="stylesheet" href="checks.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="back-nav">
+  <div class="back-nav-inner">
+    <a href="/taxes/" class="back-link"><span class="arrow">←</span> Tax Dashboard</a>
+    <span class="nav-module-name">COMPLIANCE CHECKS</span>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<header class="module-header">
+  <span class="module-num">55</span>
+  <div class="module-label">Tax Year 2025</div>
+  <h1 class="module-title">Compliance Checks</h1>
+  <p class="module-desc">
+    55 rules across 10 categories verify your tax data against IRS and California FTB requirements.
+    Each check shows current vs expected values with confidence scoring.
+  </p>
+</header>
+
+<!-- CONTENT -->
+<div class="content" id="main-content">
+
+  <!-- Empty state (shown if no data) -->
+  <div class="empty-state" id="empty-state" style="display:none">
+    <div class="empty-state-icon">📋</div>
+    <div class="empty-state-title">No compliance data yet</div>
+    <div class="empty-state-desc">Upload tax documents on the dashboard first. Compliance checks run automatically after extraction.</div>
+    <a href="/taxes/" class="empty-state-link">Go to Tax Dashboard</a>
+  </div>
+
+  <!-- Summary stats -->
+  <section class="content-section" id="stats-section" style="display:none">
+    <div class="checks-summary" id="checks-summary"></div>
+
+    <!-- Score bar -->
+    <div class="score-bar-wrap">
+      <span class="score-bar-label">Compliance Score</span>
+      <div class="score-bar">
+        <div class="score-bar-fill" id="score-bar-fill" style="width:0%"></div>
+      </div>
+      <span class="score-bar-pct" id="score-pct">0%</span>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar" id="filter-bar"></div>
+
+    <!-- Categories -->
+    <div id="categories-container"></div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="module-footer">
+  <div class="footer-brand">CUBE × TAX PREP</div>
+  <div class="footer-right">Tax Year 2025 · <a href="/taxes/">Dashboard</a></div>
+</footer>
+
+<div class="noise-overlay"></div>
+
+<script>
+// Load data from localStorage
+let complianceData = null;
+try {
+  const stored = localStorage.getItem('taxComplianceResults');
+  if (stored) {
+    complianceData = JSON.parse(stored);
+  }
+} catch (e) {
+  console.warn('Could not load compliance data:', e);
+}
+
+if (!complianceData || !complianceData.results) {
+  document.getElementById('empty-state').style.display = '';
+} else {
+  document.getElementById('stats-section').style.display = '';
+  renderAll(complianceData);
+}
+
+function renderAll(data) {
+  const { results, summary, categories } = data;
+
+  // Summary stats
+  const statsEl = document.getElementById('checks-summary');
+  statsEl.innerHTML = `
+    <div class="summary-stat total">
+      <div class="summary-stat-num">${summary.total}</div>
+      <div class="summary-stat-label">Total</div>
+    </div>
+    <div class="summary-stat passed">
+      <div class="summary-stat-num">${summary.passed}</div>
+      <div class="summary-stat-label">Passed</div>
+    </div>
+    <div class="summary-stat failed">
+      <div class="summary-stat-num">${summary.failed}</div>
+      <div class="summary-stat-label">Failed</div>
+    </div>
+    <div class="summary-stat warnings">
+      <div class="summary-stat-num">${summary.warnings}</div>
+      <div class="summary-stat-label">Warnings</div>
+    </div>
+    <div class="summary-stat skipped">
+      <div class="summary-stat-num">${summary.skipped}</div>
+      <div class="summary-stat-label">Skipped</div>
+    </div>
+  `;
+
+  // Score bar
+  const scoreFill = document.getElementById('score-bar-fill');
+  const scorePct = document.getElementById('score-pct');
+  scoreFill.style.width = summary.score + '%';
+  scorePct.textContent = summary.score + '%';
+  if (summary.score >= 90) {
+    scoreFill.style.background = 'var(--accent)';
+    scorePct.style.color = 'var(--accent)';
+  } else if (summary.score >= 70) {
+    scoreFill.style.background = 'var(--orange)';
+    scorePct.style.color = 'var(--orange)';
+  } else {
+    scoreFill.style.background = 'var(--warn)';
+    scorePct.style.color = 'var(--warn)';
+  }
+
+  // Filter bar
+  const filterBar = document.getElementById('filter-bar');
+  const filters = [
+    { id: 'all', label: 'All', count: summary.total },
+    { id: 'pass', label: 'Passed', count: summary.passed },
+    { id: 'fail', label: 'Failed', count: summary.failed },
+    { id: 'warn', label: 'Warnings', count: summary.warnings },
+    { id: 'skip', label: 'Skipped', count: summary.skipped },
+  ];
+  filterBar.innerHTML = filters.map(f =>
+    `<button class="filter-btn${f.id === 'all' ? ' active' : ''}" data-filter="${f.id}">
+      ${f.label}<span class="filter-count">${f.count}</span>
+    </button>`
+  ).join('');
+
+  filterBar.addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    filterBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter(btn.dataset.filter, results, categories);
+  });
+
+  // Render categories
+  renderCategories(results, categories, 'all');
+}
+
+function applyFilter(filter, results, categories) {
+  renderCategories(results, categories, filter);
+}
+
+function renderCategories(results, categories, filter) {
+  const container = document.getElementById('categories-container');
+  container.innerHTML = '';
+
+  for (const cat of categories) {
+    let catResults = results.filter(r => r.category === cat.id);
+    if (filter !== 'all') {
+      catResults = catResults.filter(r => r.status === filter);
+    }
+
+    // Skip categories with no visible results
+    if (catResults.length === 0 && filter !== 'all') continue;
+
+    const allCatResults = results.filter(r => r.category === cat.id);
+    const passCount = allCatResults.filter(r => r.status === 'pass').length;
+    const failCount = allCatResults.filter(r => r.status === 'fail').length;
+    const warnCount = allCatResults.filter(r => r.status === 'warn').length;
+
+    const section = document.createElement('div');
+    section.className = 'category-section';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'category-header';
+    header.innerHTML = `
+      <span class="category-icon">${cat.icon}</span>
+      <div>
+        <div class="category-name">${cat.name}</div>
+        <div class="category-description">${cat.description}</div>
+      </div>
+      <div class="category-counts">
+        ${passCount > 0 ? `<span class="category-count pass-count">${passCount} pass</span>` : ''}
+        ${failCount > 0 ? `<span class="category-count fail-count">${failCount} fail</span>` : ''}
+        ${warnCount > 0 ? `<span class="category-count warn-count">${warnCount} warn</span>` : ''}
+      </div>
+      <span class="category-chevron">▼</span>
+    `;
+
+    header.addEventListener('click', () => {
+      section.classList.toggle('collapsed');
+    });
+
+    section.appendChild(header);
+
+    // Body
+    const body = document.createElement('div');
+    body.className = 'category-body';
+
+    const displayResults = filter === 'all' ? allCatResults : catResults;
+    for (const check of displayResults) {
+      body.appendChild(renderCheckRow(check));
+    }
+
+    section.appendChild(body);
+    container.appendChild(section);
+  }
+}
+
+function renderCheckRow(check) {
+  const row = document.createElement('div');
+  row.className = 'check-row';
+
+  const statusIcons = { pass: '✓', fail: '✗', warn: '!', skip: '—' };
+  const confLevel = (check.confidence || 0) >= 0.95 ? 'high' : (check.confidence || 0) >= 0.80 ? 'medium' : 'low';
+
+  row.innerHTML = `
+    <div class="check-status-icon ${check.status}">${statusIcons[check.status] || '—'}</div>
+    <div class="check-info">
+      <div class="check-name">${check.name}</div>
+      <span class="check-irs-ref">${check.irsRef}</span>
+      <div class="check-description">${check.description}</div>
+      ${check.detail ? `<div class="check-detail">${check.detail}</div>` : ''}
+    </div>
+    <div class="check-values">
+      <div class="check-current">${check.currentValue || '—'}</div>
+      <div class="check-expected">Expected: ${check.expectedValue || '—'}</div>
+      <span class="check-confidence confidence-${confLevel}">${((check.confidence || 0) * 100).toFixed(0)}%</span>
+    </div>
+  `;
+
+  return row;
+}
+</script>
+</body>
+</html>
