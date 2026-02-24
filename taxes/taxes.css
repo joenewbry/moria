@@ -625,6 +625,62 @@
   color: var(--accent);
 }
 
+/* ── GUARANTEE GRID (dashboard summary) ── */
+.guarantee-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.guarantee-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.guarantee-card:hover { border-color: var(--border-glow); }
+
+.guarantee-icon { font-size: 36px; margin-bottom: 12px; }
+.guarantee-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.guarantee-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; font-style: italic; }
+
+.guarantee-stats {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.guarantee-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.compliance-guarantee .guarantee-num { color: var(--accent); }
+.savings-guarantee .guarantee-num { color: var(--teal); }
+
+.guarantee-label { font-size: 13px; color: var(--text-dim); }
+
+.guarantee-detail {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+}
+
+.guarantee-detail-item { padding: 2px 8px; border-radius: 4px; }
+.guarantee-detail-item.warn-count { background: rgba(255,176,84,0.12); color: var(--orange); }
+.guarantee-detail-item.fail-count { background: rgba(255,107,74,0.12); color: var(--warn); }
+.guarantee-detail-item.eval-count { background: rgba(0,210,190,0.08); color: var(--teal); }
+.guarantee-detail-item.skip-count { background: var(--surface2); color: var(--text-muted); }
+
 /* ── DISCLAIMER ── */
 .disclaimer {
   background: rgba(255,176,84,0.05);
@@ -648,6 +704,7 @@
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .filing-grid { grid-template-columns: 1fr; }
+  .guarantee-grid { grid-template-columns: 1fr; }
   .pipeline { gap: 0; }
   .pipeline-step { min-width: 100px; }
 }

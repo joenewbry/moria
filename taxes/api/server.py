@@ -45,6 +45,10 @@ looking over the document with them.
 2. **Extract structured data** into a JSON object wrapped in <extracted_data> tags. \
 This MUST come at the very end of your response.
 
+For each document, include an "extraction_status" object that reports whether each \
+field was successfully extracted ("extracted") or could not be found ("not_found"). \
+Use null for field values that could not be read.
+
 For W-2 documents, extract:
 ```json
 {
@@ -63,7 +67,22 @@ For W-2 documents, extract:
   "state_wages": 0.00,
   "state_income_tax_withheld": 0.00,
   "box12_codes": [{"code": "D", "amount": 0.00}],
-  "confidence": 0.95
+  "extraction_status": {
+    "employer_name": "extracted",
+    "employer_ein": "extracted",
+    "employee_name": "extracted",
+    "employee_ssn_last4": "extracted",
+    "wages": "extracted",
+    "fed_income_tax_withheld": "extracted",
+    "social_security_wages": "extracted",
+    "social_security_tax_withheld": "extracted",
+    "medicare_wages": "extracted",
+    "medicare_tax_withheld": "extracted",
+    "state": "extracted",
+    "state_wages": "extracted",
+    "state_income_tax_withheld": "extracted",
+    "box12_codes": "extracted"
+  }
 }
 ```
 
@@ -80,7 +99,17 @@ For 1099-NEC documents:
   "state": "CA",
   "state_income": 0.00,
   "state_tax_withheld": 0.00,
-  "confidence": 0.95
+  "extraction_status": {
+    "payer_name": "extracted",
+    "payer_tin": "extracted",
+    "recipient_name": "extracted",
+    "recipient_ssn_last4": "extracted",
+    "nonemployee_compensation": "extracted",
+    "fed_income_tax_withheld": "extracted",
+    "state": "extracted",
+    "state_income": "extracted",
+    "state_tax_withheld": "extracted"
+  }
 }
 ```
 
@@ -91,7 +120,11 @@ For 1099-INT documents:
   "payer_name": "...",
   "interest_income": 0.00,
   "fed_income_tax_withheld": 0.00,
-  "confidence": 0.95
+  "extraction_status": {
+    "payer_name": "extracted",
+    "interest_income": "extracted",
+    "fed_income_tax_withheld": "extracted"
+  }
 }
 ```
 
@@ -103,12 +136,19 @@ For 1099-DIV documents:
   "ordinary_dividends": 0.00,
   "qualified_dividends": 0.00,
   "fed_income_tax_withheld": 0.00,
-  "confidence": 0.95
+  "extraction_status": {
+    "payer_name": "extracted",
+    "ordinary_dividends": "extracted",
+    "qualified_dividends": "extracted",
+    "fed_income_tax_withheld": "extracted"
+  }
 }
 ```
 
-Set confidence between 0.0 and 1.0 based on how clearly you can read each value. \
-If a field is unreadable, use null. Wrap the JSON in <extracted_data>...</extracted_data> tags.
+For each field in extraction_status, use "extracted" if you could clearly read the value, \
+or "not_found" if the field was missing, illegible, or could not be determined. \
+If a field value is null, its extraction_status MUST be "not_found". \
+Wrap the JSON in <extracted_data>...</extracted_data> tags.
 
 IMPORTANT: Write your narration FIRST (multiple paragraphs), THEN the <extracted_data> block at the very end. \
 Do not put any text after the closing </extracted_data> tag."""

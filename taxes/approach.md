@@ -28,11 +28,64 @@
 
 ---
 
-## Confidence & Audit Risk Scoring
+## Our Approach: Two Guarantees
 
-### IRS DIF Score (Discriminant Information Function)
+We built our system around two clear promises:
 
-The IRS uses a proprietary scoring model (DIF) to select returns for audit. While the exact formula is secret, known factors include:
+1. **Audit Shield** — "If you're honest, you won't get audited." Every compliance rule maps to a real IRS or California tax code section. The rules engine verifies withholding rates, bracket math, identity consistency, and audit risk indicators. When all compliance checks pass, your return matches what the IRS expects to see.
+
+2. **Savings Finder** — "We check every deduction you qualify for." Savings rules actively look for missed deductions and credits: retirement contributions, HSA, QBI deduction, home office, student loan interest, CA renter's credit, and more. Each savings rule tells you exactly what you could claim and why.
+
+### Rules Engine Architecture
+
+Every rule is a structured object with real tax code citations:
+
+```javascript
+{
+  id: "fed-w2-inc-01",
+  name: "W-2 Wages to 1040 Line 1a",
+  taxCode: { section: "IRC 61(a)", form: "1040", line: "1a" },
+  scenarios: ["fed-w2"],
+  stage: "income",
+  type: "compliance",
+  severity: "error",
+  check(state) { ... }
+}
+```
+
+**69 rules** across 4 scenarios and 6 stages:
+
+| Stage | Name | What it covers |
+|-------|------|----------------|
+| 1 | Income Reporting | Document completeness, identity consistency, income flows, withholding rates |
+| 2 | Adjustments | SE deduction, retirement contributions, HSA, student loan interest |
+| 3 | Deductions | Standard vs itemized, SALT cap, home office, QBI deduction |
+| 4 | Credits | CTC, EITC, education credits, CA renter's credit, energy credits |
+| 5 | Tax Computation | AGI, federal/CA brackets, SE tax, refund/owed, estimated tax penalty |
+| 6 | Optimization | Math verification, audit risk indicators (round numbers, high income, loss ratios) |
+
+**4 scenarios** (tag-based filtering, not separate rule trees):
+- `fed-w2` — Federal W-2 employee
+- `fed-1099` — Federal 1099 self-employed
+- `ca-w2` — California W-2
+- `ca-1099` — California 1099
+
+**2 rule types**:
+- `compliance` (~55 rules) — Audit safety checks
+- `savings` (~16 rules) — Deduction and credit optimization
+
+### Binary Field Extraction (Not Confidence Scoring)
+
+We deliberately chose binary extraction status over confidence scoring:
+
+- Each field is either **extracted** or **not_found** — no ambiguous 0.0-1.0 scores
+- Document cards show a checkmark (all fields extracted) or warning icon (some missing)
+- The "Field Extraction" completeness bar = extracted fields / total fields
+- This is simpler to understand and more honest — either we got the data or we didn't
+
+### IRS DIF Score Awareness
+
+The IRS uses a proprietary scoring model (DIF) to select returns for audit. Known factors include:
 
 - **Income-to-deduction ratios**: Deductions disproportionate to income
 - **Schedule C losses**: Repeated business losses, especially against W-2 income
@@ -41,71 +94,23 @@ The IRS uses a proprietary scoring model (DIF) to select returns for audit. Whil
 - **High-income returns**: Audit rates increase significantly above $200K AGI
 - **Cash businesses**: Industries with high cash transaction volume
 - **Home office deductions**: Historically high audit trigger
-- **Cryptocurrency**: Emerging focus area for IRS enforcement
 
-### Field-Level Confidence (Our Innovation)
-
-Commercial tools use binary validation (valid/invalid). We introduce three-tier confidence scoring at the individual field level:
-
-| Tier | Score | Meaning | Visual |
-|------|-------|---------|--------|
-| High | ≥ 0.95 | OCR extracted cleanly, cross-validated against other fields | Green |
-| Medium | 0.80–0.94 | Extracted but needs human verification (ambiguous characters, no cross-reference) | Yellow |
-| Low | < 0.80 | Could not extract reliably, manual entry required | Red |
-
-This is more granular than any commercial product and directly supports our "trust but verify" philosophy.
+Our Stage 6 (Optimization) rules check for these factors and flag potential issues.
 
 ---
 
-## Our Approach
-
-### Architecture: Field-Level Dependency Graph
-
-Every tax form field is modeled as a node in a directed acyclic graph (DAG). Edges represent computational dependencies:
-
-```
-W-2 Box 1 (Wages) ──→ 1040 Line 1a (Total Wages)
-W-2 Box 2 (Federal Tax Withheld) ──→ 1040 Line 25a (W-2 Withholding)
-1099-NEC Box 1 (Nonemployee Compensation) ──→ Schedule SE Line 2
-Schedule SE Line 12 ──→ 1040 Line 15 (SE Tax)
-Schedule SE Line 13 ──→ 1040 Schedule 1 Line 15 (SE Deduction)
-```
-
-Benefits:
-- **Automatic propagation**: Change a W-2 value, all downstream fields recompute
-- **Confidence inheritance**: A downstream field's confidence is bounded by its inputs
-- **Completeness tracking**: Unfilled upstream nodes highlight exactly what's missing
-- **Audit trail**: Every computed value traces back to source documents
-
-### Three-Tier Confidence System
-
-**Document Level**: Overall confidence that a document was correctly identified and parsed.
-- High: Clear scan, all fields extracted, document type confirmed
-- Medium: Some fields ambiguous, document type probable
-- Low: Poor scan quality, significant extraction failures
-
-**Field Level**: Confidence in each extracted value.
-- High: Clean OCR, passes format validation, cross-references match
-- Medium: OCR result plausible but ambiguous (e.g., "1" vs "l", "0" vs "O")
-- Low: OCR failed or produced implausible result
-
-**Computation Level**: Confidence in calculated/derived values.
-- High: All inputs are high-confidence, computation is deterministic
-- Medium: At least one input is medium-confidence
-- Low: Any input is low-confidence, or computation involves judgment calls
-
-### Claude Vision API for Document Processing
+## Claude Vision API for Document Processing
 
 We use Claude's vision capabilities for document OCR and field extraction:
 
 **Pipeline**:
 1. **Upload**: User drops W-2/1099 PDF or image
-2. **Vision Extract**: Claude Vision identifies document type and extracts all fields with positional data
+2. **Vision Extract**: Claude Vision identifies document type and extracts all fields
 3. **Validate**: Each field checked against expected format (EIN format, SSN format, dollar amounts)
 4. **Cross-Reference**: Fields compared across documents (employer EIN on W-2 vs 1099, SSN consistency)
-5. **Map**: Extracted values placed into dependency graph nodes
+5. **Map**: Extracted values placed into tax computation
 6. **Compute**: Downstream values calculated (AGI, taxable income, tax owed)
-7. **Review**: Human reviews any field below high confidence
+7. **Review**: Human reviews any fields that couldn't be extracted
 
 **Why Claude Vision over Tesseract/AWS Textract**:
 - Understands document semantics, not just OCR — knows what a W-2 *is*
@@ -117,11 +122,11 @@ We use Claude's vision capabilities for document OCR and field extraction:
 ### Filing Scope
 
 **Federal (Form 1040)**:
-- Income: W-2 wages, 1099-NEC self-employment
-- Above-the-line deductions: SE tax deduction, student loan interest
+- Income: W-2 wages, 1099-NEC self-employment, 1099-INT interest, 1099-DIV dividends
+- Above-the-line deductions: SE tax deduction, student loan interest, IRA, HSA
 - Standard vs. itemized deduction comparison
 - Tax computation with bracket application
-- Credits: Child Tax Credit, EITC (if applicable)
+- Credits: Child Tax Credit, EITC, Saver's Credit, energy credits
 - Payments: W-2 withholding, estimated payments
 - Refund or amount owed
 
@@ -129,10 +134,10 @@ We use Claude's vision capabilities for document OCR and field extraction:
 - Starts from federal AGI
 - California-specific adjustments
 - CA standard deduction ($5,540 single / $11,080 MFJ for 2025)
-- CA tax brackets (1% to 13.3%)
+- CA tax brackets (1% to 12.3% + Mental Health Tax)
 - Mental Health Services Tax (1% above $1M)
 - CA withholding from W-2 Box 17
-- Renter's credit (if applicable)
+- Renter's credit, SDI overpayment
 
 ### Completeness Tracking
 
@@ -141,8 +146,8 @@ The dashboard tracks completeness at multiple levels:
 1. **Document Collection**: Which expected documents have been uploaded?
 2. **Field Extraction**: What percentage of fields were successfully extracted?
 3. **Cross-Validation**: Do values agree across documents?
-4. **Form Population**: What percentage of required form fields are filled?
-5. **Review Status**: Have all medium/low confidence fields been human-verified?
+4. **Rules Engine**: Compliance check pass rate
+5. **Review Status**: Have missing fields been manually verified?
 
 Each level rolls up into an overall "readiness to file" score displayed prominently on the dashboard.
 
@@ -154,4 +159,5 @@ Each level rolls up into an overall "readiness to file" score displayed prominen
 - **Human-in-the-loop**: Every extracted value is reviewable and editable
 - **Conservative defaults**: When ambiguous, we flag for review rather than guess
 - **Audit trail**: Every value traces to a source document or explicit user entry
+- **Real tax code citations**: Every rule references an IRC or CA RTC section
 - **Disclaimer**: Dashboard clearly states this is a preparation tool, not tax advice

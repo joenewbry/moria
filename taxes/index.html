@@ -25,8 +25,8 @@
   <div class="module-label">Tax Year 2025</div>
   <h1 class="module-title">Tax Preparation Dashboard</h1>
   <p class="module-desc">
-    AI-assisted tax preparation with field-level confidence scoring. Upload W-2s and 1099s,
-    extract data via Claude Vision, and track completeness across Federal 1040 and California 540.
+    AI-assisted tax preparation with a transparent rules engine. Upload W-2s and 1099s,
+    extract data via Claude Vision, and verify compliance across Federal 1040 and California 540.
   </p>
 </header>
 
@@ -37,7 +37,7 @@
   <section class="content-section">
     <div class="section-label">Processing Pipeline</div>
     <h2 class="section-title">7-Step Pipeline</h2>
-    <p class="section-desc">Each document flows through extraction, validation, and computation. Confidence scores propagate downstream.</p>
+    <p class="section-desc">Each document flows through extraction, validation, and computation.</p>
 
     <div class="pipeline" id="pipeline">
       <div class="pipeline-step active" data-step="1">
@@ -160,7 +160,7 @@
   <section class="content-section">
     <div class="section-label">Documents</div>
     <h2 class="section-title">Upload W-2s &amp; 1099s</h2>
-    <p class="section-desc">Drop tax documents here. Claude Vision will extract fields and assign confidence scores automatically.</p>
+    <p class="section-desc">Drop tax documents here. Claude Vision will extract and validate fields automatically.</p>
 
     <div class="upload-zone" id="upload-zone">
       <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg">
@@ -187,7 +187,7 @@
   <section class="content-section">
     <div class="section-label">Income</div>
     <h2 class="section-title">Income Sources</h2>
-    <p class="section-desc">All W-2 and 1099 income aggregated with per-source confidence scoring.</p>
+    <p class="section-desc">All W-2 and 1099 income aggregated from extracted documents.</p>
 
     <div id="income-sources">
       <div class="tax-section-card" style="text-align:center;padding:48px">
@@ -292,41 +292,49 @@
     </div>
   </section>
 
-  <!-- ── COMPLIANCE SUMMARY ── -->
+  <!-- ── RULES ENGINE SUMMARY ── -->
   <section class="content-section" id="compliance-section" style="display:none">
-    <div class="section-label">Compliance</div>
-    <h2 class="section-title">Compliance Checks</h2>
-    <p class="section-desc">55 rules across 10 categories — TurboTax-level thoroughness.</p>
+    <div class="section-label">Rules Engine</div>
+    <h2 class="section-title">Two Guarantees</h2>
+    <p class="section-desc">Transparent rules mapped to real tax code. Every check is auditable.</p>
 
-    <div class="compliance-summary" id="compliance-summary">
-      <div class="compliance-stats">
-        <div class="comp-stat passed">
-          <div class="comp-stat-num" id="comp-passed">0</div>
-          <div class="comp-stat-label">Passed</div>
+    <div class="guarantee-grid" id="guarantee-grid">
+      <div class="guarantee-card compliance-guarantee">
+        <div class="guarantee-icon">&#x1F6E1;</div>
+        <div class="guarantee-title">Audit Shield</div>
+        <div class="guarantee-desc">If you're honest, you won't get audited</div>
+        <div class="guarantee-stats">
+          <span class="guarantee-num" id="comp-passed">0</span>
+          <span class="guarantee-label">compliance checks passed</span>
         </div>
-        <div class="comp-stat failed">
-          <div class="comp-stat-num" id="comp-failed">0</div>
-          <div class="comp-stat-label">Failed</div>
-        </div>
-        <div class="comp-stat warnings">
-          <div class="comp-stat-num" id="comp-warnings">0</div>
-          <div class="comp-stat-label">Warnings</div>
-        </div>
-        <div class="comp-stat skipped">
-          <div class="comp-stat-num" id="comp-skipped">0</div>
-          <div class="comp-stat-label">Skipped</div>
+        <div class="guarantee-detail">
+          <span class="guarantee-detail-item warn-count"><span id="comp-warnings">0</span> warnings</span>
+          <span class="guarantee-detail-item fail-count"><span id="comp-failed">0</span> failed</span>
         </div>
       </div>
-
-      <div class="compliance-score-row">
-        <div class="compliance-score-bar">
-          <div class="compliance-score-fill" id="comp-score-fill" style="width:0%"></div>
+      <div class="guarantee-card savings-guarantee">
+        <div class="guarantee-icon">&#x1F50D;</div>
+        <div class="guarantee-title">Savings Finder</div>
+        <div class="guarantee-desc">We check every deduction you qualify for</div>
+        <div class="guarantee-stats">
+          <span class="guarantee-num" id="savings-opportunities">0</span>
+          <span class="guarantee-label">savings opportunities found</span>
         </div>
-        <span class="compliance-score-label" id="comp-score-label">0%</span>
+        <div class="guarantee-detail">
+          <span class="guarantee-detail-item eval-count"><span id="savings-evaluated">0</span> evaluated</span>
+          <span class="guarantee-detail-item skip-count"><span id="savings-skipped">0</span> skipped</span>
+        </div>
       </div>
-
-      <a href="checks.html" class="compliance-link">View all 55 checks in detail →</a>
     </div>
+
+    <div class="compliance-score-row">
+      <div class="compliance-score-bar">
+        <div class="compliance-score-fill" id="comp-score-fill" style="width:0%"></div>
+      </div>
+      <span class="compliance-score-label" id="comp-score-label">0%</span>
+    </div>
+
+    <a href="rules.html" class="compliance-link">View all rules with tax code citations →</a>
   </section>
 
   <!-- ── APPROACH ── -->
@@ -337,13 +345,13 @@
     <div class="phase-grid">
       <div class="phase-card">
         <div class="phase-num">01</div>
-        <h3>Field-Level DAG</h3>
-        <p>Every tax field modeled as a node in a dependency graph. Changes propagate downstream automatically. Confidence inherits from inputs.</p>
+        <h3>Rules Engine</h3>
+        <p>69 rules across 4 scenarios and 6 stages. Every rule cites real IRC/RTC sections. Compliance checks + savings optimization in one engine.</p>
       </div>
       <div class="phase-card">
         <div class="phase-num">02</div>
-        <h3>Three-Tier Confidence</h3>
-        <p>Document-level, field-level, and computation-level confidence scores. Green ≥0.95, yellow 0.80–0.94, red &lt;0.80.</p>
+        <h3>Binary Extraction</h3>
+        <p>Each field is either extracted or not — no ambiguous confidence scores. Clear checkmarks show what we got, warnings show what's missing.</p>
       </div>
       <div class="phase-card">
         <div class="phase-num">03</div>
@@ -352,8 +360,8 @@
       </div>
       <div class="phase-card">
         <div class="phase-num">04</div>
-        <h3>55 Compliance Checks</h3>
-        <p>IRS and California FTB rules verified automatically. Withholding rates, bracket math, identity consistency, and audit risk indicators.</p>
+        <h3>Two Guarantees</h3>
+        <p>Audit Shield verifies compliance with IRS/CA rules. Savings Finder checks every deduction and credit you qualify for.</p>
       </div>
     </div>
 
@@ -380,7 +388,7 @@
 
 <div class="noise-overlay"></div>
 
-<script src="compliance.js"></script>
+<script src="rules.js"></script>
 <script>
 // ── STATE ──
 const state = {
@@ -422,7 +430,7 @@ function handleFiles(files) {
       size: file.size,
       type: guessDocType(file.name),
       status: 'uploading',
-      confidence: null,
+      extractionStatus: {},
       file: file
     };
     state.documents.push(doc);
@@ -450,8 +458,16 @@ function renderDocList() {
       statusHtml = '<span class="step-confidence conf-none"><span class="spinner"></span> Uploading…</span>';
     } else if (doc.status === 'processing') {
       statusHtml = '<span class="step-confidence conf-none"><span class="spinner"></span> Analyzing…</span>';
-    } else if (doc.status === 'processed' && doc.confidence !== null) {
-      statusHtml = `<span class="step-confidence ${confClass(doc.confidence)}">${(doc.confidence * 100).toFixed(0)}%</span>`;
+    } else if (doc.status === 'processed') {
+      // Binary: all fields extracted → checkmark, some missing → warning
+      const exStatus = doc.extractionStatus || {};
+      const fields = Object.values(exStatus);
+      const missing = fields.filter(v => v === 'not_found').length;
+      if (missing > 0) {
+        statusHtml = `<span class="step-confidence conf-medium">⚠ ${fields.length - missing}/${fields.length}</span>`;
+      } else {
+        statusHtml = '<span class="step-confidence conf-high">✓ Extracted</span>';
+      }
     } else if (doc.status === 'error') {
       statusHtml = '<span class="step-confidence conf-low">Error</span>';
     } else {
@@ -593,7 +609,10 @@ async function processDocument(doc) {
                 extractedData = parsed;
                 updatePipelineStep(5, 'done');
                 updatePipelineStep(6, 'active');
-                addLogEntry(`Extracted ${parsed.doc_type || 'document'} data with ${((parsed.confidence || 0) * 100).toFixed(0)}% confidence.`, doc.name);
+                const exStatus = parsed.extraction_status || {};
+                const exFields = Object.values(exStatus);
+                const exCount = exFields.filter(v => v === 'extracted').length;
+                addLogEntry(`Extracted ${parsed.doc_type || 'document'} data — ${exCount}/${exFields.length} fields found.`, doc.name);
               } else if (eventType === 'error') {
                 addLogEntry(`Error: ${parsed.error}`, doc.name);
                 doc.status = 'error';
@@ -617,7 +636,7 @@ async function processDocument(doc) {
 
     if (extractedData) {
       doc.status = 'processed';
-      doc.confidence = extractedData.confidence || 0.90;
+      doc.extractionStatus = extractedData.extraction_status || {};
 
       // Use doc_type from extraction if we guessed wrong
       if (extractedData.doc_type) {
@@ -681,7 +700,17 @@ function renderIncomes() {
   if (state.incomes.length === 0) return;
 
   container.innerHTML = state.incomes.map(inc => {
-    const confidence = inc.confidence || 0.90;
+    const exStatus = inc.extraction_status || {};
+    const fields = Object.values(exStatus);
+    const extracted = fields.filter(v => v === 'extracted').length;
+    const total = fields.length;
+    const allExtracted = total > 0 && extracted === total;
+    const statusBadge = allExtracted
+      ? '<span class="step-confidence conf-high">✓ All fields extracted</span>'
+      : total > 0
+        ? `<span class="step-confidence conf-medium">⚠ ${extracted}/${total} fields</span>`
+        : '<span class="step-confidence conf-high">✓ Extracted</span>';
+
     if (inc.doc_type === 'W-2') {
       const employer = inc.employer_name || 'Unknown Employer';
       return `
@@ -700,7 +729,7 @@ function renderIncomes() {
             <div class="income-detail"><span class="dl">Medicare Tax</span><span class="dv">${formatCurrency(inc.medicare_tax_withheld || 0)}</span></div>
           </div>
           <div style="margin-top:10px;text-align:right">
-            <span class="step-confidence ${confClass(confidence)}">${(confidence * 100).toFixed(0)}% confidence</span>
+            ${statusBadge}
           </div>
         </div>`;
     } else {
@@ -722,7 +751,7 @@ function renderIncomes() {
             ${inc.qualified_dividends != null ? `<div class="income-detail"><span class="dl">Qualified Div</span><span class="dv">${formatCurrency(inc.qualified_dividends)}</span></div>` : ''}
           </div>
           <div style="margin-top:10px;text-align:right">
-            <span class="step-confidence ${confClass(confidence)}">${(confidence * 100).toFixed(0)}% confidence</span>
+            ${statusBadge}
           </div>
         </div>`;
     }
@@ -744,11 +773,21 @@ function updateCompleteness() {
   const n = state.documents.filter(d => d.status === 'processed').length;
   const total = Math.max(n, 2);
 
+  // Field extraction: count extracted vs total fields across all incomes
+  let totalFields = 0, extractedFields = 0;
+  state.incomes.forEach(i => {
+    const exStatus = i.extraction_status || {};
+    const vals = Object.values(exStatus);
+    totalFields += vals.length;
+    extractedFields += vals.filter(v => v === 'extracted').length;
+  });
+  const fieldPct = totalFields > 0 ? Math.round((extractedFields / totalFields) * 100) : 0;
+
   const c = {
     docs: Math.min(100, Math.round((n / total) * 100)),
-    fields: n > 0 ? Math.min(100, Math.round((state.incomes.reduce((s, i) => s + (i.confidence || 0), 0) / state.incomes.length) * 100)) : 0,
+    fields: fieldPct,
     xval: n > 1 ? 85 : (n > 0 ? 40 : 0),
-    forms: 0,  // Will be set by compliance
+    forms: 0,  // Will be set by rules engine
     review: 0
   };
   state.completeness = c;
@@ -887,54 +926,72 @@ function computeCaliforniaTax(taxable) {
   return Math.round(tax);
 }
 
-// ── COMPLIANCE ──
+// ── RULES ENGINE ──
 function runCompliance() {
-  if (typeof runComplianceChecks !== 'function') return;
+  if (typeof runRulesEngine !== 'function') return;
 
-  const complianceState = {
+  const rulesState = {
     documents: state.documents,
     incomes: state.incomes,
     filing: state.filing
   };
 
-  const { results, summary, categories } = runComplianceChecks(complianceState);
+  const { results, summary, complianceSummary, savingsSummary, stages, scenarios } = runRulesEngine(rulesState);
 
-  // Show compliance section
+  // Show rules section
   document.getElementById('compliance-section').style.display = '';
-  document.getElementById('comp-passed').textContent = summary.passed;
-  document.getElementById('comp-failed').textContent = summary.failed;
-  document.getElementById('comp-warnings').textContent = summary.warnings;
-  document.getElementById('comp-skipped').textContent = summary.skipped;
 
+  // Compliance guarantee card
+  document.getElementById('comp-passed').textContent = complianceSummary.passed;
+  document.getElementById('comp-failed').textContent = complianceSummary.failed;
+  document.getElementById('comp-warnings').textContent = complianceSummary.warnings;
+
+  // Savings guarantee card
+  document.getElementById('savings-opportunities').textContent = savingsSummary.opportunities;
+  document.getElementById('savings-evaluated').textContent = savingsSummary.evaluated;
+  document.getElementById('savings-skipped').textContent = savingsSummary.skipped;
+
+  // Score bar (compliance score)
   const scoreFill = document.getElementById('comp-score-fill');
   const scoreLabel = document.getElementById('comp-score-label');
-  scoreFill.style.width = summary.score + '%';
-  scoreLabel.textContent = summary.score + '%';
+  scoreFill.style.width = complianceSummary.score + '%';
+  scoreLabel.textContent = complianceSummary.score + '%';
 
-  if (summary.score >= 90) {
+  if (complianceSummary.score >= 90) {
     scoreFill.style.background = 'var(--accent)';
-  } else if (summary.score >= 70) {
+  } else if (complianceSummary.score >= 70) {
     scoreFill.style.background = 'var(--orange)';
   } else {
     scoreFill.style.background = 'var(--warn)';
   }
 
   // Update completeness
-  state.completeness.forms = summary.score;
-  document.getElementById('comp-forms').textContent = summary.score + '%';
+  state.completeness.forms = complianceSummary.score;
+  document.getElementById('comp-forms').textContent = complianceSummary.score + '%';
   const formsBar = document.getElementById('comp-forms-bar');
-  formsBar.style.width = summary.score + '%';
-  formsBar.className = 'completeness-fill ' + completenessClass(summary.score);
+  formsBar.style.width = complianceSummary.score + '%';
+  formsBar.className = 'completeness-fill ' + completenessClass(complianceSummary.score);
 
-  // Recalculate readiness with compliance score
+  // Recalculate readiness
   const c = state.completeness;
   const avg = Math.round((c.docs + c.fields + c.xval + c.forms + c.review) / 5);
   updateReadiness(avg);
 
-  // Save to localStorage for checks.html
+  // Save to localStorage for rules.html and checks.html (backward compat)
   try {
-    localStorage.setItem('taxComplianceResults', JSON.stringify({ results, summary, categories, timestamp: Date.now() }));
-    localStorage.setItem('taxState', JSON.stringify(complianceState));
+    // New format for rules.html
+    localStorage.setItem('taxRulesResults', JSON.stringify({
+      results, summary, complianceSummary, savingsSummary, stages, scenarios, timestamp: Date.now()
+    }));
+    // Backward compat for checks.html
+    const categories = stages.map(st => ({ id: st.id, name: st.name, icon: st.icon, description: `Stage ${st.num}: ${st.name}` }));
+    const mappedResults = results.map(r => ({
+      ...r, category: r.stage,
+      irsRef: r.taxCode ? `${r.taxCode.section} · ${r.taxCode.form} ${r.taxCode.line}` : 'General',
+      description: r.detail || '', confidence: r.extracted ? 1.0 : 0.0,
+    }));
+    localStorage.setItem('taxComplianceResults', JSON.stringify({ results: mappedResults, summary, categories, timestamp: Date.now() }));
+    localStorage.setItem('taxState', JSON.stringify(rulesState));
   } catch (e) {
     console.warn('Could not save to localStorage:', e);
   }

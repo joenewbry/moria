@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rules Engine — Tax Prep 2025</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F6E1;</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../modules/shared.css">
+  <link rel="stylesheet" href="taxes.css">
+  <link rel="stylesheet" href="rules.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="back-nav">
+  <div class="back-nav-inner">
+    <a href="/taxes/" class="back-link"><span class="arrow">←</span> Tax Dashboard</a>
+    <span class="nav-module-name">RULES ENGINE</span>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<header class="module-header">
+  <span class="module-num">69</span>
+  <div class="module-label">Tax Year 2025</div>
+  <h1 class="module-title">Rules Engine</h1>
+  <p class="module-desc">
+    Every rule maps to a real IRC or CA RTC section. Compliance checks keep you audit-safe.
+    Savings checks find every deduction and credit you qualify for.
+  </p>
+</header>
+
+<!-- CONTENT -->
+<div class="content" id="main-content">
+
+  <!-- Empty state -->
+  <div class="rules-empty-state" id="empty-state" style="display:none">
+    <div class="rules-empty-state-icon">&#x1F6E1;</div>
+    <div class="rules-empty-state-title">No rules data yet</div>
+    <div class="rules-empty-state-desc">Upload tax documents on the dashboard first. The rules engine runs automatically after extraction.</div>
+    <a href="/taxes/" class="rules-empty-state-link">Go to Tax Dashboard</a>
+  </div>
+
+  <!-- Main content (hidden until data) -->
+  <div id="rules-content" style="display:none">
+
+    <!-- A. Two Guarantees -->
+    <section class="content-section">
+      <div class="guarantee-grid" id="hero-guarantees"></div>
+    </section>
+
+    <!-- B. Flow Visualization -->
+    <section class="content-section">
+      <div class="section-label">Pipeline</div>
+      <h2 class="section-title">6-Stage Flow</h2>
+
+      <div class="scenario-tabs" id="scenario-tabs"></div>
+      <div class="flow-visualization" id="flow-viz"></div>
+    </section>
+
+    <!-- Totals bar -->
+    <div class="rules-totals" id="rules-totals"></div>
+
+    <!-- C. Rules Detail -->
+    <section class="content-section">
+      <div class="section-label">All Rules</div>
+      <h2 class="section-title">Rule Detail by Stage</h2>
+
+      <div id="rules-detail"></div>
+    </section>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="module-footer">
+  <div class="footer-brand">CUBE × TAX PREP</div>
+  <div class="footer-right">Tax Year 2025 · <a href="/taxes/">Dashboard</a></div>
+</footer>
+
+<div class="noise-overlay"></div>
+
+<script>
+// ── LOAD DATA ──
+let rulesData = null;
+try {
+  const stored = localStorage.getItem('taxRulesResults');
+  if (stored) {
+    rulesData = JSON.parse(stored);
+  }
+} catch (e) {
+  console.warn('Could not load rules data:', e);
+}
+
+if (!rulesData || !rulesData.results) {
+  document.getElementById('empty-state').style.display = '';
+} else {
+  document.getElementById('rules-content').style.display = '';
+  renderAll(rulesData);
+}
+
+let activeScenario = 'all';
+
+function renderAll(data) {
+  renderHeroGuarantees(data);
+  renderScenarioTabs(data);
+  renderFlowViz(data);
+  renderTotals(data);
+  renderRulesDetail(data);
+}
+
+// ── HERO GUARANTEES ──
+function renderHeroGuarantees(data) {
+  const { complianceSummary, savingsSummary } = data;
+  const el = document.getElementById('hero-guarantees');
+  el.innerHTML = `
+    <div class="guarantee-card compliance-guarantee">
+      <div class="guarantee-icon">&#x1F6E1;</div>
+      <div class="guarantee-title">Audit Shield</div>
+      <div class="guarantee-desc">If you're honest, you won't get audited</div>
+      <div class="guarantee-stats">
+        <span class="guarantee-num">${complianceSummary.passed}</span>
+        <span class="guarantee-label">/ ${complianceSummary.total} compliance checks passed</span>
+      </div>
+      <div class="guarantee-detail">
+        ${complianceSummary.warnings > 0 ? `<span class="guarantee-detail-item warn-count">${complianceSummary.warnings} warnings</span>` : ''}
+        ${complianceSummary.failed > 0 ? `<span class="guarantee-detail-item fail-count">${complianceSummary.failed} failed</span>` : ''}
+        ${complianceSummary.skipped > 0 ? `<span class="guarantee-detail-item skip-count">${complianceSummary.skipped} skipped</span>` : ''}
+        ${complianceSummary.failed === 0 && complianceSummary.warnings === 0 ? '<span class="guarantee-detail-item" style="color:var(--accent)">All clear</span>' : ''}
+      </div>
+    </div>
+    <div class="guarantee-card savings-guarantee">
+      <div class="guarantee-icon">&#x1F50D;</div>
+      <div class="guarantee-title">Savings Finder</div>
+      <div class="guarantee-desc">We check every deduction you qualify for</div>
+      <div class="guarantee-stats">
+        <span class="guarantee-num">${savingsSummary.opportunities}</span>
+        <span class="guarantee-label">savings opportunities found</span>
+      </div>
+      <div class="guarantee-detail">
+        <span class="guarantee-detail-item eval-count">${savingsSummary.evaluated} evaluated</span>
+        ${savingsSummary.skipped > 0 ? `<span class="guarantee-detail-item skip-count">${savingsSummary.skipped} not applicable</span>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+// ── SCENARIO TABS ──
+function renderScenarioTabs(data) {
+  const tabsEl = document.getElementById('scenario-tabs');
+  const scenarios = [
+    { id: 'all', name: 'All', count: data.results.length },
+    ...data.scenarios.map(sc => ({
+      id: sc.id,
+      name: sc.name,
+      count: data.results.filter(r => r.scenarios.includes(sc.id)).length
+    }))
+  ];
+
+  tabsEl.innerHTML = scenarios.map(sc =>
+    `<button class="scenario-tab${sc.id === 'all' ? ' active' : ''}" data-scenario="${sc.id}">
+      ${sc.name}<span style="font-family:'Space Mono';font-size:11px;margin-left:6px;opacity:0.7">${sc.count}</span>
+    </button>`
+  ).join('');
+
+  tabsEl.addEventListener('click', e => {
+    const btn = e.target.closest('.scenario-tab');
+    if (!btn) return;
+    tabsEl.querySelectorAll('.scenario-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeScenario = btn.dataset.scenario;
+    renderFlowViz(data);
+    renderTotals(data);
+    renderRulesDetail(data);
+  });
+}
+
+// ── FLOW VISUALIZATION ──
+function renderFlowViz(data) {
+  const vizEl = document.getElementById('flow-viz');
+  const stages = data.stages;
+
+  vizEl.innerHTML = stages.map(stage => {
+    const stageRules = filterByScenario(data.results.filter(r => r.stage === stage.id));
+    const passCount = stageRules.filter(r => r.status === 'pass').length;
+    const failCount = stageRules.filter(r => r.status === 'fail').length;
+    const warnCount = stageRules.filter(r => r.status === 'warn').length;
+    const total = stageRules.length;
+    const nonSkip = stageRules.filter(r => r.status !== 'skip').length;
+
+    let stateClass = '';
+    if (total === 0) {
+      stateClass = 'dimmed';
+    } else if (failCount > 0) {
+      stateClass = 'has-fail';
+    } else if (warnCount > 0) {
+      stateClass = 'has-warn';
+    } else if (passCount > 0 && nonSkip === passCount) {
+      stateClass = 'all-pass';
+    }
+
+    const countsHtml = total > 0
+      ? `<span class="pass-ct">${passCount}&#x2713;</span> ${failCount > 0 ? `<span class="fail-ct">${failCount}&#x2717;</span> ` : ''}${warnCount > 0 ? `<span class="warn-ct">${warnCount}!</span>` : ''}`
+      : '<span style="opacity:0.3">—</span>';
+
+    return `
+      <div class="flow-stage ${stateClass}" data-stage="${stage.id}">
+        <div class="flow-stage-circle">${stage.icon}</div>
+        <div class="flow-stage-name">${stage.name}</div>
+        <div class="flow-stage-counts">${countsHtml}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── TOTALS BAR ──
+function renderTotals(data) {
+  const results = filterByScenario(data.results);
+  const pass = results.filter(r => r.status === 'pass').length;
+  const fail = results.filter(r => r.status === 'fail').length;
+  const warn = results.filter(r => r.status === 'warn').length;
+  const skip = results.filter(r => r.status === 'skip').length;
+
+  document.getElementById('rules-totals').innerHTML = `
+    <div class="rules-total-item"><div class="rules-total-dot pass"></div> ${pass} passed</div>
+    <div class="rules-total-item"><div class="rules-total-dot fail"></div> ${fail} failed</div>
+    <div class="rules-total-item"><div class="rules-total-dot warn"></div> ${warn} warnings</div>
+    <div class="rules-total-item"><div class="rules-total-dot skip"></div> ${skip} skipped</div>
+    <div style="flex:1"></div>
+    <div style="color:var(--text-muted)">${results.length} rules</div>
+  `;
+}
+
+// ── RULES DETAIL ──
+function renderRulesDetail(data) {
+  const container = document.getElementById('rules-detail');
+  container.innerHTML = '';
+
+  for (const stage of data.stages) {
+    const stageRules = filterByScenario(data.results.filter(r => r.stage === stage.id));
+    if (stageRules.length === 0 && activeScenario !== 'all') continue;
+
+    const passCount = stageRules.filter(r => r.status === 'pass').length;
+    const failCount = stageRules.filter(r => r.status === 'fail').length;
+    const warnCount = stageRules.filter(r => r.status === 'warn').length;
+    const savingsCount = stageRules.filter(r => r.type === 'savings' && r.status !== 'skip').length;
+
+    const group = document.createElement('div');
+    group.className = 'stage-group';
+
+    const header = document.createElement('div');
+    header.className = 'stage-group-header';
+    header.innerHTML = `
+      <span class="stage-group-icon">${stage.icon}</span>
+      <div class="stage-group-name">Stage ${stage.num}: ${stage.name}</div>
+      <div class="stage-group-meta">
+        ${passCount > 0 ? `<span class="stage-group-count pass-count">${passCount} pass</span>` : ''}
+        ${failCount > 0 ? `<span class="stage-group-count fail-count">${failCount} fail</span>` : ''}
+        ${warnCount > 0 ? `<span class="stage-group-count warn-count">${warnCount} warn</span>` : ''}
+        ${savingsCount > 0 ? `<span class="stage-group-count savings-count">${savingsCount} savings</span>` : ''}
+      </div>
+      <span class="stage-group-chevron">&#x25BC;</span>
+    `;
+
+    header.addEventListener('click', () => group.classList.toggle('collapsed'));
+    group.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'stage-group-body';
+
+    for (const rule of stageRules) {
+      body.appendChild(renderRuleRow(rule));
+    }
+
+    group.appendChild(body);
+    container.appendChild(group);
+  }
+}
+
+function renderRuleRow(rule) {
+  const row = document.createElement('div');
+  row.className = 'rule-row';
+
+  // Dim rules not in active scenario
+  if (activeScenario !== 'all' && !rule.scenarios.includes(activeScenario)) {
+    row.classList.add('dimmed');
+  }
+
+  const statusIcons = { pass: '&#x2713;', fail: '&#x2717;', warn: '!', skip: '—' };
+  const taxCodeStr = rule.taxCode
+    ? `${rule.taxCode.section}` + (rule.taxCode.form !== 'N/A' ? ` · ${rule.taxCode.form}` : '') + (rule.taxCode.line !== 'N/A' ? ` ${rule.taxCode.line}` : '')
+    : '';
+
+  row.innerHTML = `
+    <div class="rule-status-icon ${rule.status}">${statusIcons[rule.status] || '—'}</div>
+    <div class="rule-info">
+      <div class="rule-name">${rule.name}</div>
+      <div class="rule-badges">
+        ${taxCodeStr ? `<span class="rule-tax-code">${taxCodeStr}</span>` : ''}
+        <span class="rule-type-badge ${rule.type}">${rule.type}</span>
+        ${rule.scenarios.map(sc => `<span class="rule-scenario-badge">${sc}</span>`).join('')}
+      </div>
+      ${rule.detail ? `<div class="rule-detail">${rule.detail}</div>` : ''}
+    </div>
+    <div class="rule-values">
+      <div class="rule-current">${rule.currentValue || '—'}</div>
+      <div class="rule-expected">Expected: ${rule.expectedValue || '—'}</div>
+    </div>
+  `;
+
+  return row;
+}
+
+// ── HELPERS ──
+function filterByScenario(results) {
+  if (activeScenario === 'all') return results;
+  return results.filter(r => r.scenarios.includes(activeScenario));
+}
+</script>
+</body>
+</html>
