@@ -183,7 +183,7 @@ async def extract(file: UploadFile = File(...)):
 
         try:
             async with client.messages.stream(
-                model="claude-sonnet-4-6-20250819",
+                model="claude-sonnet-4-20250514",
                 max_tokens=4096,
                 system=SYSTEM_PROMPT,
                 messages=[
