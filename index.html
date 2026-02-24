@@ -1004,6 +1004,7 @@ a.vision-link .vision-cell:hover::after {
     <a href="#pricing">Volume Pricing</a>
     <a href="#timeline">Build Timeline</a>
     <a href="#phases">Product Phases</a>
+    <a href="modules/ontology.html" class="nav-external">System Ontology ↗</a>
     <a href="/design" class="nav-external">3D Design ↗</a>
   </div>
 </nav>
@@ -1090,6 +1091,13 @@ a.vision-link .vision-cell:hover::after {
         <span class="num">08</span>
         <h4>Manufacturing &amp; Scale</h4>
         <p>From 3D-printed prototype to injection-molded production. Supply chain roadmap, certification path, and the economics of sub-$100 personal AI hardware.</p>
+      </div>
+    </a>
+    <a href="modules/ontology.html" class="vision-link" style="grid-column: 1 / -1;">
+      <div class="vision-cell" style="border-color: rgba(192,255,84,0.25); background: rgba(192,255,84,0.02);">
+        <span class="num">&Omega;</span>
+        <h4>System Ontology</h4>
+        <p>The map of what CUBE fights and why. 12 institutional adversaries ranked by value, cross-cutting capabilities, the flexibility-vs-repeatability architecture, privacy-preserving synthetic data, and the Markdown computer that learns from feedback.</p>
       </div>
     </a>
   </div>
@@ -2006,5 +2014,6 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.bar-chart').forEach(chart => observer.observe(chart));
 </script>
+<div id="dsl-version" style="position:fixed;bottom:8px;right:8px;font-family:'SF Mono',Consolas,monospace;font-size:11px;color:rgba(255,255,255,0.35);background:rgba(0,0,0,0.25);padding:2px 8px;border-radius:4px;pointer-events:none;z-index:9998;letter-spacing:0.5px">__VERSION__</div>
 </body>
 </html>

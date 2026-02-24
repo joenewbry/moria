@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Ontology &mdash; CUBE</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* VALUE MATRIX */
+.value-matrix {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.value-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 100px 100px 100px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  gap: 16px;
+  transition: all 0.3s;
+}
+
+.value-row:hover {
+  border-color: var(--border-glow);
+  transform: translateY(-1px);
+}
+
+.value-row.header {
+  background: transparent;
+  border: none;
+  padding: 8px 20px;
+}
+
+.value-row.header span {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.value-domain {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.value-bar-wrap {
+  position: relative;
+  height: 28px;
+  background: var(--surface2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.value-bar {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bg);
+  min-width: 60px;
+  transition: width 1s ease;
+}
+
+.value-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+}
+
+.value-tag.extreme { background: rgba(255,107,74,0.2); color: var(--warn); }
+.value-tag.high { background: rgba(255,176,84,0.2); color: var(--orange); }
+.value-tag.medium { background: rgba(84,160,255,0.2); color: var(--blue); }
+.value-tag.low { background: rgba(179,136,255,0.2); color: var(--purple); }
+
+/* ADVERSARY CARDS */
+.adversary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+.adversary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.adversary-card:hover {
+  border-color: var(--border-glow);
+  transform: translateY(-2px);
+}
+
+.adversary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.adversary-card.warn::before { background: var(--warn); }
+.adversary-card.orange::before { background: var(--orange); }
+.adversary-card.purple::before { background: var(--purple); }
+.adversary-card.blue::before { background: var(--blue); }
+.adversary-card.teal::before { background: var(--teal); }
+.adversary-card.accent::before { background: var(--accent); }
+
+.adversary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.adversary-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.adversary-value {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.adversary-problem {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.adversary-actions {
+  list-style: none;
+}
+
+.adversary-actions li {
+  font-size: 13px;
+  color: var(--text-dim);
+  padding: 4px 0;
+  padding-left: 20px;
+  position: relative;
+}
+
+.adversary-actions li::before {
+  content: '>';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* CAPABILITY LAYER */
+.capability-map {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.capability-node {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.capability-node:hover {
+  border-color: var(--border-glow);
+}
+
+.capability-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.capability-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.capability-node.accent .capability-name { color: var(--accent); }
+.capability-node.blue .capability-name { color: var(--blue); }
+.capability-node.teal .capability-name { color: var(--teal); }
+.capability-node.purple .capability-name { color: var(--purple); }
+.capability-node.orange .capability-name { color: var(--orange); }
+.capability-node.warn .capability-name { color: var(--warn); }
+
+.capability-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* SPECTRUM DIAGRAM */
+.spectrum {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 32px;
+  margin-bottom: 24px;
+}
+
+.spectrum-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--warn), var(--orange), var(--accent), var(--teal), var(--blue));
+  margin: 24px 0 16px;
+  position: relative;
+}
+
+.spectrum-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.spectrum-labels .left { color: var(--warn); }
+.spectrum-labels .right { color: var(--blue); }
+
+.spectrum-marker {
+  position: absolute;
+  top: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  background: var(--bg);
+  transform: translateX(-50%);
+  box-shadow: 0 0 0 4px rgba(192,255,84,0.2);
+}
+
+.spectrum-marker-label {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+
+/* LAYER DIAGRAM */
+.layer-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.layer {
+  padding: 20px 24px;
+  border: 1px solid var(--border);
+  position: relative;
+}
+
+.layer:first-child { border-radius: 16px 16px 0 0; }
+.layer:last-child { border-radius: 0 0 16px 16px; }
+
+.layer + .layer { border-top: none; }
+
+.layer-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.layer-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.layer-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.layer.accent { background: rgba(192,255,84,0.04); }
+.layer.accent .layer-num { color: var(--accent); }
+.layer.blue { background: rgba(84,160,255,0.04); }
+.layer.blue .layer-num { color: var(--blue); }
+.layer.teal { background: rgba(84,255,208,0.04); }
+.layer.teal .layer-num { color: var(--teal); }
+.layer.purple { background: rgba(179,136,255,0.04); }
+.layer.purple .layer-num { color: var(--purple); }
+.layer.orange { background: rgba(255,176,84,0.04); }
+.layer.orange .layer-num { color: var(--orange); }
+
+/* PRIVACY DIAGRAM */
+.privacy-flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.privacy-node {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.privacy-arrow {
+  color: var(--accent);
+  font-size: 20px;
+  font-family: 'Space Mono', monospace;
+}
+
+.privacy-node .p-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.privacy-node.accent .p-label { color: var(--accent); }
+.privacy-node.blue .p-label { color: var(--blue); }
+.privacy-node.teal .p-label { color: var(--teal); }
+
+.privacy-node .p-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* LEARNING CYCLE */
+.cycle-ring {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 24px;
+}
+
+.cycle-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  text-align: center;
+  flex: 0 0 180px;
+}
+
+.cycle-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  color: var(--accent);
+  font-size: 18px;
+  font-family: 'Space Mono', monospace;
+}
+
+.cycle-step .c-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.cycle-step .c-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.cycle-step .c-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* PERSON FILE */
+.person-file {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.person-file-header {
+  padding: 12px 20px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.person-file-body {
+  padding: 20px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  white-space: pre;
+}
+
+/* REGULATION MAP */
+.reg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.reg-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s;
+}
+
+.reg-card:hover { border-color: var(--border-glow); }
+
+.reg-card .reg-name {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.reg-card .reg-level {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.reg-block {
+  width: 20px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--surface2);
+}
+
+.reg-block.filled.red { background: var(--warn); }
+.reg-block.filled.orange { background: var(--orange); }
+.reg-block.filled.yellow { background: #ffdd54; }
+.reg-block.filled.green { background: var(--accent); }
+.reg-block.filled.blue { background: var(--blue); }
+
+.reg-card .reg-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.reg-card .reg-approach {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--teal);
+  font-weight: 500;
+}
+
+/* RESPONSIVE OVERRIDES */
+@media (max-width: 900px) {
+  .value-row { grid-template-columns: 1fr; gap: 8px; }
+  .value-row.header { display: none; }
+  .adversary-grid { grid-template-columns: 1fr; }
+  .privacy-flow { grid-template-columns: 1fr; }
+  .privacy-arrow { transform: rotate(90deg); text-align: center; }
+  .cycle-ring { flex-direction: column; align-items: center; }
+  .cycle-arrow { transform: rotate(90deg); padding: 8px 0; }
+}
+
+@media (max-width: 600px) {
+  .capability-map { grid-template-columns: repeat(2, 1fr); }
+  .reg-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<!-- BACK NAV -->
+<nav class="back-nav">
+  <div class="back-nav-inner">
+    <a href="../" class="back-link">
+      <span class="arrow">&larr;</span> CUBE Home
+    </a>
+    <span class="nav-module-name">SYSTEM ONTOLOGY</span>
+  </div>
+</nav>
+
+<!-- MODULE HEADER -->
+<header class="module-header">
+  <span class="module-num">&Omega;</span>
+  <div class="module-label">Ontology</div>
+  <h1 class="module-title">System Ontology</h1>
+  <p class="module-desc">The map of what CUBE does and why. A Markdown-native personal computer that fights institutional complexity on behalf of individuals and families &mdash; ranked by value, organized by capability, designed to learn.</p>
+</header>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- VALUE MATRIX -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content-section">
+    <div class="section-label">Ranked by Impact</div>
+    <div class="section-title">Value Matrix</div>
+    <div class="section-desc">Every domain ranked by annual dollar value to a typical family, hours of life reclaimed, and how hard the system is to navigate. These are the institutional adversaries where complexity is a feature, not a bug &mdash; and CUBE fights back.</div>
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">$47K+</div>
+        <div class="stat-label">Annual family exposure</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">200+</div>
+        <div class="stat-label">Hours / year navigating</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">12</div>
+        <div class="stat-label">Institutional adversaries</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">&infin;</div>
+        <div class="stat-label">Rules that change yearly</div>
+      </div>
+    </div>
+
+    <div class="value-matrix">
+      <div class="value-row header">
+        <span>Domain</span>
+        <span>Annual Value (Family)</span>
+        <span>Time</span>
+        <span>Complexity</span>
+        <span>Regulation</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">Health Insurance</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:95%; background: linear-gradient(90deg, var(--warn), var(--orange));">$5K&ndash;$25K+</div></div>
+        <span class="value-tag extreme">60+ hrs</span>
+        <span class="value-tag extreme">Extreme</span>
+        <span class="value-tag extreme">HIPAA</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">Tax System</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:85%; background: linear-gradient(90deg, var(--orange), #ffdd54);">$2K&ndash;$15K+</div></div>
+        <span class="value-tag extreme">40+ hrs</span>
+        <span class="value-tag extreme">Extreme</span>
+        <span class="value-tag extreme">IRS / FTB</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">Medicare / Medicaid</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:80%; background: linear-gradient(90deg, var(--warn), var(--orange));">$3K&ndash;$20K+</div></div>
+        <span class="value-tag extreme">50+ hrs</span>
+        <span class="value-tag extreme">Extreme</span>
+        <span class="value-tag extreme">CMS</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">Drug Companies</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:70%; background: linear-gradient(90deg, var(--purple), var(--blue));">$1K&ndash;$12K+</div></div>
+        <span class="value-tag high">20+ hrs</span>
+        <span class="value-tag high">High</span>
+        <span class="value-tag high">FDA</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">Healthcare Providers</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:65%; background: linear-gradient(90deg, var(--orange), #ffdd54);">$1K&ndash;$10K+</div></div>
+        <span class="value-tag high">30+ hrs</span>
+        <span class="value-tag high">High</span>
+        <span class="value-tag extreme">HIPAA</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">Banks / Financial</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:55%; background: linear-gradient(90deg, var(--blue), var(--teal));">$500&ndash;$5K+</div></div>
+        <span class="value-tag medium">15+ hrs</span>
+        <span class="value-tag medium">Medium</span>
+        <span class="value-tag extreme">FDIC/SEC</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">Insurance (Auto/Home)</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:50%; background: linear-gradient(90deg, var(--orange), #ffdd54);">$500&ndash;$3K+</div></div>
+        <span class="value-tag medium">10+ hrs</span>
+        <span class="value-tag medium">Medium</span>
+        <span class="value-tag high">State DOI</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">Airlines</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:40%; background: linear-gradient(90deg, var(--teal), var(--blue));">$200&ndash;$2K+</div></div>
+        <span class="value-tag medium">10+ hrs</span>
+        <span class="value-tag medium">Medium</span>
+        <span class="value-tag low">DOT</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">ISPs / Cell Providers</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:35%; background: linear-gradient(90deg, var(--purple), var(--blue));">$300&ndash;$2K+</div></div>
+        <span class="value-tag low">8+ hrs</span>
+        <span class="value-tag low">Low</span>
+        <span class="value-tag low">FCC</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">Utilities</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:30%; background: linear-gradient(90deg, var(--teal), var(--accent));">$200&ndash;$1.5K+</div></div>
+        <span class="value-tag low">5+ hrs</span>
+        <span class="value-tag low">Low</span>
+        <span class="value-tag medium">PUC</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">Student Loans</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:60%; background: linear-gradient(90deg, var(--orange), #ffdd54);">$1K&ndash;$8K+</div></div>
+        <span class="value-tag high">15+ hrs</span>
+        <span class="value-tag high">High</span>
+        <span class="value-tag high">ED / CFPB</span>
+      </div>
+      <div class="value-row">
+        <span class="value-domain">Property Tax / RE</span>
+        <div class="value-bar-wrap"><div class="value-bar" style="width:45%; background: linear-gradient(90deg, var(--blue), var(--teal));">$500&ndash;$5K+</div></div>
+        <span class="value-tag medium">10+ hrs</span>
+        <span class="value-tag medium">Medium</span>
+        <span class="value-tag medium">County</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- THE ADVERSARIES -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content-section">
+    <div class="section-label">Know Your Adversary</div>
+    <div class="section-title">What CUBE Fights</div>
+    <div class="section-desc">Each institutional adversary profits from complexity. CUBE automates the work of navigating them: filing claims, following up, appealing denials, tracking deadlines, and extracting value that individuals leave on the table.</div>
+
+    <div class="adversary-grid">
+      <div class="adversary-card warn">
+        <div class="adversary-header">
+          <span class="adversary-name">Health Insurance Payers</span>
+          <span class="adversary-value">$5K&ndash;$25K/yr</span>
+        </div>
+        <div class="adversary-problem">Deny first, delay second, hope you give up. Prior auths, EOB deciphering, surprise billing, out-of-network gotchas.</div>
+        <ul class="adversary-actions">
+          <li>Auto-parse EOBs and match against provider bills</li>
+          <li>Draft and submit claim appeals from templates</li>
+          <li>Track prior authorization status and deadlines</li>
+          <li>Flag balance billing violations (No Surprises Act)</li>
+          <li>Compare in-network alternatives before procedures</li>
+          <li>Negotiate payment plans with provider billing</li>
+        </ul>
+      </div>
+
+      <div class="adversary-card orange">
+        <div class="adversary-header">
+          <span class="adversary-name">Tax System (IRS / State)</span>
+          <span class="adversary-value">$2K&ndash;$15K/yr</span>
+        </div>
+        <div class="adversary-problem">5,000+ page tax code that changes yearly. Miss a deduction and you overpay. Miss a deadline and you get penalized.</div>
+        <ul class="adversary-actions">
+          <li>Ingest new tax code annually &mdash; extract rules automatically</li>
+          <li>OCR W-2s, 1099s, and supporting documents</li>
+          <li>Optimize deductions: itemized vs. standard, credits</li>
+          <li>Compute federal + state returns with audit trail</li>
+          <li>Track quarterly estimated payments for self-employed</li>
+          <li>Flag audit risk areas and suggest documentation</li>
+        </ul>
+      </div>
+
+      <div class="adversary-card warn">
+        <div class="adversary-header">
+          <span class="adversary-name">Medicare / Medicaid</span>
+          <span class="adversary-value">$3K&ndash;$20K/yr</span>
+        </div>
+        <div class="adversary-problem">Labyrinthine eligibility rules, Part A/B/C/D maze, enrollment windows, coverage gaps, and catastrophic coverage thresholds.</div>
+        <ul class="adversary-actions">
+          <li>Determine eligibility across all program types</li>
+          <li>Compare Medicare Advantage vs. Original + Medigap</li>
+          <li>Track donut hole and catastrophic coverage thresholds</li>
+          <li>Flag enrollment windows and auto-remind</li>
+          <li>Appeal Part D formulary denials</li>
+          <li>Coordinate benefits between Medicare and employer plans</li>
+        </ul>
+      </div>
+
+      <div class="adversary-card purple">
+        <div class="adversary-header">
+          <span class="adversary-name">Drug Companies / Pharmacies</span>
+          <span class="adversary-value">$1K&ndash;$12K/yr</span>
+        </div>
+        <div class="adversary-problem">Opaque pricing, formulary games, step therapy requirements, manufacturer coupon mazes, and pharmacy benefit manager (PBM) middlemen.</div>
+        <ul class="adversary-actions">
+          <li>Compare drug prices across pharmacies (GoodRx, CostPlus)</li>
+          <li>Find manufacturer patient assistance programs</li>
+          <li>Appeal step therapy and prior auth requirements</li>
+          <li>Track generic availability dates</li>
+          <li>Flag therapeutic alternatives with prescriber</li>
+          <li>Monitor formulary changes at open enrollment</li>
+        </ul>
+      </div>
+
+      <div class="adversary-card blue">
+        <div class="adversary-header">
+          <span class="adversary-name">Healthcare Providers</span>
+          <span class="adversary-value">$1K&ndash;$10K/yr</span>
+        </div>
+        <div class="adversary-problem">Chargemaster prices 10x Medicare rates, coding errors on 30&ndash;80% of bills, upcoding, and unbundling that nobody checks.</div>
+        <ul class="adversary-actions">
+          <li>Audit medical bills against CPT/ICD coding rules</li>
+          <li>Compare charges against Medicare allowable amounts</li>
+          <li>Request itemized bills (triggers automatic reductions)</li>
+          <li>Negotiate cash-pay rates for uninsured procedures</li>
+          <li>Consolidate health records via FHIR from all providers</li>
+          <li>Track referrals, lab results, and follow-up appointments</li>
+        </ul>
+      </div>
+
+      <div class="adversary-card teal">
+        <div class="adversary-header">
+          <span class="adversary-name">Banks / Financial Services</span>
+          <span class="adversary-value">$500&ndash;$5K/yr</span>
+        </div>
+        <div class="adversary-problem">Overdraft fees, low savings rates, hidden account fees, and credit card rate games. They profit from your inattention.</div>
+        <ul class="adversary-actions">
+          <li>Monitor account fees and flag avoidable charges</li>
+          <li>Track high-yield savings rates and recommend moves</li>
+          <li>Alert on credit card rate increases</li>
+          <li>Dispute unauthorized charges automatically</li>
+          <li>Optimize credit card rewards strategy</li>
+          <li>Track subscriptions and flag unused services</li>
+        </ul>
+      </div>
+
+      <div class="adversary-card accent">
+        <div class="adversary-header">
+          <span class="adversary-name">Airlines</span>
+          <span class="adversary-value">$200&ndash;$2K/yr</span>
+        </div>
+        <div class="adversary-problem">Dynamic pricing, change fees, lost bag runaround, delay compensation rules nobody knows, and loyalty program devaluations.</div>
+        <ul class="adversary-actions">
+          <li>Monitor price drops after booking for rebooking/credit</li>
+          <li>File DOT complaints for delays and cancellations</li>
+          <li>Track EU261 compensation for international flights</li>
+          <li>Automate lost baggage claims with documentation</li>
+          <li>Compare loyalty program values across airlines</li>
+        </ul>
+      </div>
+
+      <div class="adversary-card blue">
+        <div class="adversary-header">
+          <span class="adversary-name">ISPs / Cell Providers</span>
+          <span class="adversary-value">$300&ndash;$2K/yr</span>
+        </div>
+        <div class="adversary-problem">Promotional rates that expire silently, data caps, equipment rental fees, and retention departments that only help when you threaten to leave.</div>
+        <ul class="adversary-actions">
+          <li>Track promotional rate expirations</li>
+          <li>Generate plan comparison spreadsheets</li>
+          <li>Script retention department calls</li>
+          <li>File FCC complaints for service issues</li>
+          <li>Monitor usage against plan limits</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- CROSS-CUTTING CAPABILITIES -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content-section">
+    <div class="section-label">Capability Layer</div>
+    <div class="section-title">What CUBE Can Do</div>
+    <div class="section-desc">These capabilities work across every domain. Each adversary-specific workflow is composed from these primitives. Adding a new domain means composing existing capabilities, not building from scratch.</div>
+
+    <div class="capability-map">
+      <div class="capability-node accent">
+        <div class="capability-icon">&#9881;</div>
+        <div class="capability-name">Document OCR</div>
+        <div class="capability-desc">Scan, extract, and structure data from any document</div>
+      </div>
+      <div class="capability-node blue">
+        <div class="capability-icon">&#9993;</div>
+        <div class="capability-name">Communication</div>
+        <div class="capability-desc">Draft emails, place calls, send letters, fax</div>
+      </div>
+      <div class="capability-node teal">
+        <div class="capability-icon">&#9202;</div>
+        <div class="capability-name">Monitoring</div>
+        <div class="capability-desc">Watch for deadlines, price changes, status updates</div>
+      </div>
+      <div class="capability-node purple">
+        <div class="capability-icon">&#9997;</div>
+        <div class="capability-name">Filing</div>
+        <div class="capability-desc">Submit forms, claims, appeals, and applications</div>
+      </div>
+      <div class="capability-node orange">
+        <div class="capability-icon">&#128269;</div>
+        <div class="capability-name">Research</div>
+        <div class="capability-desc">Compare options, find regulations, gather precedents</div>
+      </div>
+      <div class="capability-node warn">
+        <div class="capability-icon">&#9878;</div>
+        <div class="capability-name">Negotiation</div>
+        <div class="capability-desc">Rate comparisons, scripts, escalation paths</div>
+      </div>
+      <div class="capability-node accent">
+        <div class="capability-icon">&#128203;</div>
+        <div class="capability-name">Tracking</div>
+        <div class="capability-desc">Follow-ups, status tracking, deadline enforcement</div>
+      </div>
+      <div class="capability-node blue">
+        <div class="capability-icon">&#128424;</div>
+        <div class="capability-name">Print / Mail</div>
+        <div class="capability-desc">Print documents, generate mail-ready PDFs</div>
+      </div>
+      <div class="capability-node teal">
+        <div class="capability-icon">&#128218;</div>
+        <div class="capability-name">Learning</div>
+        <div class="capability-desc">Adapt to new rules, codes, and regulations</div>
+      </div>
+      <div class="capability-node purple">
+        <div class="capability-icon">&#128100;</div>
+        <div class="capability-name">Identity</div>
+        <div class="capability-desc">Know who is talking, per-person preferences</div>
+      </div>
+      <div class="capability-node orange">
+        <div class="capability-icon">&#128276;</div>
+        <div class="capability-name">Reminders</div>
+        <div class="capability-desc">Proactive alerts for emails, deadlines, opportunities</div>
+      </div>
+      <div class="capability-node warn">
+        <div class="capability-icon">&#128274;</div>
+        <div class="capability-name">Privacy</div>
+        <div class="capability-desc">All data local, synthetic copies for engineering</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- FLEXIBILITY VS. REPEATABILITY -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content-section">
+    <div class="section-label">Core Trade-off</div>
+    <div class="section-title">Flexibility vs. Repeatability</div>
+    <div class="section-desc">A pure rule-based tax system breaks every April. A pure LLM system hallucinates deductions. CUBE uses a layered hybrid: the LLM reads new regulations and extracts structured rules, then a deterministic engine executes them. Humans review. Feedback improves extraction. The system gets better every year without being rewritten.</div>
+
+    <div class="spectrum">
+      <div class="spectrum-labels">
+        <span class="left">RIGID RULES</span>
+        <span class="right">PURE LLM</span>
+      </div>
+      <div class="spectrum-bar">
+        <div class="spectrum-marker" style="left: 62%;">
+          <div class="spectrum-marker-label">CUBE HYBRID</div>
+        </div>
+      </div>
+      <div class="spectrum-labels">
+        <span style="color:var(--text-muted); font-size:10px; font-family:'Space Mono',monospace;">Deterministic but brittle</span>
+        <span style="color:var(--text-muted); font-size:10px; font-family:'Space Mono',monospace;">Flexible but unpredictable</span>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-label" style="margin-top:0;">The Problem</div>
+        <div class="decision-card" style="margin-bottom:16px;">
+          <h4>Rules Rot</h4>
+          <p>Tax code changes every year. Insurance formularies change every quarter. Step therapy requirements change monthly. Any hard-coded rule system requires constant manual maintenance by domain experts &mdash; which is the exact bottleneck we are trying to eliminate.</p>
+        </div>
+        <div class="decision-card blue">
+          <h4>LLMs Hallucinate</h4>
+          <p>An LLM asked &ldquo;can I deduct my home office?&rdquo; might say yes even when you don&rsquo;t qualify. For high-stakes domains like taxes and healthcare, you need deterministic execution with an audit trail. &ldquo;I did X because rule Y says Z&rdquo; &mdash; not &ldquo;the model thought so.&rdquo;</p>
+        </div>
+      </div>
+      <div>
+        <div class="section-label" style="margin-top:0;">The Architecture</div>
+        <div class="layer-stack">
+          <div class="layer accent">
+            <div class="layer-num">LAYER 5 &mdash; FEEDBACK</div>
+            <div class="layer-title">Human Review + Learning</div>
+            <div class="layer-desc">User reviews results, flags errors. Feedback improves rule extraction next cycle.</div>
+          </div>
+          <div class="layer blue">
+            <div class="layer-num">LAYER 4 &mdash; EXECUTION</div>
+            <div class="layer-title">Deterministic Rule Engine</div>
+            <div class="layer-desc">Apply extracted rules to user data. Fully auditable. No LLM in the loop.</div>
+          </div>
+          <div class="layer teal">
+            <div class="layer-num">LAYER 3 &mdash; EXTRACTION</div>
+            <div class="layer-title">LLM Rule Extraction</div>
+            <div class="layer-desc">LLM reads new regulations and outputs structured, testable rules as JSON/Markdown.</div>
+          </div>
+          <div class="layer purple">
+            <div class="layer-num">LAYER 2 &mdash; INGESTION</div>
+            <div class="layer-title">Document Intake</div>
+            <div class="layer-desc">New tax code, insurance policy, formulary &mdash; ingested as raw documents.</div>
+          </div>
+          <div class="layer orange">
+            <div class="layer-num">LAYER 1 &mdash; DATA</div>
+            <div class="layer-title">User Data + Documents</div>
+            <div class="layer-desc">W-2s, medical records, bills, policies &mdash; everything the user has, on-device.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;">
+      <div class="section-label">How It Adapts</div>
+      <div class="arch-diagram">
+        <div class="arch-diagram-label">Annual Adaptation Cycle &mdash; Tax Example</div>
+        <div class="arch-flow">
+          <div class="arch-node orange">
+            <div class="node-label">New Tax Code</div>
+            <div class="node-sub">IRS publishes updates</div>
+          </div>
+          <div class="arch-arrow">&rarr;</div>
+          <div class="arch-node purple">
+            <div class="node-label">LLM Reads</div>
+            <div class="node-sub">extracts structured rules</div>
+          </div>
+          <div class="arch-arrow">&rarr;</div>
+          <div class="arch-node teal">
+            <div class="node-label">Diff + Test</div>
+            <div class="node-sub">compare against last year</div>
+          </div>
+          <div class="arch-arrow">&rarr;</div>
+          <div class="arch-node blue">
+            <div class="node-label">Execute</div>
+            <div class="node-sub">deterministic engine</div>
+          </div>
+          <div class="arch-arrow">&rarr;</div>
+          <div class="arch-node accent">
+            <div class="node-label">Review</div>
+            <div class="node-sub">human confirms result</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PRIVACY ARCHITECTURE -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content-section">
+    <div class="section-label">Privacy by Design</div>
+    <div class="section-title">Privacy-Preserving Engineering</div>
+    <div class="section-desc">All real data stays on the CUBE. Engineers work with structurally identical synthetic data where every PII field &mdash; names, SSNs, addresses, account numbers &mdash; is replaced with realistic but fake values. Same format, same edge cases, zero privacy risk.</div>
+
+    <div class="privacy-flow">
+      <div class="privacy-node accent">
+        <div class="p-label">REAL DATA</div>
+        <div class="p-desc">On-device only<br>Never leaves the CUBE<br>Encrypted at rest</div>
+      </div>
+      <div class="privacy-arrow">&rarr;</div>
+      <div class="privacy-node blue">
+        <div class="p-label">SYNTHETIC ENGINE</div>
+        <div class="p-desc">Field-level replacement<br>Structure preserved<br>Edge cases maintained</div>
+      </div>
+      <div class="privacy-arrow">&rarr;</div>
+      <div class="privacy-node teal">
+        <div class="p-label">SYNTHETIC DATA</div>
+        <div class="p-desc">Safe for engineers<br>Functionally identical<br>Shareable / testable</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="decision-card">
+          <h4>What Gets Replaced</h4>
+          <p>Patient names, SSNs, dates of birth, addresses, phone numbers, account numbers, employer names, hospital names, provider names, prescription details, diagnosis codes tied to identity. Everything that could identify a person.</p>
+        </div>
+      </div>
+      <div>
+        <div class="decision-card teal">
+          <h4>What Stays the Same</h4>
+          <p>Document structure, field types, value ranges, coding systems (CPT, ICD-10, tax form fields), edge cases (multi-state filing, secondary insurance, partial year coverage), and statistical distributions. The synthetic data triggers the same code paths.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="person-file" style="margin-top:24px;">
+      <div class="person-file-header">synthetic/medical_bill_001.md</div>
+      <div class="person-file-body"># Medical Bill &mdash; Synthetic
+Patient: <span style="color:var(--teal);">Sarah Mitchell</span>  (real: [REDACTED])
+DOB: <span style="color:var(--teal);">1987-03-15</span>  (real: [REDACTED])
+Provider: <span style="color:var(--teal);">Bay Area Medical Center</span>
+Account: <span style="color:var(--teal);">BM-449821</span>
+
+## Charges
+| CPT    | Description            | Billed   | Allowed  | Paid   |
+|--------|------------------------|----------|----------|--------|
+| 99213  | Office visit, est.     | $285.00  | $142.50  | $114.00|
+| 85025  | CBC with diff          | $95.00   | $18.75   | $15.00 |
+| 36415  | Venipuncture           | $45.00   | $12.00   | $9.60  |
+
+## Insurance
+Plan: <span style="color:var(--teal);">Blue Shield PPO</span>  Member: <span style="color:var(--teal);">XYZ-88341-02</span>
+Copay: $30  Coinsurance: 20%  Deductible remaining: $450</div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- LEARNING SYSTEM -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content-section">
+    <div class="section-label">Adaptive</div>
+    <div class="section-title">The Learning System</div>
+    <div class="section-desc">CUBE improves through conversational feedback. Every correction, preference, and outcome is stored as Markdown &mdash; per person, per domain. The system explains its reasoning, accepts corrections, and gets better over time.</div>
+
+    <div class="cycle-ring">
+      <div class="cycle-step">
+        <div class="c-num">01</div>
+        <div class="c-title">CUBE Acts</div>
+        <div class="c-desc">Files a claim, computes taxes, drafts an appeal</div>
+      </div>
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-step">
+        <div class="c-num">02</div>
+        <div class="c-title">Explains Why</div>
+        <div class="c-desc">Shows reasoning in Markdown: rules applied, sources cited</div>
+      </div>
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-step">
+        <div class="c-num">03</div>
+        <div class="c-title">User Reviews</div>
+        <div class="c-desc">Confirms, corrects, or asks questions conversationally</div>
+      </div>
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-step">
+        <div class="c-num">04</div>
+        <div class="c-title">CUBE Learns</div>
+        <div class="c-desc">Feedback stored in per-person profile, improves next cycle</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-label" style="margin-top:0;">Per-Person Profile</div>
+        <div class="person-file">
+          <div class="person-file-header">profiles/joe.md</div>
+          <div class="person-file-body"># Joe &mdash; CUBE Profile
+
+## Preferences
+- Prefers detailed explanations for tax decisions
+- Wants all medical bills audited automatically
+- Morning briefing at 7:00 AM
+- Voice: concise, no small talk
+
+## Tax Context
+- Filing: Married filing jointly
+- State: California (Form 540)
+- Self-employed income (Schedule C)
+- Home office deduction: qualified
+- Estimated quarterly payments: yes
+
+## Health Context
+- Primary: Stanford Health Care (FHIR)
+- Insurance: Aetna PPO
+- Medications: [tracked in health/meds.md]
+- Prefers generic medications when available
+
+## Corrections Log
+- 2026-01-15: "Don&apos;t count the garage as
+  home office square footage" &rarr; updated
+  home office calc to exclude garage
+- 2026-02-01: "My HSA contribution limit
+  is family, not individual" &rarr; fixed
+  HSA limit from $4,150 to $8,300</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label" style="margin-top:0;">Explainable Decisions</div>
+        <div class="person-file">
+          <div class="person-file-header">decisions/tax-2025-home-office.md</div>
+          <div class="person-file-body"># Decision: Home Office Deduction
+
+## Result: <span style="color:var(--accent);">$4,680 deduction (regular method)</span>
+
+## Reasoning
+1. Joe has a dedicated home office
+   (spare bedroom, 180 sq ft)
+2. Total home: 1,800 sq ft
+   &rarr; Business use: 10%
+3. Compared methods:
+   - Simplified: 180 sqft &times; $5 = $900
+   - Regular: 10% of mortgage interest,
+     property tax, utilities = $4,680
+4. Regular method saves $3,780 more
+
+## Rules Applied
+- IRC &sect;280A(c)(1): exclusive use test &check;
+- IRC &sect;280A(c)(1)(A): principal place
+  of business &check;
+- Pub 587: regular method calculation
+
+## User Correction Applied
+- Excluded garage (400 sq ft) per
+  Joe&apos;s feedback on 2026-01-15
+- Previous calc used 2,200 sq ft total
+  &rarr; now correctly uses 1,800 sq ft</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- REGULATION LANDSCAPE -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content-section">
+    <div class="section-label">Regulatory Landscape</div>
+    <div class="section-title">Regulation &amp; Access</div>
+    <div class="section-desc">How regulated each domain is determines CUBE&rsquo;s approach. Heavily regulated domains (banking, healthcare) require careful API-based access. Lightly regulated domains (airlines, telecom) are more accessible but the rules change constantly. The phone system is the most universal access point &mdash; every institution has a phone number.</div>
+
+    <div class="reg-grid">
+      <div class="reg-card">
+        <div class="reg-name">Banking / Financial</div>
+        <div class="reg-level">
+          <div class="reg-block filled red"></div>
+          <div class="reg-block filled red"></div>
+          <div class="reg-block filled red"></div>
+          <div class="reg-block filled red"></div>
+          <div class="reg-block filled red"></div>
+        </div>
+        <div class="reg-desc">FDIC, SEC, CFPB, state regulators. Direct account access requires bank partnerships or screen scraping (Plaid). Read-only aggregation is feasible.</div>
+        <div class="reg-approach">Approach: Plaid API for read access, manual entry fallback, no write access to accounts</div>
+      </div>
+      <div class="reg-card">
+        <div class="reg-name">Healthcare Data</div>
+        <div class="reg-level">
+          <div class="reg-block filled red"></div>
+          <div class="reg-block filled red"></div>
+          <div class="reg-block filled red"></div>
+          <div class="reg-block filled red"></div>
+          <div class="reg-block filled red"></div>
+        </div>
+        <div class="reg-desc">HIPAA, HITECH, state privacy laws. But FHIR + patient right of access means individuals CAN get their data programmatically. 21st Century Cures Act requires it.</div>
+        <div class="reg-approach">Approach: FHIR R4 APIs (patient-authorized), SMART on FHIR auth, OCR for paper documents</div>
+      </div>
+      <div class="reg-card">
+        <div class="reg-name">Tax / Government</div>
+        <div class="reg-level">
+          <div class="reg-block filled orange"></div>
+          <div class="reg-block filled orange"></div>
+          <div class="reg-block filled orange"></div>
+          <div class="reg-block filled orange"></div>
+          <div class="reg-block"></div>
+        </div>
+        <div class="reg-desc">IRS e-file requires authorized provider status. State varies. But document processing and computation are fully local &mdash; no API needed until final submission.</div>
+        <div class="reg-approach">Approach: OCR + local computation, e-file via authorized transmitter or print-and-mail</div>
+      </div>
+      <div class="reg-card">
+        <div class="reg-name">Insurance (Health)</div>
+        <div class="reg-level">
+          <div class="reg-block filled orange"></div>
+          <div class="reg-block filled orange"></div>
+          <div class="reg-block filled orange"></div>
+          <div class="reg-block filled orange"></div>
+          <div class="reg-block"></div>
+        </div>
+        <div class="reg-desc">State DOI, ACA, ERISA (employer plans). Claims data available via payer portals. No standardized API, but EOBs and letters can be OCR&rsquo;d.</div>
+        <div class="reg-approach">Approach: OCR all documents, phone calls for follow-up, appeal letters via templates</div>
+      </div>
+      <div class="reg-card">
+        <div class="reg-name">Telecom / ISP</div>
+        <div class="reg-level">
+          <div class="reg-block filled green"></div>
+          <div class="reg-block filled green"></div>
+          <div class="reg-block"></div>
+          <div class="reg-block"></div>
+          <div class="reg-block"></div>
+        </div>
+        <div class="reg-desc">FCC, minimal enforcement. Plans and pricing are public. Main leverage is threatening to switch and filing FCC complaints. Phone calls are the primary tool.</div>
+        <div class="reg-approach">Approach: Plan scraping, retention call scripts, FCC complaint filing, price monitoring</div>
+      </div>
+      <div class="reg-card">
+        <div class="reg-name">Airlines / Travel</div>
+        <div class="reg-level">
+          <div class="reg-block filled green"></div>
+          <div class="reg-block filled green"></div>
+          <div class="reg-block"></div>
+          <div class="reg-block"></div>
+          <div class="reg-block"></div>
+        </div>
+        <div class="reg-desc">DOT, EU261. Pricing is public. Booking APIs exist (Google Flights, Amadeus). Compensation claims are well-defined but rarely filed.</div>
+        <div class="reg-approach">Approach: Price monitoring APIs, DOT complaint forms, EU261 claim templates</div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;">
+      <div class="decision-card">
+        <h4>The Phone Is the Universal API</h4>
+        <p>Every institution &mdash; no matter how regulated &mdash; has a phone number. CUBE can place calls via Twilio, navigate IVR menus, wait on hold, and escalate to humans. For domains where APIs don&rsquo;t exist or are locked behind partnerships, the phone is CUBE&rsquo;s universal access layer. Less regulated than bank APIs, more reliable than web scraping, and available for every single adversary on this page.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- THE MARKDOWN COMPUTER -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content-section">
+    <div class="section-label">Foundation</div>
+    <div class="section-title">The Markdown Computer</div>
+    <div class="section-desc">CUBE is a new type of computer where Markdown is the operating system. Every piece of state &mdash; user profiles, decisions, rules, feedback, health records, tax computations &mdash; is a human-readable Markdown file. The system explains itself because it IS the explanation.</div>
+
+    <div class="phase-grid">
+      <div class="phase-card current">
+        <div class="phase-num">HUMAN-READABLE STATE</div>
+        <h3>No Black Boxes</h3>
+        <p>Every decision, computation, and recommendation is stored as a Markdown file that any human can read, understand, and correct. There are no opaque databases or hidden model weights driving behavior.</p>
+        <ul>
+          <li>Tax computations with cited IRC sections</li>
+          <li>Medical bill audits with CPT code references</li>
+          <li>Insurance appeal letters with regulation citations</li>
+          <li>User corrections stored inline with context</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">CONVERSATIONAL INTERFACE</div>
+        <h3>Talk to Your Data</h3>
+        <p>The primary interface is conversation &mdash; voice or text. Ask questions, give corrections, request actions. CUBE searches its Markdown knowledge base, reasons about it, and responds with citations.</p>
+        <ul>
+          <li>&ldquo;Why did you deduct $4,680 for home office?&rdquo;</li>
+          <li>&ldquo;Appeal that denied claim from Aetna.&rdquo;</li>
+          <li>&ldquo;What&rsquo;s my total healthcare spend this year?&rdquo;</li>
+          <li>&ldquo;Remind me when open enrollment starts.&rdquo;</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">MULTI-USER</div>
+        <h3>Family-Aware</h3>
+        <p>CUBE knows who is talking to it. Each family member has their own profile with preferences, context, and correction history. Shared context (household taxes, family health) is accessible to authorized members.</p>
+        <ul>
+          <li>Voice identification or explicit &ldquo;this is Joe&rdquo;</li>
+          <li>Per-person communication preferences</li>
+          <li>Shared household financial context</li>
+          <li>Individual health records (private by default)</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">SELF-IMPROVING</div>
+        <h3>Gets Better Over Time</h3>
+        <p>Every interaction is a training signal. Corrections improve future behavior. Successful outcomes reinforce patterns. The system&rsquo;s quality is proportional to how much you use it.</p>
+        <ul>
+          <li>Correction log per domain per person</li>
+          <li>Outcome tracking (did the appeal work?)</li>
+          <li>Rule accuracy metrics over time</li>
+          <li>Proactive suggestions based on past patterns</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="module-footer">
+  <div class="footer-brand">CUBE by Digital Surface Labs</div>
+  <div class="footer-right">February 2026 &mdash; System Ontology &middot; <a href="../">Back to CUBE</a></div>
+</footer>
+
+</body>
+</html>
