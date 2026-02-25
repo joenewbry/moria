@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(head:*)",
+      "Bash(git:*)",
+      "Bash(sort:*)",
+      "Bash(wc:*)",
+      "WebFetch(domain:labs.lawhive.co.uk)",
+      "WebFetch(domain:lawhive.co.uk)",
+      "WebFetch(domain:docs.openclaw.ai)",
+      "WebFetch(domain:ayta-legaltech.com)",
+      "WebFetch(domain:www.ibanet.org)",
+      "WebFetch(domain:github.com)"
+    ]
+  }
+}

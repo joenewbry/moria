@@ -356,7 +356,7 @@ canvas {
         <div class="version-dot dot-pla"></div>
         <div>
           <div class="vb-name">PLA Prototype</div>
-          <div class="vb-desc">130×130×80mm · 3D printable · Dev unit</div>
+          <div class="vb-desc">130×130×110mm · 3D printable · Dev unit</div>
         </div>
       </button>
       <button class="version-btn" id="btn-alum" onclick="setVersion('alum')">
@@ -425,7 +425,7 @@ canvas {
     <!-- HUD -->
     <div class="hud">
       <div class="hud-badge accent" id="hud-version">PLA Prototype</div>
-      <div class="hud-badge" id="hud-dims">130 × 130 × 80 mm</div>
+      <div class="hud-badge" id="hud-dims">130 × 130 × 110 mm</div>
       <div class="hud-controls">
         Drag to rotate · Scroll to zoom<br>
         Right-drag to pan · R to reset
@@ -488,11 +488,15 @@ rimLight.position.set(0, -3, -5);
 scene.add(rimLight);
 
 // ── ENVIRONMENT MAP (simple gradient) ────────────────────────────
-const pmremGenerator = new THREE.PMREMGenerator(renderer);
-pmremGenerator.compileEquirectangularShader();
-const envScene = new THREE.RoomEnvironment();
-const envTexture = pmremGenerator.fromScene(envScene).texture;
-scene.environment = envTexture;
+try {
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  pmremGenerator.compileEquirectangularShader();
+  const envScene = new THREE.RoomEnvironment();
+  const envTexture = pmremGenerator.fromScene(envScene).texture;
+  scene.environment = envTexture;
+} catch(e) {
+  // RoomEnvironment not available in this Three.js version — skip
+}
 
 // ── MATERIALS ────────────────────────────────────────────────────
 const materials = {
@@ -557,8 +561,8 @@ const groups = {};
 function buildPLA() {
   const g = new THREE.Group();
 
-  // Main body: 130×130×80mm → 13×13×8 units
-  const bodyGeo = new THREE.BoxGeometry(13, 8, 13);
+  // Main body: 130×130×110mm → 13×11×13 units
+  const bodyGeo = new THREE.BoxGeometry(13, 11, 13);
   const body = new THREE.Mesh(bodyGeo, materials.pla);
   body.castShadow = true;
   body.receiveShadow = true;
@@ -580,14 +584,14 @@ function buildPLA() {
   // LED strip bar at bottom of front face
   const ledGeo = new THREE.BoxGeometry(5.0, 0.4, 0.1);
   const led = new THREE.Mesh(ledGeo, materials.ledGreen);
-  led.position.set(0, -3.3, 6.51);
+  led.position.set(0, -4.8, 6.51);
   g.add(led);
 
   // Vent grilles on sides (right face x = +6.5)
   for (let i = 0; i < 5; i++) {
     const ventGeo = new THREE.BoxGeometry(0.1, 0.4, 7.0);
     const vent = new THREE.Mesh(ventGeo, materials.ventGrille);
-    vent.position.set(6.51, -1.2 + i * 0.9, 0);
+    vent.position.set(6.51, 2.0 + i * 0.9, 0);
     g.add(vent);
   }
 
@@ -667,10 +671,10 @@ groups.steel.visible = false;
 // ── SPECS DATA ───────────────────────────────────────────────────
 const specs = {
   pla: [
-    ['Size', '130 × 130 × 80 mm'],
+    ['Size', '130 × 130 × 110 mm'],
     ['Material', 'PLA / PETG'],
-    ['Weight', '~220g printed'],
-    ['Wall', '2mm shell'],
+    ['Weight', '~280g printed'],
+    ['Wall', '2.5mm shell'],
     ['Cooling', '40mm fan vent'],
     ['Camera', 'CSI fisheye cutout'],
     ['Speaker', '4×4 grille dots'],
@@ -705,7 +709,7 @@ const specs = {
 };
 
 const hudLabels = {
-  pla:   ['PLA Prototype', '130 × 130 × 80 mm'],
+  pla:   ['PLA Prototype', '130 × 130 × 110 mm'],
   alum:  ['Aluminum Production', '50 × 50 × 50 mm'],
   steel: ['Stainless Steel Concept', '50 × 50 × 50 mm'],
 };
@@ -890,11 +894,7 @@ function animate() {
 
 animate();
 
-// THREE.RoomEnvironment polyfill (not in r128)
-// Simple fallback: use neutral color tone
-if (typeof THREE.RoomEnvironment === 'undefined') {
-  scene.environment = null;
-}
 </script>
+<div id="dsl-version" style="position:fixed;bottom:8px;right:8px;font-family:'SF Mono',Consolas,monospace;font-size:11px;color:rgba(255,255,255,0.35);background:rgba(0,0,0,0.25);padding:2px 8px;border-radius:4px;pointer-events:none;z-index:9998;letter-spacing:0.5px">__VERSION__</div>
 </body>
 </html>
