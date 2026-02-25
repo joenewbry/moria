@@ -7,7 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../modules/shared.css">
-  <link rel="stylesheet" href="taxes.css">
+  <link rel="stylesheet" href="wizard.css">
 </head>
 <body>
 
@@ -16,7 +16,7 @@
   <div class="back-nav-inner">
     <a href="/" class="back-link"><span class="arrow">←</span> CUBE Home</a>
     <span class="nav-module-name">TAX PREP</span>
-    <a href="interview.html" class="interview-link">Start Interview</a>
+    <span id="nav-status" style="font-size:12px;color:var(--text-muted)"></span>
   </div>
 </nav>
 
@@ -24,395 +24,444 @@
 <header class="module-header">
   <span class="module-num">TX</span>
   <div class="module-label" id="tax-year-label">Tax Year 2025</div>
-  <h1 class="module-title">Tax Preparation Dashboard</h1>
+  <h1 class="module-title">Tax Preparation</h1>
   <p class="module-desc">
-    AI-assisted tax preparation with a transparent rules engine. Upload W-2s and 1099s,
-    extract data via Claude Vision, and verify compliance across Federal, California, and New York.
+    Walk through your taxes step by step. Upload documents, answer a few questions,
+    and get completed IRS and state forms ready to file.
   </p>
 
-  <!-- Year Selector -->
-  <div class="year-selector" id="year-selector">
-    <button class="year-tab" data-year="2023">2023</button>
-    <button class="year-tab" data-year="2024">2024</button>
-    <button class="year-tab active" data-year="2025">2025</button>
+  <!-- PROGRESS BAR -->
+  <div class="wizard-progress" id="wizard-progress">
+    <div class="progress-step active" data-step="1" onclick="goToStep(1)">
+      <div class="progress-dot">1</div>
+      <div class="progress-label">Year</div>
+    </div>
+    <div class="progress-step" data-step="2" onclick="goToStep(2)">
+      <div class="progress-dot">2</div>
+      <div class="progress-label">Personal</div>
+    </div>
+    <div class="progress-step" data-step="3" onclick="goToStep(3)">
+      <div class="progress-dot">3</div>
+      <div class="progress-label">Documents</div>
+    </div>
+    <div class="progress-step" data-step="4" onclick="goToStep(4)">
+      <div class="progress-dot">4</div>
+      <div class="progress-label">Questions</div>
+    </div>
+    <div class="progress-step" data-step="5" onclick="goToStep(5)">
+      <div class="progress-dot">5</div>
+      <div class="progress-label">Deductions</div>
+    </div>
+    <div class="progress-step" data-step="6" onclick="goToStep(6)">
+      <div class="progress-dot">6</div>
+      <div class="progress-label">Review</div>
+    </div>
+    <div class="progress-step" data-step="7" onclick="goToStep(7)">
+      <div class="progress-dot">7</div>
+      <div class="progress-label">Generate</div>
+    </div>
+    <div class="progress-step" data-step="8" onclick="goToStep(8)">
+      <div class="progress-dot">8</div>
+      <div class="progress-label">File</div>
+    </div>
   </div>
 </header>
 
 <!-- CONTENT -->
 <div class="content">
 
-  <!-- ── PIPELINE ── -->
-  <section class="content-section">
-    <div class="section-label">Processing Pipeline</div>
-    <h2 class="section-title">7-Step Pipeline</h2>
-    <p class="section-desc">Each document flows through extraction, validation, and computation.</p>
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- STEP 1: Welcome / Tax Year                        -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div class="wizard-step active" data-step="1" id="step-1">
+    <div class="step-title">Which tax year are you filing?</div>
+    <div class="step-subtitle">Select the year for this return. We support 2023–2025 with current federal and state tax brackets.</div>
 
-    <div class="pipeline" id="pipeline">
-      <div class="pipeline-step active" data-step="1">
-        <div class="step-circle">1</div>
-        <div class="step-label">Upload</div>
-        <span class="step-confidence conf-none">—</span>
+    <div class="option-grid" data-field="taxYear">
+      <div class="option-card" data-value="2023">
+        <div class="option-icon">📅</div>
+        <div class="option-label">2023</div>
+        <div class="option-desc">Jan 2023 – Dec 2023</div>
       </div>
-      <div class="pipeline-step" data-step="2">
-        <div class="step-circle">2</div>
-        <div class="step-label">Vision Extract</div>
-        <span class="step-confidence conf-none">—</span>
+      <div class="option-card" data-value="2024">
+        <div class="option-icon">📅</div>
+        <div class="option-label">2024</div>
+        <div class="option-desc">Jan 2024 – Dec 2024</div>
       </div>
-      <div class="pipeline-step" data-step="3">
-        <div class="step-circle">3</div>
-        <div class="step-label">Validate</div>
-        <span class="step-confidence conf-none">—</span>
-      </div>
-      <div class="pipeline-step" data-step="4">
-        <div class="step-circle">4</div>
-        <div class="step-label">Cross-Ref</div>
-        <span class="step-confidence conf-none">—</span>
-      </div>
-      <div class="pipeline-step" data-step="5">
-        <div class="step-circle">5</div>
-        <div class="step-label">Map Fields</div>
-        <span class="step-confidence conf-none">—</span>
-      </div>
-      <div class="pipeline-step" data-step="6">
-        <div class="step-circle">6</div>
-        <div class="step-label">Compute</div>
-        <span class="step-confidence conf-none">—</span>
-      </div>
-      <div class="pipeline-step" data-step="7">
-        <div class="step-circle">7</div>
-        <div class="step-label">Review</div>
-        <span class="step-confidence conf-none">—</span>
+      <div class="option-card selected" data-value="2025">
+        <div class="option-icon">📅</div>
+        <div class="option-label">2025</div>
+        <div class="option-desc">Jan 2025 – Dec 2025</div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- ── READINESS + COMPLETENESS ── -->
-  <section class="content-section">
-    <div class="two-col">
-      <!-- Readiness Ring -->
-      <div class="readiness" id="readiness">
-        <div class="readiness-ring">
-          <svg width="120" height="120" viewBox="0 0 120 120">
-            <circle class="ring-bg" cx="60" cy="60" r="52"/>
-            <circle class="ring-fill" cx="60" cy="60" r="52"
-              stroke="var(--text-muted)"
-              stroke-dasharray="326.73"
-              stroke-dashoffset="326.73"
-              id="readiness-ring-fill"/>
-          </svg>
-          <div class="readiness-pct" id="readiness-pct">0%</div>
-        </div>
-        <div class="readiness-title">Filing Readiness</div>
-        <div class="readiness-subtitle">Upload documents to begin</div>
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- STEP 2: Personal Info                              -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div class="wizard-step" data-step="2" id="step-2">
+    <div class="step-title">Tell us about yourself</div>
+    <div class="step-subtitle">Basic information needed for your tax return.</div>
+
+    <!-- Name -->
+    <div class="input-row" style="margin-bottom:20px">
+      <div class="input-group">
+        <div class="input-label">First Name</div>
+        <input type="text" class="input-field" id="firstName" placeholder="First name" autocomplete="given-name">
       </div>
+      <div class="input-group">
+        <div class="input-label">Last Name</div>
+        <input type="text" class="input-field" id="lastName" placeholder="Last name" autocomplete="family-name">
+      </div>
+    </div>
 
-      <!-- Completeness Tracker -->
-      <div>
-        <div class="section-label">Completeness</div>
-        <h2 class="section-title" style="margin-bottom:24px">Tracker</h2>
-
-        <div class="completeness-bar-wrap">
-          <div class="completeness-label">
-            <span class="cl-name">Document Collection</span>
-            <span class="cl-pct" id="comp-docs">0%</span>
+    <!-- SSN + State -->
+    <div class="input-row" style="margin-bottom:28px">
+      <div class="input-group">
+        <div class="input-label">SSN (Last 4 digits only)</div>
+        <input type="text" class="input-field" id="ssnLast4" placeholder="1234" maxlength="4" pattern="\d{4}" autocomplete="off">
+      </div>
+      <div class="input-group">
+        <div class="input-label">State of Residence</div>
+        <div class="option-grid" data-field="stateOfResidence" style="margin-bottom:0">
+          <div class="option-card" data-value="CA">
+            <div class="option-label">California</div>
           </div>
-          <div class="completeness-bar">
-            <div class="completeness-fill low" id="comp-docs-bar" style="width:0%"></div>
+          <div class="option-card" data-value="NY">
+            <div class="option-label">New York</div>
           </div>
-        </div>
-
-        <div class="completeness-bar-wrap">
-          <div class="completeness-label">
-            <span class="cl-name">Field Extraction</span>
-            <span class="cl-pct" id="comp-fields">0%</span>
-          </div>
-          <div class="completeness-bar">
-            <div class="completeness-fill low" id="comp-fields-bar" style="width:0%"></div>
-          </div>
-        </div>
-
-        <div class="completeness-bar-wrap">
-          <div class="completeness-label">
-            <span class="cl-name">Cross-Validation</span>
-            <span class="cl-pct" id="comp-xval">0%</span>
-          </div>
-          <div class="completeness-bar">
-            <div class="completeness-fill low" id="comp-xval-bar" style="width:0%"></div>
-          </div>
-        </div>
-
-        <div class="completeness-bar-wrap">
-          <div class="completeness-label">
-            <span class="cl-name">Compliance Checks</span>
-            <span class="cl-pct" id="comp-forms">0%</span>
-          </div>
-          <div class="completeness-bar">
-            <div class="completeness-fill low" id="comp-forms-bar" style="width:0%"></div>
-          </div>
-        </div>
-
-        <div class="completeness-bar-wrap">
-          <div class="completeness-label">
-            <span class="cl-name">Human Review</span>
-            <span class="cl-pct" id="comp-review">0%</span>
-          </div>
-          <div class="completeness-bar">
-            <div class="completeness-fill low" id="comp-review-bar" style="width:0%"></div>
+          <div class="option-card" data-value="other">
+            <div class="option-label">Other</div>
+            <div class="option-desc">Federal only</div>
           </div>
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- ── UPLOAD SECTION ── -->
-  <section class="content-section">
-    <div class="section-label">Documents</div>
-    <h2 class="section-title">Upload W-2s &amp; 1099s</h2>
-    <p class="section-desc">Drop tax documents here. Claude Vision will extract and validate fields automatically.</p>
+    <!-- Filing Status -->
+    <div class="input-label" style="margin-bottom:12px">Filing Status</div>
+    <div class="option-grid" data-field="filingStatus">
+      <div class="option-card selected" data-value="single">
+        <div class="option-label">Single</div>
+      </div>
+      <div class="option-card" data-value="mfj">
+        <div class="option-label">Married Filing Jointly</div>
+      </div>
+      <div class="option-card" data-value="mfs">
+        <div class="option-label">Married Filing Separately</div>
+      </div>
+      <div class="option-card" data-value="hoh">
+        <div class="option-label">Head of Household</div>
+      </div>
+      <div class="option-card" data-value="qss">
+        <div class="option-label">Qualifying Surviving Spouse</div>
+      </div>
+    </div>
+
+    <!-- Dependents -->
+    <div class="input-label" style="margin-bottom:12px">Dependents</div>
+    <div class="input-row">
+      <div class="input-group">
+        <div class="input-label">Children under 17</div>
+        <input type="number" class="input-field" id="childrenUnder17" value="0" min="0" max="20">
+      </div>
+      <div class="input-group">
+        <div class="input-label">Other dependents</div>
+        <input type="number" class="input-field" id="otherDependents" value="0" min="0" max="20">
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- STEP 3: Document Upload                            -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div class="wizard-step" data-step="3" id="step-3">
+    <div class="step-title">Upload your tax documents</div>
+    <div class="step-subtitle">
+      Drop your W-2s, 1099s, 1098s, and other forms here. Claude Vision will extract the data automatically.
+    </div>
 
     <div class="upload-zone" id="upload-zone">
-      <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg">
+      <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg,.webp">
       <div class="upload-icon">📄</div>
-      <div class="upload-title">Drop documents here or click to browse</div>
-      <div class="upload-hint">Supports PDF, PNG, JPG — W-2, 1099-NEC, 1099-INT, 1099-DIV</div>
+      <div class="upload-title">Drop files here or click to upload</div>
+      <div class="upload-hint">Supports PDF, PNG, JPG, WebP — W-2, 1099-NEC, 1099-INT, 1099-DIV, 1098, 1099-B</div>
     </div>
 
     <div class="doc-list" id="doc-list"></div>
-  </section>
 
-  <!-- ── PROCESSING LOG ── -->
-  <section class="content-section" id="processing-section" style="display:none">
-    <div class="section-label">Claude Vision</div>
-    <h2 class="section-title">Processing Log</h2>
-    <p class="section-desc">Real-time narrative from Claude as it analyzes your documents.</p>
+    <div id="income-sources"></div>
 
-    <div class="processing-log" id="processing-log">
-      <div class="log-entries" id="log-entries"></div>
-    </div>
-  </section>
-
-  <!-- ── INCOME SOURCES ── -->
-  <section class="content-section">
-    <div class="section-label">Income</div>
-    <h2 class="section-title">Income Sources</h2>
-    <p class="section-desc">All W-2 and 1099 income aggregated from extracted documents.</p>
-
-    <div id="income-sources">
-      <div class="tax-section-card" style="text-align:center;padding:48px">
-        <div style="font-size:32px;margin-bottom:12px;opacity:0.4">📊</div>
-        <div style="color:var(--text-muted);font-size:14px">Upload documents to populate income sources</div>
+    <div id="processing-section" style="display:none">
+      <div class="processing-log" id="processing-log">
+        <div class="log-entries" id="log-entries"></div>
       </div>
     </div>
+  </div>
 
-    <!-- Summary row (hidden until data) -->
-    <div class="stat-row" id="income-summary" style="display:none">
-      <div class="stat-box">
-        <div class="stat-num" id="total-w2">$0</div>
-        <div class="stat-label">W-2 Wages</div>
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- STEP 4: Gap Analysis / Follow-up Questions         -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div class="wizard-step" data-step="4" id="step-4">
+    <div class="step-title">A few more questions</div>
+    <div class="step-subtitle">
+      Based on what we've seen in your documents, here are some things that might save you money.
+    </div>
+
+    <div id="gap-questions"></div>
+
+    <div id="gap-empty" style="display:none;text-align:center;padding:40px;color:var(--text-muted)">
+      Everything looks covered! Your documents captured the key information.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- STEP 5: Deductions & Credits                       -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div class="wizard-step" data-step="5" id="step-5">
+    <div class="step-title">Deductions & Credits</div>
+    <div class="step-subtitle">
+      We'll compare standard vs. itemized deductions and check which credits you qualify for.
+    </div>
+
+    <!-- Standard vs Itemized -->
+    <div class="input-label" style="margin-bottom:12px">Deduction Method</div>
+    <div class="deduction-compare" id="deduction-compare">
+      <div class="deduction-option selected" data-value="standard" onclick="selectDeduction('standard')">
+        <div class="recommended" id="std-recommended" style="display:none">RECOMMENDED</div>
+        <div class="ded-type">Standard Deduction</div>
+        <div class="ded-amount" id="std-ded-amount">$15,000</div>
+        <div class="ded-note">No documentation required</div>
       </div>
-      <div class="stat-box">
-        <div class="stat-num" id="total-1099">$0</div>
-        <div class="stat-label">1099 Income</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num" id="total-gross">$0</div>
-        <div class="stat-label">Total Gross</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num" id="total-withheld">$0</div>
-        <div class="stat-label">Total Withheld</div>
+      <div class="deduction-option" data-value="itemized" onclick="selectDeduction('itemized')">
+        <div class="recommended" id="item-recommended" style="display:none">RECOMMENDED</div>
+        <div class="ded-type">Itemized Deductions</div>
+        <div class="ded-amount" id="item-ded-amount">$0</div>
+        <div class="ded-note">Mortgage interest, SALT, charitable, etc.</div>
       </div>
     </div>
-  </section>
 
-  <!-- ── FILING OVERVIEW ── -->
-  <section class="content-section">
-    <div class="section-label">Filing</div>
-    <h2 class="section-title">Filing Overview</h2>
-    <p class="section-desc">Federal Form 1040 and California Form 540. Values computed from uploaded documents.</p>
+    <!-- Itemized breakdown -->
+    <div class="itemized-fields" id="itemized-fields">
+      <div class="input-row" style="margin-bottom:16px">
+        <div class="input-group">
+          <div class="input-label">Mortgage Interest</div>
+          <input type="number" class="input-field money" id="ded-mortgage" placeholder="0" oninput="updateItemized()">
+        </div>
+        <div class="input-group">
+          <div class="input-label">State & Local Taxes (SALT) — capped at $10,000</div>
+          <input type="number" class="input-field money" id="ded-salt" placeholder="0" oninput="updateItemized()">
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <div class="input-label">Charitable Contributions</div>
+          <input type="number" class="input-field money" id="ded-charitable" placeholder="0" oninput="updateItemized()">
+        </div>
+        <div class="input-group">
+          <div class="input-label">Medical Expenses (above 7.5% of AGI)</div>
+          <input type="number" class="input-field money" id="ded-medical" placeholder="0" oninput="updateItemized()">
+        </div>
+      </div>
+    </div>
 
-    <div class="filing-grid">
+    <!-- Credits -->
+    <div class="input-label" style="margin-top:32px;margin-bottom:12px">Tax Credits</div>
+    <div class="credits-grid" id="credits-grid">
+      <div class="credit-card" id="credit-ctc">
+        <div class="credit-name">Child Tax Credit</div>
+        <div class="credit-amount" id="ctc-amount">$0</div>
+        <div class="credit-desc">$2,000 per qualifying child under 17</div>
+      </div>
+      <div class="credit-card" id="credit-education">
+        <div class="credit-name">Education Credits</div>
+        <div class="credit-amount" id="edu-credit-amount">$0</div>
+        <div class="credit-desc">American Opportunity or Lifetime Learning</div>
+      </div>
+      <div class="credit-card" id="credit-renter">
+        <div class="credit-name">CA Renter's Credit</div>
+        <div class="credit-amount" id="renter-credit-amount">$0</div>
+        <div class="credit-desc">$60/$120 for qualifying CA renters</div>
+      </div>
+      <div class="credit-card" id="credit-ev">
+        <div class="credit-name">Clean Vehicle Credit</div>
+        <div class="credit-amount" id="ev-credit-amount">$0</div>
+        <div class="credit-desc">Up to $7,500 for qualifying EVs</div>
+      </div>
+      <div class="credit-card" id="credit-childcare">
+        <div class="credit-name">Child & Dependent Care</div>
+        <div class="credit-amount" id="childcare-credit-amount">$0</div>
+        <div class="credit-desc">Childcare/daycare expenses credit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- STEP 6: Computation & Review                       -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div class="wizard-step" data-step="6" id="step-6">
+    <div class="step-title">Your Tax Summary</div>
+    <div class="step-subtitle">
+      Here's the full computation. All values are editable — click any number to adjust.
+    </div>
+
+    <!-- Refund/Owed Banner -->
+    <div class="result-banner" id="result-banner">
+      <div class="result-label" id="result-label">Estimated Federal Result</div>
+      <div class="result-amount" id="result-amount">$0</div>
+      <div class="result-detail" id="result-detail"></div>
+    </div>
+
+    <!-- Filing Cards -->
+    <div class="filing-grid" id="filing-grid">
       <!-- Federal 1040 -->
-      <div class="filing-card federal">
+      <div class="filing-card federal" id="fed-card">
         <div class="filing-label">Federal — Form 1040</div>
-        <div class="filing-row">
-          <span class="label">Total Income (Line 9)</span>
-          <span class="value pending" id="fed-income">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">Adjustments (Sch 1)</span>
-          <span class="value pending" id="fed-adj">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">AGI (Line 11)</span>
-          <span class="value pending" id="fed-agi">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">Deduction</span>
-          <span class="value pending" id="fed-deduction">Standard</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">Taxable Income (Line 15)</span>
-          <span class="value pending" id="fed-taxable">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">Tax (Line 16)</span>
-          <span class="value pending" id="fed-tax">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">Total Payments</span>
-          <span class="value pending" id="fed-payments">—</span>
-        </div>
-        <div class="filing-row" style="border-bottom:none;padding-top:12px">
-          <span class="label" style="font-weight:600;color:var(--text)">Refund / Owed</span>
-          <span class="value pending" id="fed-result" style="font-size:16px">—</span>
-        </div>
+        <div class="filing-row"><span class="label">Wages (W-2)</span><span class="value" id="fed-wages">$0</span></div>
+        <div class="filing-row"><span class="label">Other Income</span><span class="value" id="fed-other">$0</span></div>
+        <div class="filing-row"><span class="label">Total Income</span><span class="value" id="fed-income">$0</span></div>
+        <div class="filing-row"><span class="label">Adjustments</span><span class="value" id="fed-adj">$0</span></div>
+        <div class="filing-row"><span class="label">AGI</span><span class="value" id="fed-agi">$0</span></div>
+        <div class="filing-row"><span class="label">Deduction</span><span class="value" id="fed-deduction">$0</span></div>
+        <div class="filing-row"><span class="label">Taxable Income</span><span class="value" id="fed-taxable">$0</span></div>
+        <div class="filing-row"><span class="label">Income Tax</span><span class="value" id="fed-income-tax">$0</span></div>
+        <div class="filing-row"><span class="label">SE Tax</span><span class="value" id="fed-se-tax">$0</span></div>
+        <div class="filing-row"><span class="label">Credits</span><span class="value" id="fed-credits">$0</span></div>
+        <div class="filing-row"><span class="label">Total Tax</span><span class="value" id="fed-total-tax">$0</span></div>
+        <div class="filing-row"><span class="label">Withholding</span><span class="value" id="fed-withheld">$0</span></div>
+        <div class="filing-row total"><span class="label">Refund / Owed</span><span class="value" id="fed-result">$0</span></div>
       </div>
 
-      <!-- California 540 -->
-      <div class="filing-card state" id="ca-filing-card">
+      <!-- CA 540 -->
+      <div class="filing-card state" id="ca-card" style="display:none">
         <div class="filing-label">California — Form 540</div>
-        <div class="filing-row">
-          <span class="label">Federal AGI</span>
-          <span class="value pending" id="ca-agi">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">CA Adjustments</span>
-          <span class="value pending" id="ca-adj">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">CA Taxable Income</span>
-          <span class="value pending" id="ca-taxable">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">CA Tax</span>
-          <span class="value pending" id="ca-tax">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">CA Withholding</span>
-          <span class="value pending" id="ca-withheld">—</span>
-        </div>
-        <div class="filing-row" style="border-bottom:none;padding-top:12px">
-          <span class="label" style="font-weight:600;color:var(--text)">Refund / Owed</span>
-          <span class="value pending" id="ca-result" style="font-size:16px">—</span>
-        </div>
+        <div class="filing-row"><span class="label">Federal AGI</span><span class="value" id="ca-agi">$0</span></div>
+        <div class="filing-row"><span class="label">CA Deduction</span><span class="value" id="ca-deduction">$0</span></div>
+        <div class="filing-row"><span class="label">Taxable Income</span><span class="value" id="ca-taxable">$0</span></div>
+        <div class="filing-row"><span class="label">CA Tax</span><span class="value" id="ca-tax">$0</span></div>
+        <div class="filing-row"><span class="label">Mental Health Surtax</span><span class="value" id="ca-mh-tax">$0</span></div>
+        <div class="filing-row"><span class="label">Credits</span><span class="value" id="ca-credits">$0</span></div>
+        <div class="filing-row"><span class="label">Total CA Tax</span><span class="value" id="ca-total-tax">$0</span></div>
+        <div class="filing-row"><span class="label">Withholding</span><span class="value" id="ca-withheld">$0</span></div>
+        <div class="filing-row total"><span class="label">Refund / Owed</span><span class="value" id="ca-result">$0</span></div>
       </div>
 
-      <!-- New York IT-201 (shown when state=NY) -->
-      <div class="filing-card state-ny" id="ny-filing-card" style="display:none">
+      <!-- NY IT-201 -->
+      <div class="filing-card state state-ny" id="ny-card" style="display:none">
         <div class="filing-label">New York — Form IT-201</div>
-        <div class="filing-row">
-          <span class="label">Federal AGI</span>
-          <span class="value pending" id="ny-agi">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">NY Adjustments</span>
-          <span class="value pending" id="ny-adj">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">NY Taxable Income</span>
-          <span class="value pending" id="ny-taxable">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">NY Tax</span>
-          <span class="value pending" id="ny-tax">—</span>
-        </div>
-        <div class="filing-row">
-          <span class="label">NY Withholding</span>
-          <span class="value pending" id="ny-withheld">—</span>
-        </div>
-        <div class="filing-row" style="border-bottom:none;padding-top:12px">
-          <span class="label" style="font-weight:600;color:var(--text)">Refund / Owed</span>
-          <span class="value pending" id="ny-result" style="font-size:16px">—</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── RULES ENGINE SUMMARY ── -->
-  <section class="content-section" id="compliance-section" style="display:none">
-    <div class="section-label">Rules Engine</div>
-    <h2 class="section-title">Two Guarantees</h2>
-    <p class="section-desc">Transparent rules mapped to real tax code. Every check is auditable.</p>
-
-    <div class="guarantee-grid" id="guarantee-grid">
-      <div class="guarantee-card compliance-guarantee">
-        <div class="guarantee-icon">&#x1F6E1;</div>
-        <div class="guarantee-title">Audit Shield</div>
-        <div class="guarantee-desc">If you're honest, you won't get audited</div>
-        <div class="guarantee-stats">
-          <span class="guarantee-num" id="comp-passed">0</span>
-          <span class="guarantee-label">compliance checks passed</span>
-        </div>
-        <div class="guarantee-detail">
-          <span class="guarantee-detail-item warn-count"><span id="comp-warnings">0</span> warnings</span>
-          <span class="guarantee-detail-item fail-count"><span id="comp-failed">0</span> failed</span>
-        </div>
-      </div>
-      <div class="guarantee-card savings-guarantee">
-        <div class="guarantee-icon">&#x1F50D;</div>
-        <div class="guarantee-title">Savings Finder</div>
-        <div class="guarantee-desc">We check every deduction you qualify for</div>
-        <div class="guarantee-stats">
-          <span class="guarantee-num" id="savings-opportunities">0</span>
-          <span class="guarantee-label">savings opportunities found</span>
-        </div>
-        <div class="guarantee-detail">
-          <span class="guarantee-detail-item eval-count"><span id="savings-evaluated">0</span> evaluated</span>
-          <span class="guarantee-detail-item skip-count"><span id="savings-skipped">0</span> skipped</span>
-        </div>
+        <div class="filing-row"><span class="label">Federal AGI</span><span class="value" id="ny-agi">$0</span></div>
+        <div class="filing-row"><span class="label">NY Deduction</span><span class="value" id="ny-deduction">$0</span></div>
+        <div class="filing-row"><span class="label">Taxable Income</span><span class="value" id="ny-taxable">$0</span></div>
+        <div class="filing-row"><span class="label">NY Tax</span><span class="value" id="ny-tax">$0</span></div>
+        <div class="filing-row"><span class="label">Credits</span><span class="value" id="ny-credits">$0</span></div>
+        <div class="filing-row"><span class="label">Total NY Tax</span><span class="value" id="ny-total-tax">$0</span></div>
+        <div class="filing-row"><span class="label">Withholding</span><span class="value" id="ny-withheld">$0</span></div>
+        <div class="filing-row total"><span class="label">Refund / Owed</span><span class="value" id="ny-result">$0</span></div>
       </div>
     </div>
 
-    <div class="compliance-score-row">
-      <div class="compliance-score-bar">
-        <div class="compliance-score-fill" id="comp-score-fill" style="width:0%"></div>
+    <!-- Rules Engine Panel -->
+    <div class="rules-panel" id="rules-panel" style="display:none">
+      <div class="rules-panel-header" onclick="toggleRulesPanel()">
+        <div class="rules-panel-title">Compliance & Savings Check</div>
+        <div class="rules-panel-toggle">▼</div>
       </div>
-      <span class="compliance-score-label" id="comp-score-label">0%</span>
-    </div>
-
-    <a href="rules.html" class="compliance-link">View all rules with tax code citations →</a>
-  </section>
-
-  <!-- ── APPROACH ── -->
-  <section class="content-section">
-    <div class="section-label">Methodology</div>
-    <h2 class="section-title">Our Approach</h2>
-
-    <div class="phase-grid">
-      <div class="phase-card">
-        <div class="phase-num">01</div>
-        <h3>Rules Engine</h3>
-        <p>69 rules across 4 scenarios and 6 stages. Every rule cites real IRC/RTC sections. Compliance checks + savings optimization in one engine.</p>
-      </div>
-      <div class="phase-card">
-        <div class="phase-num">02</div>
-        <h3>Binary Extraction</h3>
-        <p>Each field is either extracted or not — no ambiguous confidence scores. Clear checkmarks show what we got, warnings show what's missing.</p>
-      </div>
-      <div class="phase-card">
-        <div class="phase-num">03</div>
-        <h3>Claude Vision OCR</h3>
-        <p>Semantic document understanding, not just character recognition. Handles varied W-2 layouts. Extracts structured field→value mappings.</p>
-      </div>
-      <div class="phase-card">
-        <div class="phase-num">04</div>
-        <h3>Two Guarantees</h3>
-        <p>Audit Shield verifies compliance with IRS/CA rules. Savings Finder checks every deduction and credit you qualify for.</p>
+      <div class="rules-panel-body">
+        <div class="rules-stat-grid" id="rules-stats">
+          <div class="rules-stat passed"><div class="rules-stat-num" id="rp-passed">0</div><div class="rules-stat-label">Passed</div></div>
+          <div class="rules-stat failed"><div class="rules-stat-num" id="rp-failed">0</div><div class="rules-stat-label">Failed</div></div>
+          <div class="rules-stat warnings"><div class="rules-stat-num" id="rp-warnings">0</div><div class="rules-stat-label">Warnings</div></div>
+          <div class="rules-stat skipped"><div class="rules-stat-num" id="rp-skipped">0</div><div class="rules-stat-label">Skipped</div></div>
+        </div>
+        <div id="rules-detail"></div>
       </div>
     </div>
+  </div>
 
-    <p style="margin-top:24px;font-size:13px;color:var(--text-muted)">
-      Full methodology: <a href="approach.md" style="color:var(--teal);text-decoration:none">approach.md</a>
-    </p>
-  </section>
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- STEP 7: Form Generation                            -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div class="wizard-step" data-step="7" id="step-7">
+    <div class="step-title">Generate Your Tax Forms</div>
+    <div class="step-subtitle">
+      We'll fill out the official IRS and state forms with your data.
+    </div>
 
-  <!-- DISCLAIMER -->
-  <div class="disclaimer">
-    <strong>Disclaimer</strong>
-    This is a tax preparation assistance tool, not professional tax advice. All extracted values should be
-    verified against original documents before filing. Consult a qualified tax professional for complex
-    tax situations. This tool does not e-file — it generates completed forms for your review.
+    <button class="generate-btn" id="generate-btn" onclick="generateAllForms()">
+      Generate Tax Forms
+    </button>
+
+    <div class="form-gen-list" id="form-gen-list">
+      <div class="form-gen-item" id="gen-1040">
+        <div class="form-gen-icon">📄</div>
+        <div class="form-gen-info">
+          <div class="form-gen-name">Federal Form 1040</div>
+          <div class="form-gen-detail">U.S. Individual Income Tax Return</div>
+        </div>
+        <div class="form-gen-status pending" id="gen-1040-status">Pending</div>
+      </div>
+      <div class="form-gen-item" id="gen-ca540" style="display:none">
+        <div class="form-gen-icon">📄</div>
+        <div class="form-gen-info">
+          <div class="form-gen-name">California Form 540</div>
+          <div class="form-gen-detail">California Resident Income Tax Return</div>
+        </div>
+        <div class="form-gen-status pending" id="gen-ca540-status">Pending</div>
+      </div>
+      <div class="form-gen-item" id="gen-ny201" style="display:none">
+        <div class="form-gen-icon">📄</div>
+        <div class="form-gen-info">
+          <div class="form-gen-name">New York Form IT-201</div>
+          <div class="form-gen-detail">Resident Income Tax Return</div>
+        </div>
+        <div class="form-gen-status pending" id="gen-ny201-status">Pending</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════ -->
+  <!-- STEP 8: Output / Download                          -->
+  <!-- ══════════════════════════════════════════════════ -->
+  <div class="wizard-step" data-step="8" id="step-8">
+    <div class="step-title">Your forms are ready</div>
+    <div class="step-subtitle">
+      Download your completed tax forms, print them, or start over.
+    </div>
+
+    <div id="form-downloads"></div>
+
+    <div class="output-actions" style="margin-top:24px">
+      <button class="output-btn" id="btn-download-all" onclick="downloadAllForms()">
+        <div class="output-icon">📥</div>
+        <div class="output-label">Download All</div>
+        <div class="output-desc">Save all forms as PDF</div>
+      </button>
+      <button class="output-btn" onclick="window.print()">
+        <div class="output-icon">🖨️</div>
+        <div class="output-label">Print</div>
+        <div class="output-desc">Print tax summary</div>
+      </button>
+      <button class="output-btn disabled" disabled>
+        <div class="output-icon">📧</div>
+        <div class="output-label">Email</div>
+        <div class="output-desc">Coming soon</div>
+      </button>
+    </div>
+
+    <!-- Filing disclaimer -->
+    <div class="disclaimer">
+      <strong>Important</strong>
+      This tool generates completed tax forms for your review. It does not e-file with the IRS or state tax authorities.
+      All values should be verified against original documents before filing. Consult a qualified tax professional
+      for complex situations. This is not professional tax advice.
+    </div>
+  </div>
+
+  <!-- ── NAVIGATION ── -->
+  <div class="wizard-nav" id="wizard-nav">
+    <button class="nav-btn" id="prev-btn" onclick="prevStep()" disabled>← Back</button>
+    <span class="nav-step-indicator" id="step-indicator">1 / 8</span>
+    <button class="nav-btn primary" id="next-btn" onclick="nextStep()">Next →</button>
   </div>
 
 </div>
@@ -425,689 +474,12 @@
 
 <div class="noise-overlay"></div>
 
+<!-- SCRIPTS -->
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="tax-data.js"></script>
 <script src="rules.js"></script>
-<script>
-// ── STATE ──
-const state = {
-  documents: [],
-  incomes: [],
-  pipeline: { current: 1, steps: {} },
-  completeness: { docs: 0, fields: 0, xval: 0, forms: 0, review: 0 },
-  filing: null,
-  taxYear: parseInt(localStorage.getItem('taxYear') || '2025'),
-  stateId: localStorage.getItem('taxStateId') || 'california',
-  filingStatus: localStorage.getItem('taxFilingStatus') || 'single',
-};
-
-const API_BASE = '/taxes/api';
-
-// ── YEAR SELECTOR ──
-(function initYearSelector() {
-  const selector = document.getElementById('year-selector');
-  const tabs = selector.querySelectorAll('.year-tab');
-  // Set active tab from state
-  tabs.forEach(tab => {
-    tab.classList.toggle('active', parseInt(tab.dataset.year) === state.taxYear);
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      state.taxYear = parseInt(tab.dataset.year);
-      localStorage.setItem('taxYear', state.taxYear);
-      document.getElementById('tax-year-label').textContent = 'Tax Year ' + state.taxYear;
-      // Re-compute if we have data
-      if (state.incomes.length > 0) {
-        updateFilingOverview();
-        runCompliance();
-      }
-    });
-  });
-  document.getElementById('tax-year-label').textContent = 'Tax Year ' + state.taxYear;
-
-  // Show/hide state filing cards based on stateId
-  updateStateCards();
-})();
-
-function updateStateCards() {
-  const caCard = document.getElementById('ca-filing-card');
-  const nyCard = document.getElementById('ny-filing-card');
-  if (caCard) caCard.style.display = (state.stateId === 'california') ? '' : 'none';
-  if (nyCard) nyCard.style.display = (state.stateId === 'newYork') ? '' : 'none';
-
-  // Update filing grid columns
-  const filingGrid = document.querySelector('.filing-grid');
-  if (filingGrid) {
-    const visibleCards = filingGrid.querySelectorAll('.filing-card:not([style*="display: none"])').length;
-    filingGrid.style.gridTemplateColumns = visibleCards > 2 ? 'repeat(3, 1fr)' : visibleCards > 1 ? '1fr 1fr' : '1fr';
-  }
-}
-
-// Read interview state on load
-(function loadInterviewState() {
-  try {
-    const interviewJSON = localStorage.getItem('taxInterviewState');
-    if (interviewJSON) {
-      const interview = JSON.parse(interviewJSON);
-      if (interview.taxYear) {
-        state.taxYear = interview.taxYear;
-        localStorage.setItem('taxYear', state.taxYear);
-        document.getElementById('tax-year-label').textContent = 'Tax Year ' + state.taxYear;
-        // Update year selector tabs
-        document.querySelectorAll('.year-tab').forEach(tab => {
-          tab.classList.toggle('active', parseInt(tab.dataset.year) === state.taxYear);
-        });
-      }
-      if (interview.stateOfResidence) {
-        const stMap = { CA: 'california', NY: 'newYork' };
-        state.stateId = stMap[interview.stateOfResidence] || null;
-        localStorage.setItem('taxStateId', state.stateId || '');
-        updateStateCards();
-      }
-      if (interview.filingStatus) {
-        state.filingStatus = interview.filingStatus;
-        localStorage.setItem('taxFilingStatus', state.filingStatus);
-      }
-    }
-  } catch (e) { /* ignore */ }
-})();
-
-// ── UPLOAD HANDLING ──
-const uploadZone = document.getElementById('upload-zone');
-const fileInput = document.getElementById('file-input');
-
-['dragenter', 'dragover'].forEach(e => {
-  uploadZone.addEventListener(e, ev => { ev.preventDefault(); uploadZone.classList.add('dragover'); });
-});
-['dragleave', 'drop'].forEach(e => {
-  uploadZone.addEventListener(e, ev => { ev.preventDefault(); uploadZone.classList.remove('dragover'); });
-});
-
-uploadZone.addEventListener('drop', e => {
-  const files = Array.from(e.dataTransfer.files);
-  handleFiles(files);
-});
-
-fileInput.addEventListener('change', e => {
-  handleFiles(Array.from(e.target.files));
-  e.target.value = '';
-});
-
-function handleFiles(files) {
-  files.forEach(file => {
-    const doc = {
-      id: crypto.randomUUID(),
-      name: file.name,
-      size: file.size,
-      type: guessDocType(file.name),
-      status: 'uploading',
-      extractionStatus: {},
-      file: file
-    };
-    state.documents.push(doc);
-    renderDocList();
-    processDocument(doc);
-  });
-}
-
-function guessDocType(name) {
-  const lower = name.toLowerCase();
-  if (lower.includes('w-2') || lower.includes('w2')) return 'W-2';
-  if (lower.includes('1099-nec') || lower.includes('1099nec')) return '1099-NEC';
-  if (lower.includes('1099-int')) return '1099-INT';
-  if (lower.includes('1099-div')) return '1099-DIV';
-  if (lower.includes('1099')) return '1099';
-  return 'Unknown';
-}
-
-function renderDocList() {
-  const list = document.getElementById('doc-list');
-  list.innerHTML = state.documents.map(doc => {
-    const iconClass = doc.type.startsWith('W-2') ? 'w2' : 'nec';
-    let statusHtml;
-    if (doc.status === 'uploading') {
-      statusHtml = '<span class="step-confidence conf-none"><span class="spinner"></span> Uploading…</span>';
-    } else if (doc.status === 'processing') {
-      statusHtml = '<span class="step-confidence conf-none"><span class="spinner"></span> Analyzing…</span>';
-    } else if (doc.status === 'processed') {
-      // Binary: all fields extracted → checkmark, some missing → warning
-      const exStatus = doc.extractionStatus || {};
-      const fields = Object.values(exStatus);
-      const missing = fields.filter(v => v === 'not_found').length;
-      if (missing > 0) {
-        statusHtml = `<span class="step-confidence conf-medium">⚠ ${fields.length - missing}/${fields.length}</span>`;
-      } else {
-        statusHtml = '<span class="step-confidence conf-high">✓ Extracted</span>';
-      }
-    } else if (doc.status === 'error') {
-      statusHtml = '<span class="step-confidence conf-low">Error</span>';
-    } else {
-      statusHtml = '<span class="step-confidence conf-none">—</span>';
-    }
-    return `
-      <div class="doc-item">
-        <div class="doc-icon ${iconClass}">${doc.type.startsWith('W') ? 'W' : '#'}</div>
-        <div class="doc-info">
-          <div class="doc-name">${doc.name}</div>
-          <div class="doc-meta">${doc.type} · ${formatSize(doc.size)}</div>
-        </div>
-        <div class="doc-status">${statusHtml}</div>
-      </div>`;
-  }).join('');
-}
-
-function confClass(score) {
-  if (score >= 0.95) return 'conf-high';
-  if (score >= 0.80) return 'conf-medium';
-  return 'conf-low';
-}
-
-function completenessClass(pct) {
-  if (pct >= 95) return 'high';
-  if (pct >= 80) return 'medium';
-  return 'low';
-}
-
-function formatSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / 1048576).toFixed(1) + ' MB';
-}
-
-function formatCurrency(n) {
-  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
-
-// ── PROCESSING LOG ──
-function showProcessingLog() {
-  document.getElementById('processing-section').style.display = '';
-}
-
-function addLogEntry(text, docName) {
-  const entries = document.getElementById('log-entries');
-  const entry = document.createElement('div');
-  entry.className = 'log-entry';
-  if (docName) {
-    const label = document.createElement('span');
-    label.className = 'log-doc-label';
-    label.textContent = docName;
-    entry.appendChild(label);
-  }
-  const content = document.createElement('div');
-  content.className = 'log-text';
-  content.textContent = text;
-  entry.appendChild(content);
-  entries.appendChild(entry);
-  // Scroll to bottom
-  const log = document.getElementById('processing-log');
-  log.scrollTop = log.scrollHeight;
-  // Animate in
-  requestAnimationFrame(() => entry.classList.add('visible'));
-}
-
-function addLogDivider() {
-  const entries = document.getElementById('log-entries');
-  const divider = document.createElement('div');
-  divider.className = 'log-divider';
-  entries.appendChild(divider);
-}
-
-// ── REAL API PROCESSING ──
-async function processDocument(doc) {
-  showProcessingLog();
-  updatePipelineStep(1, 'active');
-  addLogEntry(`Uploading ${doc.name}…`, doc.name);
-
-  doc.status = 'uploading';
-  renderDocList();
-
-  const formData = new FormData();
-  formData.append('file', doc.file);
-
-  try {
-    updatePipelineStep(1, 'done');
-    updatePipelineStep(2, 'active');
-    doc.status = 'processing';
-    renderDocList();
-    addLogEntry('Sending to Claude Vision for analysis…', doc.name);
-
-    const response = await fetch(`${API_BASE}/extract`, {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-    }
-
-    // Read SSE stream
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let extractedData = null;
-    let logCount = 0;
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-
-      // Parse SSE events from buffer
-      const lines = buffer.split('\n');
-      buffer = lines.pop(); // Keep incomplete line in buffer
-
-      let eventType = null;
-      let eventData = '';
-
-      for (const line of lines) {
-        if (line.startsWith('event: ')) {
-          eventType = line.slice(7).trim();
-        } else if (line.startsWith('data: ')) {
-          eventData = line.slice(6);
-          if (eventType && eventData) {
-            try {
-              const parsed = JSON.parse(eventData);
-              if (eventType === 'log') {
-                logCount++;
-                addLogEntry(parsed.text, doc.name);
-                // Advance pipeline based on log progress
-                if (logCount === 1) { updatePipelineStep(2, 'active'); }
-                if (logCount === 2) { updatePipelineStep(2, 'done'); updatePipelineStep(3, 'active'); }
-                if (logCount === 3) { updatePipelineStep(3, 'done'); updatePipelineStep(4, 'active'); }
-                if (logCount === 4) { updatePipelineStep(4, 'done'); updatePipelineStep(5, 'active'); }
-              } else if (eventType === 'data') {
-                extractedData = parsed;
-                updatePipelineStep(5, 'done');
-                updatePipelineStep(6, 'active');
-                const exStatus = parsed.extraction_status || {};
-                const exFields = Object.values(exStatus);
-                const exCount = exFields.filter(v => v === 'extracted').length;
-                addLogEntry(`Extracted ${parsed.doc_type || 'document'} data — ${exCount}/${exFields.length} fields found.`, doc.name);
-              } else if (eventType === 'error') {
-                addLogEntry(`Error: ${parsed.error}`, doc.name);
-                doc.status = 'error';
-                renderDocList();
-              } else if (eventType === 'done') {
-                updatePipelineStep(6, 'done');
-                updatePipelineStep(7, 'active');
-              }
-            } catch (e) {
-              // Skip malformed JSON
-            }
-            eventType = null;
-            eventData = '';
-          }
-        } else if (line === '') {
-          eventType = null;
-          eventData = '';
-        }
-      }
-    }
-
-    if (extractedData) {
-      doc.status = 'processed';
-      doc.extractionStatus = extractedData.extraction_status || {};
-
-      // Use doc_type from extraction if we guessed wrong
-      if (extractedData.doc_type) {
-        doc.type = extractedData.doc_type;
-      }
-
-      state.incomes.push(extractedData);
-      renderDocList();
-      renderIncomes();
-      updateCompleteness();
-      updateFilingOverview();
-      runCompliance();
-      updatePipelineStep(7, 'done');
-      addLogDivider();
-    } else if (doc.status !== 'error') {
-      doc.status = 'error';
-      addLogEntry('No structured data received from API.', doc.name);
-      renderDocList();
-    }
-
-  } catch (error) {
-    doc.status = 'error';
-    addLogEntry(`Error: ${error.message}`, doc.name);
-    renderDocList();
-    console.error('Processing error:', error);
-  }
-}
-
-// ── PIPELINE UI ──
-function updatePipelineStep(step, status) {
-  const pipelineEl = document.getElementById('pipeline');
-  const allSteps = pipelineEl.querySelectorAll('.pipeline-step');
-
-  allSteps.forEach((el, i) => {
-    const sn = i + 1;
-    if (sn < step) {
-      el.className = 'pipeline-step done';
-      const conf = el.querySelector('.step-confidence');
-      if (conf.textContent === '—' || conf.textContent === '…') {
-        conf.className = 'step-confidence conf-high';
-        conf.textContent = '✓';
-      }
-    } else if (sn === step) {
-      if (status === 'done') {
-        el.className = 'pipeline-step done';
-        const conf = el.querySelector('.step-confidence');
-        conf.className = 'step-confidence conf-high';
-        conf.textContent = '✓';
-      } else {
-        el.className = 'pipeline-step active';
-        el.querySelector('.step-confidence').className = 'step-confidence conf-none';
-        el.querySelector('.step-confidence').textContent = '…';
-      }
-    }
-  });
-}
-
-// ── INCOME RENDERING ──
-function renderIncomes() {
-  const container = document.getElementById('income-sources');
-  if (state.incomes.length === 0) return;
-
-  container.innerHTML = state.incomes.map(inc => {
-    const exStatus = inc.extraction_status || {};
-    const fields = Object.values(exStatus);
-    const extracted = fields.filter(v => v === 'extracted').length;
-    const total = fields.length;
-    const allExtracted = total > 0 && extracted === total;
-    const statusBadge = allExtracted
-      ? '<span class="step-confidence conf-high">✓ All fields extracted</span>'
-      : total > 0
-        ? `<span class="step-confidence conf-medium">⚠ ${extracted}/${total} fields</span>`
-        : '<span class="step-confidence conf-high">✓ Extracted</span>';
-
-    if (inc.doc_type === 'W-2') {
-      const employer = inc.employer_name || 'Unknown Employer';
-      return `
-        <div class="income-card">
-          <div class="income-header">
-            <div class="income-type">
-              <span class="type-badge w2">W-2</span>
-              <span class="income-employer">${employer}</span>
-            </div>
-            <span class="income-amount">${formatCurrency(inc.wages || 0)}</span>
-          </div>
-          <div class="income-details">
-            <div class="income-detail"><span class="dl">Fed Withheld</span><span class="dv">${formatCurrency(inc.fed_income_tax_withheld || 0)}</span></div>
-            <div class="income-detail"><span class="dl">State Withheld</span><span class="dv">${formatCurrency(inc.state_income_tax_withheld || 0)}</span></div>
-            <div class="income-detail"><span class="dl">SS Tax</span><span class="dv">${formatCurrency(inc.social_security_tax_withheld || 0)}</span></div>
-            <div class="income-detail"><span class="dl">Medicare Tax</span><span class="dv">${formatCurrency(inc.medicare_tax_withheld || 0)}</span></div>
-          </div>
-          <div style="margin-top:10px;text-align:right">
-            ${statusBadge}
-          </div>
-        </div>`;
-    } else {
-      const payer = inc.payer_name || 'Unknown Payer';
-      const amount = inc.nonemployee_compensation || inc.interest_income || inc.ordinary_dividends || 0;
-      const docType = inc.doc_type || 'Unknown';
-      return `
-        <div class="income-card">
-          <div class="income-header">
-            <div class="income-type">
-              <span class="type-badge nec">${docType}</span>
-              <span class="income-employer">${payer}</span>
-            </div>
-            <span class="income-amount">${formatCurrency(amount)}</span>
-          </div>
-          <div class="income-details">
-            ${inc.fed_income_tax_withheld ? `<div class="income-detail"><span class="dl">Fed Withheld</span><span class="dv">${formatCurrency(inc.fed_income_tax_withheld)}</span></div>` : ''}
-            ${inc.state_tax_withheld ? `<div class="income-detail"><span class="dl">State Withheld</span><span class="dv">${formatCurrency(inc.state_tax_withheld)}</span></div>` : ''}
-            ${inc.qualified_dividends != null ? `<div class="income-detail"><span class="dl">Qualified Div</span><span class="dv">${formatCurrency(inc.qualified_dividends)}</span></div>` : ''}
-          </div>
-          <div style="margin-top:10px;text-align:right">
-            ${statusBadge}
-          </div>
-        </div>`;
-    }
-  }).join('');
-
-  // Summary
-  const totalW2 = state.incomes.filter(i => i.doc_type === 'W-2').reduce((s, i) => s + (i.wages || 0), 0);
-  const total1099 = state.incomes.filter(i => i.doc_type !== 'W-2').reduce((s, i) => s + (i.nonemployee_compensation || i.interest_income || i.ordinary_dividends || 0), 0);
-  const totalWithheld = state.incomes.reduce((s, i) => s + (i.fed_income_tax_withheld || 0), 0);
-
-  document.getElementById('total-w2').textContent = formatCurrency(totalW2);
-  document.getElementById('total-1099').textContent = formatCurrency(total1099);
-  document.getElementById('total-gross').textContent = formatCurrency(totalW2 + total1099);
-  document.getElementById('total-withheld').textContent = formatCurrency(totalWithheld);
-  document.getElementById('income-summary').style.display = '';
-}
-
-function updateCompleteness() {
-  const n = state.documents.filter(d => d.status === 'processed').length;
-  const total = Math.max(n, 2);
-
-  // Field extraction: count extracted vs total fields across all incomes
-  let totalFields = 0, extractedFields = 0;
-  state.incomes.forEach(i => {
-    const exStatus = i.extraction_status || {};
-    const vals = Object.values(exStatus);
-    totalFields += vals.length;
-    extractedFields += vals.filter(v => v === 'extracted').length;
-  });
-  const fieldPct = totalFields > 0 ? Math.round((extractedFields / totalFields) * 100) : 0;
-
-  const c = {
-    docs: Math.min(100, Math.round((n / total) * 100)),
-    fields: fieldPct,
-    xval: n > 1 ? 85 : (n > 0 ? 40 : 0),
-    forms: 0,  // Will be set by rules engine
-    review: 0
-  };
-  state.completeness = c;
-
-  ['docs', 'fields', 'xval', 'forms', 'review'].forEach(key => {
-    const pct = c[key];
-    document.getElementById('comp-' + key).textContent = pct + '%';
-    const bar = document.getElementById('comp-' + key + '-bar');
-    bar.style.width = pct + '%';
-    bar.className = 'completeness-fill ' + completenessClass(pct);
-  });
-
-  const avg = Math.round((c.docs + c.fields + c.xval + c.forms + c.review) / 5);
-  updateReadiness(avg);
-}
-
-function updateReadiness(pct) {
-  const circumference = 2 * Math.PI * 52;
-  const offset = circumference - (pct / 100) * circumference;
-  const fill = document.getElementById('readiness-ring-fill');
-  const color = pct >= 95 ? 'var(--accent)' : pct >= 80 ? 'var(--orange)' : pct >= 50 ? 'var(--blue)' : 'var(--text-muted)';
-  fill.setAttribute('stroke', color);
-  fill.setAttribute('stroke-dashoffset', offset);
-  document.getElementById('readiness-pct').textContent = pct + '%';
-  document.getElementById('readiness-pct').style.color = color;
-}
-
-function updateFilingOverview() {
-  // Get year-appropriate constants
-  const c = typeof getTaxConstants === 'function'
-    ? getTaxConstants(state.taxYear, state.stateId, state.filingStatus)
-    : null;
-  const fed = c ? c.fed : null;
-  const sc = c ? c.state : null;
-
-  const totalW2 = state.incomes.filter(i => i.doc_type === 'W-2').reduce((s, i) => s + (i.wages || 0), 0);
-  const totalNEC = state.incomes.filter(i => i.doc_type === '1099-NEC').reduce((s, i) => s + (i.nonemployee_compensation || 0), 0);
-  const totalINT = state.incomes.filter(i => i.doc_type === '1099-INT').reduce((s, i) => s + (i.interest_income || 0), 0);
-  const totalDIV = state.incomes.filter(i => i.doc_type === '1099-DIV').reduce((s, i) => s + (i.ordinary_dividends || 0), 0);
-  const totalIncome = totalW2 + totalNEC + totalINT + totalDIV;
-
-  const seRate = fed ? fed.seTaxRate : 0.153;
-  const seTaxableIncome = totalNEC * 0.9235;
-  const seTax = Math.round(seTaxableIncome * seRate);
-  const seDeduction = Math.floor(seTax * 0.5);
-  const adjustments = seDeduction;
-  const agi = totalIncome - adjustments;
-  const standardDeduction = fed ? fed.stdDeduction : 15000;
-  const taxableIncome = Math.max(0, agi - standardDeduction);
-  const fedIncomeTax = fed ? computeTaxFromBrackets(taxableIncome, fed.brackets) : computeFederalTax(taxableIncome);
-  const totalFedTax = fedIncomeTax + seTax;
-  const totalFedWithheld = state.incomes.reduce((s, i) => s + (i.fed_income_tax_withheld || 0), 0);
-  const fedResult = totalFedWithheld - totalFedTax;
-
-  setVal('fed-income', formatCurrency(totalIncome));
-  setVal('fed-adj', adjustments > 0 ? '−' + formatCurrency(adjustments) : '$0');
-  setVal('fed-agi', formatCurrency(agi));
-  setVal('fed-deduction', `Standard (${formatCurrency(standardDeduction)})`);
-  setVal('fed-taxable', formatCurrency(taxableIncome));
-  setVal('fed-tax', formatCurrency(totalFedTax));
-  setVal('fed-payments', formatCurrency(totalFedWithheld));
-  const fedEl = document.getElementById('fed-result');
-  fedEl.textContent = fedResult >= 0 ? '+' + formatCurrency(fedResult) : '−' + formatCurrency(Math.abs(fedResult));
-  fedEl.className = 'value ' + (fedResult >= 0 ? 'refund' : 'owed');
-
-  const totalStateWithheld = state.incomes.reduce((s, i) => s + (i.state_income_tax_withheld || i.state_tax_withheld || 0), 0);
-
-  // Filing state base
-  const filingBase = {
-    filingStatus: state.filingStatus || 'single',
-    totalW2Wages: totalW2,
-    totalIncome,
-    adjustments,
-    agi,
-    standardDeduction,
-    taxableIncome,
-    fedIncomeTax,
-    seTax,
-    totalFedTax,
-    totalFedWithheld,
-    fedResult,
-    totalStateWithheld,
-  };
-
-  // California
-  if (state.stateId === 'california') {
-    const caStdDeduction = sc ? sc.stdDeduction : 5540;
-    const caTaxable = Math.max(0, agi - caStdDeduction);
-    let caTax = sc ? computeTaxFromBrackets(caTaxable, sc.brackets) : computeCaliforniaTax(caTaxable);
-    if (caTaxable > (sc ? sc.mentalHealthThreshold : 1000000)) {
-      caTax += Math.round((caTaxable - (sc ? sc.mentalHealthThreshold : 1000000)) * (sc ? sc.mentalHealthRate : 0.01));
-    }
-    const caResult = totalStateWithheld - caTax;
-
-    setVal('ca-agi', formatCurrency(agi));
-    setVal('ca-adj', '$0');
-    setVal('ca-taxable', formatCurrency(caTaxable));
-    setVal('ca-tax', formatCurrency(caTax));
-    setVal('ca-withheld', formatCurrency(totalStateWithheld));
-    const caEl = document.getElementById('ca-result');
-    caEl.textContent = caResult >= 0 ? '+' + formatCurrency(caResult) : '−' + formatCurrency(Math.abs(caResult));
-    caEl.className = 'value ' + (caResult >= 0 ? 'refund' : 'owed');
-
-    filingBase.caTaxableIncome = caTaxable;
-    filingBase.caTax = caTax;
-    filingBase.caResult = caResult;
-  }
-
-  // New York
-  if (state.stateId === 'newYork') {
-    const nyStdDeduction = sc ? sc.stdDeduction : 8000;
-    const nyTaxable = Math.max(0, agi - nyStdDeduction);
-    const nyTax = sc ? computeTaxFromBrackets(nyTaxable, sc.brackets) : computeNYTax(nyTaxable, null);
-    const nyResult = totalStateWithheld - nyTax;
-
-    setVal('ny-agi', formatCurrency(agi));
-    setVal('ny-adj', '$0');
-    setVal('ny-taxable', formatCurrency(nyTaxable));
-    setVal('ny-tax', formatCurrency(nyTax));
-    setVal('ny-withheld', formatCurrency(totalStateWithheld));
-    const nyEl = document.getElementById('ny-result');
-    nyEl.textContent = nyResult >= 0 ? '+' + formatCurrency(nyResult) : '−' + formatCurrency(Math.abs(nyResult));
-    nyEl.className = 'value ' + (nyResult >= 0 ? 'refund' : 'owed');
-
-    filingBase.nyTaxableIncome = nyTaxable;
-    filingBase.nyTax = nyTax;
-    filingBase.nyResult = nyResult;
-  }
-
-  state.filing = filingBase;
-}
-
-function setVal(id, text) {
-  const el = document.getElementById(id);
-  el.textContent = text;
-  el.classList.remove('pending');
-}
-
-// ── RULES ENGINE ──
-function runCompliance() {
-  if (typeof runRulesEngine !== 'function') return;
-
-  const rulesState = {
-    documents: state.documents,
-    incomes: state.incomes,
-    filing: state.filing,
-    taxYear: state.taxYear,
-    stateId: state.stateId,
-  };
-
-  const { results, summary, complianceSummary, savingsSummary, stages, scenarios } = runRulesEngine(rulesState);
-
-  // Show rules section
-  document.getElementById('compliance-section').style.display = '';
-
-  // Compliance guarantee card
-  document.getElementById('comp-passed').textContent = complianceSummary.passed;
-  document.getElementById('comp-failed').textContent = complianceSummary.failed;
-  document.getElementById('comp-warnings').textContent = complianceSummary.warnings;
-
-  // Savings guarantee card
-  document.getElementById('savings-opportunities').textContent = savingsSummary.opportunities;
-  document.getElementById('savings-evaluated').textContent = savingsSummary.evaluated;
-  document.getElementById('savings-skipped').textContent = savingsSummary.skipped;
-
-  // Score bar (compliance score)
-  const scoreFill = document.getElementById('comp-score-fill');
-  const scoreLabel = document.getElementById('comp-score-label');
-  scoreFill.style.width = complianceSummary.score + '%';
-  scoreLabel.textContent = complianceSummary.score + '%';
-
-  if (complianceSummary.score >= 90) {
-    scoreFill.style.background = 'var(--accent)';
-  } else if (complianceSummary.score >= 70) {
-    scoreFill.style.background = 'var(--orange)';
-  } else {
-    scoreFill.style.background = 'var(--warn)';
-  }
-
-  // Update completeness
-  state.completeness.forms = complianceSummary.score;
-  document.getElementById('comp-forms').textContent = complianceSummary.score + '%';
-  const formsBar = document.getElementById('comp-forms-bar');
-  formsBar.style.width = complianceSummary.score + '%';
-  formsBar.className = 'completeness-fill ' + completenessClass(complianceSummary.score);
-
-  // Recalculate readiness
-  const c = state.completeness;
-  const avg = Math.round((c.docs + c.fields + c.xval + c.forms + c.review) / 5);
-  updateReadiness(avg);
-
-  // Save to localStorage for rules.html and checks.html (backward compat)
-  try {
-    // New format for rules.html
-    localStorage.setItem('taxRulesResults', JSON.stringify({
-      results, summary, complianceSummary, savingsSummary, stages, scenarios, timestamp: Date.now()
-    }));
-    // Backward compat for checks.html
-    const categories = stages.map(st => ({ id: st.id, name: st.name, icon: st.icon, description: `Stage ${st.num}: ${st.name}` }));
-    const mappedResults = results.map(r => ({
-      ...r, category: r.stage,
-      irsRef: r.taxCode ? `${r.taxCode.section} · ${r.taxCode.form} ${r.taxCode.line}` : 'General',
-      description: r.detail || '', confidence: r.extracted ? 1.0 : 0.0,
-    }));
-    localStorage.setItem('taxComplianceResults', JSON.stringify({ results: mappedResults, summary, categories, timestamp: Date.now() }));
-    localStorage.setItem('taxState', JSON.stringify(rulesState));
-  } catch (e) {
-    console.warn('Could not save to localStorage:', e);
-  }
-}
-</script>
+<script src="gap-analysis.js"></script>
+<script src="form-filler.js"></script>
+<script src="wizard.js"></script>
 </body>
 </html>
