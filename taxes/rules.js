@@ -1,5 +1,5 @@
 /**
- * Tax Rules Engine — ~71 rules across 4 scenarios and 6 stages
+ * Tax Rules Engine — ~76 rules across 6 scenarios and 6 stages
  *
  * Each rule:
  *   { id, name, taxCode: { section, form, line }, scenarios[], stage, type, severity, check(state) }
@@ -12,12 +12,14 @@
  *   fed-1099 — Federal 1099 self-employed
  *   ca-w2    — California W-2
  *   ca-1099  — California 1099
+ *   ny-w2    — New York W-2
+ *   ny-1099  — New York 1099
  *
  * Stages (6-stage linear flow):
  *   1. income       — Income Reporting
  *   2. adjustments  — Above-the-line (SE deduction, etc.)
  *   3. deductions   — Standard vs itemized
- *   4. credits      — CTC, EITC, CA renter's credit, etc.
+ *   4. credits      — CTC, EITC, CA renter's credit, NY EITC, etc.
  *   5. computation  — Brackets, SE tax, refund/owed
  *   6. optimization — Audit risk review, savings suggestions
  *
@@ -26,7 +28,11 @@
  *   savings    — "We check every deduction you qualify for"
  *
  * State shape expected:
- *   { documents: [...], incomes: [...], filing: { ... computed tax values ... } }
+ *   { documents: [...], incomes: [...], filing: { ... }, taxYear: 2025, stateId: 'california'|'newYork'|null }
+ *
+ * Dynamic constants:
+ *   When tax-data.js is loaded, runRulesEngine() injects state.constants = getTaxConstants(year, state, filingStatus)
+ *   Each rule can access s.constants.fed and s.constants.state for year-appropriate values.
  */
 
 // ── HELPERS ──
@@ -50,7 +56,9 @@ function rateInRange(actual, low, high) {
   return actual >= low && actual <= high;
 }
 
-// ── 2025 TAX CONSTANTS ──
+// ── TAX CONSTANTS (dynamic via tax-data.js) ──
+// Legacy globals for backward compat — these are used only as fallbacks
+// when tax-data.js is not loaded. Prefer s.constants in rule checks.
 const FED_STANDARD_DEDUCTION_SINGLE = 15000;
 const CA_STANDARD_DEDUCTION_SINGLE = 5540;
 const SS_RATE = 0.062;
@@ -58,40 +66,61 @@ const SS_WAGE_BASE_2025 = 176100;
 const MEDICARE_RATE = 0.0145;
 const SE_TAX_RATE = 0.153;
 
-const FED_BRACKETS = [
-  [11925, 0.10], [48475 - 11925, 0.12], [103350 - 48475, 0.22],
-  [197300 - 103350, 0.24], [250525 - 197300, 0.32],
-  [626350 - 250525, 0.35], [Infinity, 0.37]
-];
-
-const CA_BRACKETS = [
-  [10412, 0.01], [24684 - 10412, 0.02], [38959 - 24684, 0.04],
-  [54081 - 38959, 0.06], [68350 - 54081, 0.08],
-  [349137 - 68350, 0.093], [418961 - 349137, 0.103],
-  [698271 - 418961, 0.113], [Infinity, 0.123]
-];
-
+// Legacy compute functions — used when tax-data.js is not loaded
 function computeFedTax(taxable) {
+  if (typeof computeTaxFromBrackets === 'function' && typeof getTaxConstants === 'function') {
+    const c = getTaxConstants(2025, null, 'single');
+    return computeTaxFromBrackets(taxable, c.fed.brackets);
+  }
+  const brackets = [
+    [11925, 0.10], [48475 - 11925, 0.12], [103350 - 48475, 0.22],
+    [197300 - 103350, 0.24], [250525 - 197300, 0.32],
+    [626350 - 250525, 0.35], [Infinity, 0.37]
+  ];
   let tax = 0, remaining = taxable;
-  for (const [width, rate] of FED_BRACKETS) {
+  for (const [width, rate] of brackets) {
     if (remaining <= 0) break;
-    const amt = Math.min(remaining, width);
-    tax += amt * rate;
-    remaining -= amt;
+    tax += Math.min(remaining, width) * rate;
+    remaining -= width;
   }
   return Math.round(tax);
 }
 
 function computeCATax(taxable) {
+  if (typeof computeTaxFromBrackets === 'function' && typeof getTaxConstants === 'function') {
+    const c = getTaxConstants(2025, 'california', 'single');
+    let tax = computeTaxFromBrackets(taxable, c.state.brackets);
+    if (taxable > 1000000) tax += Math.round((taxable - 1000000) * 0.01);
+    return tax;
+  }
+  const brackets = [
+    [10412, 0.01], [24684 - 10412, 0.02], [38959 - 24684, 0.04],
+    [54081 - 38959, 0.06], [68350 - 54081, 0.08],
+    [349137 - 68350, 0.093], [418961 - 349137, 0.103],
+    [698271 - 418961, 0.113], [Infinity, 0.123]
+  ];
   let tax = 0, remaining = taxable;
-  for (const [width, rate] of CA_BRACKETS) {
+  for (const [width, rate] of brackets) {
     if (remaining <= 0) break;
-    const amt = Math.min(remaining, width);
-    tax += amt * rate;
-    remaining -= amt;
+    tax += Math.min(remaining, width) * rate;
+    remaining -= width;
   }
   if (taxable > 1000000) tax += (taxable - 1000000) * 0.01;
   return Math.round(tax);
+}
+
+function computeNYTax(taxable, constants) {
+  if (constants && constants.brackets) {
+    return computeTaxFromBrackets(taxable, constants.brackets);
+  }
+  // Fallback 2025 NY single brackets
+  const brackets = [
+    [8500, 0.04], [3200, 0.045], [2200, 0.0525],
+    [66750, 0.0585], [134750, 0.0625],
+    [862150, 0.0685], [3922450, 0.0965],
+    [20000000, 0.103], [Infinity, 0.109]
+  ];
+  return computeTaxFromBrackets(taxable, brackets);
 }
 
 // ── SCENARIOS ──
@@ -100,6 +129,8 @@ const SCENARIOS = [
   { id: 'fed-1099', name: 'Fed 1099', description: 'Federal 1099 self-employed' },
   { id: 'ca-w2', name: 'CA W-2', description: 'California W-2' },
   { id: 'ca-1099', name: 'CA 1099', description: 'California 1099' },
+  { id: 'ny-w2', name: 'NY W-2', description: 'New York W-2 employee' },
+  { id: 'ny-1099', name: 'NY 1099', description: 'New York 1099 self-employed' },
 ];
 
 // ── STAGES ──
@@ -319,8 +350,8 @@ const RULES = [
   {
     id: 'id-05',
     name: 'State Residency Identified',
-    taxCode: { section: 'CA RTC 17014', form: '540', line: 'Header' },
-    scenarios: ['ca-w2', 'ca-1099'],
+    taxCode: { section: 'CA RTC 17014', form: '540/IT-201', line: 'Header' },
+    scenarios: ['ca-w2', 'ca-1099', 'ny-w2', 'ny-1099'],
     stage: 'income',
     type: 'compliance',
     severity: 'warning',
@@ -548,11 +579,14 @@ const RULES = [
     type: 'compliance',
     severity: 'warning',
     check(s) {
+      const c = s.constants ? s.constants.fed : null;
+      const ssBase = c ? c.ssWageBase : SS_WAGE_BASE_2025;
+      const ssRate = c ? c.ssRate : SS_RATE;
       const w2s = s.incomes.filter(i => i.doc_type === 'W-2' && i.social_security_wages > 0);
       if (w2s.length === 0) return { status: 'skip', currentValue: '—', expectedValue: '6.2%', extracted: false, detail: 'No SS wages' };
       const issues = [];
       for (const w of w2s) {
-        const expected = Math.min(w.social_security_wages, SS_WAGE_BASE_2025) * SS_RATE;
+        const expected = Math.min(w.social_security_wages, ssBase) * ssRate;
         if (!approxEqual(w.social_security_tax_withheld, expected, Math.max(expected * 0.02, 10))) {
           issues.push(w.employer_name);
         }
@@ -560,7 +594,7 @@ const RULES = [
       return {
         status: issues.length > 0 ? 'warn' : 'pass',
         currentValue: w2s.map(w => fmt(w.social_security_tax_withheld)).join(', '),
-        expectedValue: w2s.map(w => fmt(Math.min(w.social_security_wages, SS_WAGE_BASE_2025) * SS_RATE)).join(', '),
+        expectedValue: w2s.map(w => fmt(Math.min(w.social_security_wages, ssBase) * ssRate)).join(', '),
         extracted: true,
         detail: issues.length > 0 ? `SS tax mismatch for: ${issues.join(', ')}` : 'Social Security tax correctly withheld at 6.2%'
       };
@@ -575,11 +609,13 @@ const RULES = [
     type: 'compliance',
     severity: 'warning',
     check(s) {
+      const c = s.constants ? s.constants.fed : null;
+      const medRate = c ? c.medicareRate : MEDICARE_RATE;
       const w2s = s.incomes.filter(i => i.doc_type === 'W-2' && i.medicare_wages > 0);
       if (w2s.length === 0) return { status: 'skip', currentValue: '—', expectedValue: '1.45%', extracted: false, detail: 'No Medicare wages' };
       const issues = [];
       for (const w of w2s) {
-        const expected = w.medicare_wages * MEDICARE_RATE;
+        const expected = w.medicare_wages * medRate;
         if (!approxEqual(w.medicare_tax_withheld, expected, Math.max(expected * 0.02, 10))) {
           issues.push(w.employer_name);
         }
@@ -587,7 +623,7 @@ const RULES = [
       return {
         status: issues.length > 0 ? 'warn' : 'pass',
         currentValue: w2s.map(w => fmt(w.medicare_tax_withheld)).join(', '),
-        expectedValue: w2s.map(w => fmt(w.medicare_wages * MEDICARE_RATE)).join(', '),
+        expectedValue: w2s.map(w => fmt(w.medicare_wages * medRate)).join(', '),
         extracted: true,
         detail: issues.length > 0 ? `Medicare tax mismatch for: ${issues.join(', ')}` : 'Medicare tax correctly withheld at 1.45%'
       };
@@ -602,13 +638,15 @@ const RULES = [
     type: 'compliance',
     severity: 'warning',
     check(s) {
+      const c = s.constants ? s.constants.fed : null;
+      const ssBase = c ? c.ssWageBase : SS_WAGE_BASE_2025;
       const w2s = s.incomes.filter(i => i.doc_type === 'W-2' && i.social_security_wages > 0);
-      if (w2s.length === 0) return { status: 'skip', currentValue: '—', expectedValue: '≤$176,100', extracted: false, detail: 'No SS wages' };
-      const over = w2s.filter(w => w.social_security_wages > SS_WAGE_BASE_2025);
+      if (w2s.length === 0) return { status: 'skip', currentValue: '—', expectedValue: `≤${fmt(ssBase)}`, extracted: false, detail: 'No SS wages' };
+      const over = w2s.filter(w => w.social_security_wages > ssBase);
       return {
         status: over.length > 0 ? 'warn' : 'pass',
         currentValue: w2s.map(w => fmt(w.social_security_wages)).join(', '),
-        expectedValue: `≤${fmt(SS_WAGE_BASE_2025)}`,
+        expectedValue: `≤${fmt(ssBase)}`,
         extracted: true,
         detail: over.length > 0 ? 'SS wages exceed annual wage base — verify with employer' : 'SS wages within wage base limit'
       };
@@ -617,8 +655,8 @@ const RULES = [
   {
     id: 'wh-05',
     name: 'State Withholding Present',
-    taxCode: { section: 'CA RTC 18662', form: 'W-2', line: 'Box 17' },
-    scenarios: ['ca-w2'],
+    taxCode: { section: 'CA RTC 18662 / NY Tax Law 671', form: 'W-2', line: 'Box 17' },
+    scenarios: ['ca-w2', 'ny-w2'],
     stage: 'income',
     type: 'compliance',
     severity: 'warning',
@@ -674,10 +712,12 @@ const RULES = [
     type: 'compliance',
     severity: 'error',
     check(s) {
+      const c = s.constants ? s.constants.fed : null;
+      const seRate = c ? c.seTaxRate : SE_TAX_RATE;
       const necTotal = s.incomes.filter(i => i.doc_type === '1099-NEC').reduce((sum, i) => sum + (i.nonemployee_compensation || 0), 0);
       if (necTotal === 0) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No SE income' };
       const seNet = necTotal * 0.9235;
-      const seTax = seNet * SE_TAX_RATE;
+      const seTax = seNet * seRate;
       const seDeduction = Math.floor(seTax * 0.5);
       return {
         status: 'pass',
@@ -700,12 +740,13 @@ const RULES = [
     type: 'savings',
     severity: 'info',
     check(s) {
+      const c = s.constants ? s.constants.fed : null;
       const has401k = s.incomes.some(i => i.box12_codes && i.box12_codes.some(c => ['D', 'E', 'G', 'AA', 'BB'].includes(c.code)));
       const total401k = s.incomes.reduce((sum, i) => {
         if (!i.box12_codes) return sum;
         return sum + i.box12_codes.filter(c => ['D', 'E', 'G', 'AA', 'BB'].includes(c.code)).reduce((s2, c) => s2 + (c.amount || 0), 0);
       }, 0);
-      const max2025 = 23500; // 2025 401k limit
+      const max2025 = c ? c.contrib401kLimit : 23500;
       if (has401k) {
         const remaining = max2025 - total401k;
         return {
@@ -736,12 +777,13 @@ const RULES = [
     type: 'savings',
     severity: 'info',
     check(s) {
+      const c = s.constants ? s.constants.fed : null;
       const hasHSA = s.incomes.some(i => i.box12_codes && i.box12_codes.some(c => c.code === 'W'));
       const hsaAmount = s.incomes.reduce((sum, i) => {
         if (!i.box12_codes) return sum;
         return sum + i.box12_codes.filter(c => c.code === 'W').reduce((s2, c) => s2 + (c.amount || 0), 0);
       }, 0);
-      const maxSelf2025 = 4300; // 2025 self-only HSA limit
+      const maxSelf2025 = c ? c.contribHSASelf : 4300;
       if (hasHSA) {
         const remaining = maxSelf2025 - hsaAmount;
         return {
@@ -792,16 +834,20 @@ const RULES = [
     severity: 'info',
     check(s) {
       if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No filing data' };
+      const c = s.constants ? s.constants.fed : null;
+      const fs = s.filing.filingStatus || 'single';
+      const phaseout = c ? (c.studentLoanPhaseout[fs] || c.studentLoanPhaseout.single) : 90000;
+      const maxDeduct = c ? c.studentLoanMax : 2500;
       const agi = s.filing.agi || 0;
-      const eligible = agi < 90000; // 2025 phaseout for single
+      const eligible = agi < phaseout;
       return {
         status: eligible ? 'warn' : 'skip',
         currentValue: fmt(agi),
-        expectedValue: 'AGI < $90,000',
+        expectedValue: `AGI < ${fmt(phaseout)}`,
         extracted: true,
         detail: eligible
-          ? 'Your AGI qualifies for student loan interest deduction (up to $2,500). Upload 1098-E if you paid student loan interest.'
-          : 'AGI exceeds student loan interest deduction phaseout ($90,000 single)'
+          ? `Your AGI qualifies for student loan interest deduction (up to ${fmt(maxDeduct)}). Upload 1098-E if you paid student loan interest.`
+          : `AGI exceeds student loan interest deduction phaseout (${fmt(phaseout)} ${fs})`
       };
     }
   },
@@ -835,11 +881,13 @@ const RULES = [
     severity: 'info',
     check(s) {
       if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No filing data' };
+      const c = s.constants ? s.constants.fed : null;
+      const fs = s.filing.filingStatus || 'single';
       const agi = s.filing.agi || 0;
       const has401k = s.incomes.some(i => i.box12_codes && i.box12_codes.some(c => ['D', 'E', 'G'].includes(c.code)));
-      const iraLimit = 7000; // 2025
-      // If covered by employer plan, traditional IRA deduction phases out at $79,000–$89,000 (single)
-      if (has401k && agi > 89000) {
+      const iraLimit = c ? c.contribIRALimit : 7000;
+      const iraPhaseout = c ? (c.iraPhaseout[fs] || c.iraPhaseout.single) : [79000, 89000];
+      if (has401k && agi > iraPhaseout[1]) {
         return {
           status: 'skip',
           currentValue: 'Has employer plan',
@@ -871,14 +919,17 @@ const RULES = [
     type: 'compliance',
     severity: 'error',
     check(s) {
-      if (!s.filing || !s.filing.agi) return { status: 'skip', currentValue: '—', expectedValue: '$15,000', extracted: false, detail: 'No filing data' };
-      const deduction = s.filing.standardDeduction || FED_STANDARD_DEDUCTION_SINGLE;
+      const c = s.constants ? s.constants.fed : null;
+      const fs = s.filing?.filingStatus || 'single';
+      const expectedDed = c ? c.stdDeduction : FED_STANDARD_DEDUCTION_SINGLE;
+      if (!s.filing || !s.filing.agi) return { status: 'skip', currentValue: '—', expectedValue: fmt(expectedDed), extracted: false, detail: 'No filing data' };
+      const deduction = s.filing.standardDeduction || expectedDed;
       return {
-        status: deduction === FED_STANDARD_DEDUCTION_SINGLE ? 'pass' : 'warn',
+        status: deduction === expectedDed ? 'pass' : 'warn',
         currentValue: fmt(deduction),
-        expectedValue: fmt(FED_STANDARD_DEDUCTION_SINGLE),
+        expectedValue: fmt(expectedDed),
         extracted: true,
-        detail: deduction === FED_STANDARD_DEDUCTION_SINGLE ? 'Standard deduction correctly applied' : 'Non-standard deduction amount — verify if itemizing'
+        detail: deduction === expectedDed ? 'Standard deduction correctly applied' : 'Non-standard deduction amount — verify if itemizing'
       };
     }
   },
@@ -911,11 +962,13 @@ const RULES = [
     type: 'compliance',
     severity: 'error',
     check(s) {
-      if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '$5,540', extracted: false, detail: 'No filing data' };
+      const sc = s.constants ? s.constants.state : null;
+      const caStdDed = sc ? sc.stdDeduction : CA_STANDARD_DEDUCTION_SINGLE;
+      if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: fmt(caStdDed), extracted: false, detail: 'No filing data' };
       return {
         status: 'pass',
-        currentValue: fmt(CA_STANDARD_DEDUCTION_SINGLE),
-        expectedValue: fmt(CA_STANDARD_DEDUCTION_SINGLE),
+        currentValue: fmt(caStdDed),
+        expectedValue: fmt(caStdDed),
         extracted: true,
         detail: 'California standard deduction correctly applied'
       };
@@ -934,12 +987,15 @@ const RULES = [
     severity: 'info',
     check(s) {
       if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No filing data' };
+      const c = s.constants ? s.constants.fed : null;
+      const stdDed = c ? c.stdDeduction : FED_STANDARD_DEDUCTION_SINGLE;
+      const saltCap = c ? c.saltCap : 10000;
       return {
         status: 'warn',
         currentValue: 'Standard',
         expectedValue: 'Optimal choice',
         extracted: true,
-        detail: `Using standard deduction (${fmt(FED_STANDARD_DEDUCTION_SINGLE)}). Itemize if mortgage interest + state/local taxes + charitable giving > ${fmt(FED_STANDARD_DEDUCTION_SINGLE)}. SALT deduction capped at $10,000 (IRC 164(b)(6)).`
+        detail: `Using standard deduction (${fmt(stdDed)}). Itemize if mortgage interest + state/local taxes + charitable giving > ${fmt(stdDed)}. SALT deduction capped at ${fmt(saltCap)} (IRC 164(b)(6)).`
       };
     }
   },
@@ -997,6 +1053,9 @@ const RULES = [
     type: 'savings',
     severity: 'info',
     check(s) {
+      const c = s.constants ? s.constants.fed : null;
+      const fs = s.filing?.filingStatus || 'single';
+      const qbiThresh = c ? (c.qbiThreshold[fs] || c.qbiThreshold.single) : 191950;
       const necTotal = s.incomes.filter(i => i.doc_type === '1099-NEC').reduce((sum, i) => sum + (i.nonemployee_compensation || 0), 0);
       if (necTotal === 0) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No qualified business income' };
       const qbi = Math.floor(necTotal * 0.20);
@@ -1007,7 +1066,7 @@ const RULES = [
         currentValue: `${fmt(maxQBI)} potential`,
         expectedValue: 'Up to 20% of QBI',
         extracted: true,
-        detail: `Potential QBI deduction of ${fmt(maxQBI)} (20% of ${fmt(necTotal)} SE income). Full deduction available if taxable income < $191,950 (single, 2025). Specified service trades may have additional limitations.`
+        detail: `Potential QBI deduction of ${fmt(maxQBI)} (20% of ${fmt(necTotal)} SE income). Full deduction available if taxable income < ${fmt(qbiThresh)} (${fs}). Specified service trades may have additional limitations.`
       };
     }
   },
@@ -1020,15 +1079,16 @@ const RULES = [
     type: 'savings',
     severity: 'info',
     check(s) {
+      const c = s.constants ? s.constants.fed : null;
+      const mileRate = c ? c.mileageRate : 0.70;
       const necTotal = s.incomes.filter(i => i.doc_type === '1099-NEC').reduce((sum, i) => sum + (i.nonemployee_compensation || 0), 0);
       if (necTotal === 0) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No SE income' };
-      const rate2025 = 0.70; // 70 cents/mile for 2025
       return {
         status: 'skip',
         currentValue: 'Not tracked',
-        expectedValue: `$${rate2025}/mile`,
+        expectedValue: `$${mileRate}/mile`,
         extracted: true,
-        detail: `Self-employed individuals can deduct business miles at $${rate2025}/mile (2025 rate). Keep a mileage log. Common deductible trips: client meetings, supply runs, travel between work sites.`
+        detail: `Self-employed individuals can deduct business miles at $${mileRate}/mile. Keep a mileage log. Common deductible trips: client meetings, supply runs, travel between work sites.`
       };
     }
   },
@@ -1066,14 +1126,16 @@ const RULES = [
     severity: 'warning',
     check(s) {
       if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No filing data' };
+      const c = s.constants ? s.constants.fed : null;
+      const eitcLimit = c ? c.eitcNoChild : 18591;
       const agi = s.filing.agi || 0;
-      const eligible = agi < 18591; // 2025 limit, no children, single
+      const eligible = agi < eitcLimit;
       return {
         status: eligible ? 'warn' : 'skip',
         currentValue: fmt(agi),
-        expectedValue: '< $18,591 (no children)',
+        expectedValue: `< ${fmt(eitcLimit)} (no children)`,
         extracted: true,
-        detail: eligible ? 'May qualify for EITC — verify with full eligibility rules' : 'AGI exceeds EITC limit for no-child filers'
+        detail: eligible ? 'May qualify for EITC — verify with full eligibility rules' : `AGI exceeds EITC limit for no-child filers (${fmt(eitcLimit)})`
       };
     }
   },
@@ -1105,13 +1167,15 @@ const RULES = [
     severity: 'info',
     check(s) {
       if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No filing data' };
+      const c = s.constants ? s.constants.fed : null;
+      const saversLimit = c ? c.saversCreditLimit : 38250;
       const agi = s.filing.agi || 0;
-      const eligible = agi < 38250; // 2025 limit single
+      const eligible = agi < saversLimit;
       const has401k = s.incomes.some(i => i.box12_codes && i.box12_codes.some(c => ['D', 'E', 'G'].includes(c.code)));
       return {
         status: eligible && has401k ? 'warn' : 'skip',
         currentValue: has401k ? 'Has 401k' : 'No retirement',
-        expectedValue: 'AGI < $38,250',
+        expectedValue: `AGI < ${fmt(saversLimit)}`,
         extracted: true,
         detail: eligible && has401k ? "May qualify for Saver's Credit — up to $1,000 credit for retirement contributions" : "Not eligible or no retirement contributions detected"
       };
@@ -1130,16 +1194,20 @@ const RULES = [
     severity: 'info',
     check(s) {
       if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No filing data' };
+      const sc = s.constants ? s.constants.state : null;
+      const fs = s.filing.filingStatus || 'single';
+      const renterLimit = sc ? (sc.rentersCreditLimit[fs] || sc.rentersCreditLimit.single) : 50746;
+      const renterAmt = sc ? (sc.rentersCreditAmount[fs] || sc.rentersCreditAmount.single) : 60;
       const agi = s.filing.agi || 0;
-      const eligible = agi < 50746; // 2025 limit single
+      const eligible = agi < renterLimit;
       return {
         status: eligible ? 'warn' : 'skip',
         currentValue: fmt(agi),
-        expectedValue: 'AGI < $50,746 (single)',
+        expectedValue: `AGI < ${fmt(renterLimit)} (${fs})`,
         extracted: true,
         detail: eligible
-          ? 'Your AGI qualifies for the CA renter\'s credit ($60 for single filers). Must have rented a CA residence for more than half the year. Claim on Form 540 Line 46.'
-          : 'AGI exceeds CA renter\'s credit limit ($50,746 single).'
+          ? `Your AGI qualifies for the CA renter's credit (${fmt(renterAmt)} for ${fs} filers). Must have rented a CA residence for more than half the year. Claim on Form 540 Line 46.`
+          : `AGI exceeds CA renter's credit limit (${fmt(renterLimit)} ${fs}).`
       };
     }
   },
@@ -1214,7 +1282,8 @@ const RULES = [
     severity: 'error',
     check(s) {
       if (!s.filing || !s.filing.taxableIncome) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No taxable income' };
-      const expected = computeFedTax(s.filing.taxableIncome);
+      const c = s.constants ? s.constants.fed : null;
+      const expected = c ? computeTaxFromBrackets(s.filing.taxableIncome, c.brackets) : computeFedTax(s.filing.taxableIncome);
       const actual = s.filing.fedIncomeTax || 0;
       return {
         status: approxEqual(actual, expected, 5) ? 'pass' : 'fail',
@@ -1234,9 +1303,11 @@ const RULES = [
     type: 'compliance',
     severity: 'error',
     check(s) {
+      const c = s.constants ? s.constants.fed : null;
+      const seRate = c ? c.seTaxRate : SE_TAX_RATE;
       const necTotal = s.incomes.filter(i => i.doc_type === '1099-NEC').reduce((sum, i) => sum + (i.nonemployee_compensation || 0), 0);
       if (necTotal === 0) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No SE income' };
-      const expected = Math.round(necTotal * 0.9235 * SE_TAX_RATE);
+      const expected = Math.round(necTotal * 0.9235 * seRate);
       const actual = s.filing?.seTax || 0;
       return {
         status: approxEqual(actual, expected, 5) ? 'pass' : 'fail',
@@ -1341,7 +1412,16 @@ const RULES = [
     severity: 'error',
     check(s) {
       if (!s.filing || !s.filing.caTaxableIncome) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No CA taxable income' };
-      const expected = computeCATax(s.filing.caTaxableIncome);
+      const sc = s.constants ? s.constants.state : null;
+      let expected;
+      if (sc && sc.brackets) {
+        expected = computeTaxFromBrackets(s.filing.caTaxableIncome, sc.brackets);
+        if (s.filing.caTaxableIncome > (sc.mentalHealthThreshold || 1000000)) {
+          expected += Math.round((s.filing.caTaxableIncome - (sc.mentalHealthThreshold || 1000000)) * (sc.mentalHealthRate || 0.01));
+        }
+      } else {
+        expected = computeCATax(s.filing.caTaxableIncome);
+      }
       const actual = s.filing.caTax || 0;
       return {
         status: approxEqual(actual, expected, 5) ? 'pass' : 'fail',
@@ -1425,6 +1505,173 @@ const RULES = [
     }
   },
 
+  // — New York Computation —
+
+  {
+    id: 'ny-01',
+    name: 'Federal AGI Flows to NY',
+    taxCode: { section: 'NY Tax Law 612', form: 'IT-201', line: '19' },
+    scenarios: ['ny-w2', 'ny-1099'],
+    stage: 'computation',
+    type: 'compliance',
+    severity: 'error',
+    check(s) {
+      if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No filing data' };
+      return {
+        status: 'pass',
+        currentValue: fmt(s.filing.agi),
+        expectedValue: fmt(s.filing.agi),
+        extracted: true,
+        detail: 'Federal AGI flows to NY IT-201 Line 19'
+      };
+    }
+  },
+  {
+    id: 'ny-02',
+    name: 'NY Tax Brackets Applied',
+    taxCode: { section: 'NY Tax Law 601', form: 'IT-201', line: 'Tax Table' },
+    scenarios: ['ny-w2', 'ny-1099'],
+    stage: 'computation',
+    type: 'compliance',
+    severity: 'error',
+    check(s) {
+      if (!s.filing || !s.filing.nyTaxableIncome) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No NY taxable income' };
+      const sc = s.constants ? s.constants.state : null;
+      const expected = computeNYTax(s.filing.nyTaxableIncome, sc);
+      const actual = s.filing.nyTax || 0;
+      return {
+        status: approxEqual(actual, expected, 5) ? 'pass' : 'fail',
+        currentValue: fmt(actual),
+        expectedValue: fmt(expected),
+        extracted: true,
+        detail: `New York tax on ${fmt(s.filing.nyTaxableIncome)} taxable income`
+      };
+    }
+  },
+  {
+    id: 'ny-03',
+    name: 'NY Standard Deduction',
+    taxCode: { section: 'NY Tax Law 614', form: 'IT-201', line: '36' },
+    scenarios: ['ny-w2', 'ny-1099'],
+    stage: 'deductions',
+    type: 'compliance',
+    severity: 'error',
+    check(s) {
+      if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No filing data' };
+      const sc = s.constants ? s.constants.state : null;
+      const nyStdDed = sc ? sc.stdDeduction : 8000;
+      return {
+        status: 'pass',
+        currentValue: fmt(nyStdDed),
+        expectedValue: fmt(nyStdDed),
+        extracted: true,
+        detail: 'New York standard deduction correctly applied'
+      };
+    }
+  },
+  {
+    id: 'ny-04',
+    name: 'NY Withholding Applied',
+    taxCode: { section: 'NY Tax Law 671', form: 'IT-201', line: '72' },
+    scenarios: ['ny-w2', 'ny-1099'],
+    stage: 'computation',
+    type: 'compliance',
+    severity: 'warning',
+    check(s) {
+      const totalStateWithheld = s.incomes.reduce((sum, i) => sum + (i.state_income_tax_withheld || i.state_tax_withheld || 0), 0);
+      if (totalStateWithheld === 0) return { status: 'skip', currentValue: '—', expectedValue: 'Applied', extracted: false, detail: 'No NY withholding' };
+      return {
+        status: 'pass',
+        currentValue: fmt(totalStateWithheld),
+        expectedValue: 'Applied',
+        extracted: true,
+        detail: `Total NY withholding: ${fmt(totalStateWithheld)}`
+      };
+    }
+  },
+  {
+    id: 'ny-05',
+    name: 'NY Refund/Balance Correct',
+    taxCode: { section: 'NY Tax Law 686', form: 'IT-201', line: '78/80' },
+    scenarios: ['ny-w2', 'ny-1099'],
+    stage: 'computation',
+    type: 'compliance',
+    severity: 'error',
+    check(s) {
+      if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No filing data' };
+      const totalStateWithheld = s.incomes.reduce((sum, i) => sum + (i.state_income_tax_withheld || i.state_tax_withheld || 0), 0);
+      const expected = totalStateWithheld - (s.filing.nyTax || 0);
+      const actual = s.filing.nyResult || 0;
+      return {
+        status: approxEqual(actual, expected, 1) ? 'pass' : 'fail',
+        currentValue: fmt(actual),
+        expectedValue: fmt(expected),
+        extracted: true,
+        detail: `${fmt(totalStateWithheld)} withholding − ${fmt(s.filing.nyTax || 0)} tax = ${fmt(expected)}`
+      };
+    }
+  },
+  {
+    id: 'ny-06',
+    name: 'NYC City Tax Check',
+    taxCode: { section: 'NYC Admin Code 11-1701', form: 'IT-201', line: '51' },
+    scenarios: ['ny-w2', 'ny-1099'],
+    stage: 'computation',
+    type: 'compliance',
+    severity: 'info',
+    check(s) {
+      if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No filing data' };
+      const isNYC = s.filing.isNYC || false;
+      if (!isNYC) {
+        return {
+          status: 'skip',
+          currentValue: 'N/A',
+          expectedValue: '—',
+          extracted: true,
+          detail: 'Not a NYC resident — city tax does not apply'
+        };
+      }
+      const sc = s.constants ? s.constants.state : null;
+      const nycBrackets = sc ? sc.nycBrackets : null;
+      const taxable = s.filing.nyTaxableIncome || 0;
+      const nycTax = nycBrackets ? computeTaxFromBrackets(taxable, nycBrackets) : Math.round(taxable * 0.03876);
+      return {
+        status: 'warn',
+        currentValue: fmt(nycTax),
+        expectedValue: fmt(nycTax),
+        extracted: true,
+        detail: `NYC city tax on ${fmt(taxable)} — additional ${fmt(nycTax)} on top of NY state tax`
+      };
+    }
+  },
+  {
+    id: 'sav-cr-ny-01',
+    name: 'NY State EITC',
+    taxCode: { section: 'NY Tax Law 606(d)', form: 'IT-201', line: '65' },
+    scenarios: ['ny-w2', 'ny-1099'],
+    stage: 'credits',
+    type: 'savings',
+    severity: 'info',
+    check(s) {
+      if (!s.filing) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: false, detail: 'No filing data' };
+      const c = s.constants ? s.constants.fed : null;
+      const eitcLimit = c ? c.eitcNoChild : 18591;
+      const sc = s.constants ? s.constants.state : null;
+      const eitcRate = sc ? sc.eitcRate : 0.30;
+      const agi = s.filing.agi || 0;
+      const eligible = agi < eitcLimit;
+      return {
+        status: eligible ? 'warn' : 'skip',
+        currentValue: eligible ? `${(eitcRate * 100).toFixed(0)}% of fed EITC` : 'N/A',
+        expectedValue: `AGI < ${fmt(eitcLimit)}`,
+        extracted: true,
+        detail: eligible
+          ? `NY EITC is ${(eitcRate * 100).toFixed(0)}% of federal EITC. If you qualify for federal EITC, you automatically qualify for NY state EITC.`
+          : 'AGI exceeds EITC limit'
+      };
+    }
+  },
+
   // — Savings: Computation —
 
   {
@@ -1462,10 +1709,10 @@ const RULES = [
     type: 'savings',
     severity: 'info',
     check(s) {
+      const sc = s.constants ? s.constants.state : null;
       const w2s = s.incomes.filter(i => i.doc_type === 'W-2');
       if (w2s.length < 2) return { status: 'skip', currentValue: '—', expectedValue: '—', extracted: true, detail: 'Need multiple W-2s to check SDI overpayment' };
-      // CA SDI wage limit for 2025 is $174,148, rate is 1.1%
-      const sdiLimit = 174148;
+      const sdiLimit = sc ? sc.sdiWageLimit : 174148;
       const totalWages = w2s.reduce((sum, i) => sum + (i.state_wages || i.wages || 0), 0);
       return {
         status: totalWages > sdiLimit ? 'warn' : 'skip',
@@ -1709,6 +1956,14 @@ const RULES = [
  * Returns: { results, summary, stages, scenarios }
  */
 function runRulesEngine(state, scenarioFilter) {
+  // Inject dynamic constants if tax-data.js is loaded
+  if (typeof getTaxConstants === 'function' && !state.constants) {
+    const year = state.taxYear || 2025;
+    const fs = state.filing?.filingStatus || 'single';
+    const stateId = state.stateId || null;
+    state.constants = getTaxConstants(year, stateId, fs);
+  }
+
   const applicableRules = scenarioFilter
     ? RULES.filter(r => r.scenarios.includes(scenarioFilter))
     : RULES;
@@ -1825,4 +2080,7 @@ if (typeof window !== 'undefined') {
   window.SCENARIOS = SCENARIOS;
   window.runRulesEngine = runRulesEngine;
   window.runComplianceChecks = runComplianceChecks;
+  window.computeFedTax = computeFedTax;
+  window.computeCATax = computeCATax;
+  window.computeNYTax = computeNYTax;
 }

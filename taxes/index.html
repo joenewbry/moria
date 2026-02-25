@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tax Prep 2025 — CUBE</title>
+  <title>Tax Prep — CUBE</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../modules/shared.css">
@@ -15,19 +15,27 @@
 <nav class="back-nav">
   <div class="back-nav-inner">
     <a href="/" class="back-link"><span class="arrow">←</span> CUBE Home</a>
-    <span class="nav-module-name">TAX PREP 2025</span>
+    <span class="nav-module-name">TAX PREP</span>
+    <a href="interview.html" class="interview-link">Start Interview</a>
   </div>
 </nav>
 
 <!-- HEADER -->
 <header class="module-header">
   <span class="module-num">TX</span>
-  <div class="module-label">Tax Year 2025</div>
+  <div class="module-label" id="tax-year-label">Tax Year 2025</div>
   <h1 class="module-title">Tax Preparation Dashboard</h1>
   <p class="module-desc">
     AI-assisted tax preparation with a transparent rules engine. Upload W-2s and 1099s,
-    extract data via Claude Vision, and verify compliance across Federal 1040 and California 540.
+    extract data via Claude Vision, and verify compliance across Federal, California, and New York.
   </p>
+
+  <!-- Year Selector -->
+  <div class="year-selector" id="year-selector">
+    <button class="year-tab" data-year="2023">2023</button>
+    <button class="year-tab" data-year="2024">2024</button>
+    <button class="year-tab active" data-year="2025">2025</button>
+  </div>
 </header>
 
 <!-- CONTENT -->
@@ -262,7 +270,7 @@
       </div>
 
       <!-- California 540 -->
-      <div class="filing-card state">
+      <div class="filing-card state" id="ca-filing-card">
         <div class="filing-label">California — Form 540</div>
         <div class="filing-row">
           <span class="label">Federal AGI</span>
@@ -287,6 +295,35 @@
         <div class="filing-row" style="border-bottom:none;padding-top:12px">
           <span class="label" style="font-weight:600;color:var(--text)">Refund / Owed</span>
           <span class="value pending" id="ca-result" style="font-size:16px">—</span>
+        </div>
+      </div>
+
+      <!-- New York IT-201 (shown when state=NY) -->
+      <div class="filing-card state-ny" id="ny-filing-card" style="display:none">
+        <div class="filing-label">New York — Form IT-201</div>
+        <div class="filing-row">
+          <span class="label">Federal AGI</span>
+          <span class="value pending" id="ny-agi">—</span>
+        </div>
+        <div class="filing-row">
+          <span class="label">NY Adjustments</span>
+          <span class="value pending" id="ny-adj">—</span>
+        </div>
+        <div class="filing-row">
+          <span class="label">NY Taxable Income</span>
+          <span class="value pending" id="ny-taxable">—</span>
+        </div>
+        <div class="filing-row">
+          <span class="label">NY Tax</span>
+          <span class="value pending" id="ny-tax">—</span>
+        </div>
+        <div class="filing-row">
+          <span class="label">NY Withholding</span>
+          <span class="value pending" id="ny-withheld">—</span>
+        </div>
+        <div class="filing-row" style="border-bottom:none;padding-top:12px">
+          <span class="label" style="font-weight:600;color:var(--text)">Refund / Owed</span>
+          <span class="value pending" id="ny-result" style="font-size:16px">—</span>
         </div>
       </div>
     </div>
@@ -383,11 +420,12 @@
 <!-- FOOTER -->
 <footer class="module-footer">
   <div class="footer-brand">CUBE × TAX PREP</div>
-  <div class="footer-right">Tax Year 2025 · <a href="approach.md">Methodology</a></div>
+  <div class="footer-right"><a href="approach.md">Methodology</a></div>
 </footer>
 
 <div class="noise-overlay"></div>
 
+<script src="tax-data.js"></script>
 <script src="rules.js"></script>
 <script>
 // ── STATE ──
@@ -396,10 +434,82 @@ const state = {
   incomes: [],
   pipeline: { current: 1, steps: {} },
   completeness: { docs: 0, fields: 0, xval: 0, forms: 0, review: 0 },
-  filing: null
+  filing: null,
+  taxYear: parseInt(localStorage.getItem('taxYear') || '2025'),
+  stateId: localStorage.getItem('taxStateId') || 'california',
+  filingStatus: localStorage.getItem('taxFilingStatus') || 'single',
 };
 
 const API_BASE = '/taxes/api';
+
+// ── YEAR SELECTOR ──
+(function initYearSelector() {
+  const selector = document.getElementById('year-selector');
+  const tabs = selector.querySelectorAll('.year-tab');
+  // Set active tab from state
+  tabs.forEach(tab => {
+    tab.classList.toggle('active', parseInt(tab.dataset.year) === state.taxYear);
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.taxYear = parseInt(tab.dataset.year);
+      localStorage.setItem('taxYear', state.taxYear);
+      document.getElementById('tax-year-label').textContent = 'Tax Year ' + state.taxYear;
+      // Re-compute if we have data
+      if (state.incomes.length > 0) {
+        updateFilingOverview();
+        runCompliance();
+      }
+    });
+  });
+  document.getElementById('tax-year-label').textContent = 'Tax Year ' + state.taxYear;
+
+  // Show/hide state filing cards based on stateId
+  updateStateCards();
+})();
+
+function updateStateCards() {
+  const caCard = document.getElementById('ca-filing-card');
+  const nyCard = document.getElementById('ny-filing-card');
+  if (caCard) caCard.style.display = (state.stateId === 'california') ? '' : 'none';
+  if (nyCard) nyCard.style.display = (state.stateId === 'newYork') ? '' : 'none';
+
+  // Update filing grid columns
+  const filingGrid = document.querySelector('.filing-grid');
+  if (filingGrid) {
+    const visibleCards = filingGrid.querySelectorAll('.filing-card:not([style*="display: none"])').length;
+    filingGrid.style.gridTemplateColumns = visibleCards > 2 ? 'repeat(3, 1fr)' : visibleCards > 1 ? '1fr 1fr' : '1fr';
+  }
+}
+
+// Read interview state on load
+(function loadInterviewState() {
+  try {
+    const interviewJSON = localStorage.getItem('taxInterviewState');
+    if (interviewJSON) {
+      const interview = JSON.parse(interviewJSON);
+      if (interview.taxYear) {
+        state.taxYear = interview.taxYear;
+        localStorage.setItem('taxYear', state.taxYear);
+        document.getElementById('tax-year-label').textContent = 'Tax Year ' + state.taxYear;
+        // Update year selector tabs
+        document.querySelectorAll('.year-tab').forEach(tab => {
+          tab.classList.toggle('active', parseInt(tab.dataset.year) === state.taxYear);
+        });
+      }
+      if (interview.stateOfResidence) {
+        const stMap = { CA: 'california', NY: 'newYork' };
+        state.stateId = stMap[interview.stateOfResidence] || null;
+        localStorage.setItem('taxStateId', state.stateId || '');
+        updateStateCards();
+      }
+      if (interview.filingStatus) {
+        state.filingStatus = interview.filingStatus;
+        localStorage.setItem('taxFilingStatus', state.filingStatus);
+      }
+    }
+  } catch (e) { /* ignore */ }
+})();
 
 // ── UPLOAD HANDLING ──
 const uploadZone = document.getElementById('upload-zone');
@@ -816,20 +926,28 @@ function updateReadiness(pct) {
 }
 
 function updateFilingOverview() {
+  // Get year-appropriate constants
+  const c = typeof getTaxConstants === 'function'
+    ? getTaxConstants(state.taxYear, state.stateId, state.filingStatus)
+    : null;
+  const fed = c ? c.fed : null;
+  const sc = c ? c.state : null;
+
   const totalW2 = state.incomes.filter(i => i.doc_type === 'W-2').reduce((s, i) => s + (i.wages || 0), 0);
   const totalNEC = state.incomes.filter(i => i.doc_type === '1099-NEC').reduce((s, i) => s + (i.nonemployee_compensation || 0), 0);
   const totalINT = state.incomes.filter(i => i.doc_type === '1099-INT').reduce((s, i) => s + (i.interest_income || 0), 0);
   const totalDIV = state.incomes.filter(i => i.doc_type === '1099-DIV').reduce((s, i) => s + (i.ordinary_dividends || 0), 0);
   const totalIncome = totalW2 + totalNEC + totalINT + totalDIV;
 
+  const seRate = fed ? fed.seTaxRate : 0.153;
   const seTaxableIncome = totalNEC * 0.9235;
-  const seTax = Math.round(seTaxableIncome * 0.153);
+  const seTax = Math.round(seTaxableIncome * seRate);
   const seDeduction = Math.floor(seTax * 0.5);
   const adjustments = seDeduction;
   const agi = totalIncome - adjustments;
-  const standardDeduction = 15000;
+  const standardDeduction = fed ? fed.stdDeduction : 15000;
   const taxableIncome = Math.max(0, agi - standardDeduction);
-  const fedIncomeTax = computeFederalTax(taxableIncome);
+  const fedIncomeTax = fed ? computeTaxFromBrackets(taxableIncome, fed.brackets) : computeFederalTax(taxableIncome);
   const totalFedTax = fedIncomeTax + seTax;
   const totalFedWithheld = state.incomes.reduce((s, i) => s + (i.fed_income_tax_withheld || 0), 0);
   const fedResult = totalFedWithheld - totalFedTax;
@@ -837,7 +955,7 @@ function updateFilingOverview() {
   setVal('fed-income', formatCurrency(totalIncome));
   setVal('fed-adj', adjustments > 0 ? '−' + formatCurrency(adjustments) : '$0');
   setVal('fed-agi', formatCurrency(agi));
-  setVal('fed-deduction', 'Standard ($15,000)');
+  setVal('fed-deduction', `Standard (${formatCurrency(standardDeduction)})`);
   setVal('fed-taxable', formatCurrency(taxableIncome));
   setVal('fed-tax', formatCurrency(totalFedTax));
   setVal('fed-payments', formatCurrency(totalFedWithheld));
@@ -845,25 +963,11 @@ function updateFilingOverview() {
   fedEl.textContent = fedResult >= 0 ? '+' + formatCurrency(fedResult) : '−' + formatCurrency(Math.abs(fedResult));
   fedEl.className = 'value ' + (fedResult >= 0 ? 'refund' : 'owed');
 
-  // California
-  const caStdDeduction = 5540;
-  const caTaxable = Math.max(0, agi - caStdDeduction);
-  const caTax = computeCaliforniaTax(caTaxable);
   const totalStateWithheld = state.incomes.reduce((s, i) => s + (i.state_income_tax_withheld || i.state_tax_withheld || 0), 0);
-  const caResult = totalStateWithheld - caTax;
 
-  setVal('ca-agi', formatCurrency(agi));
-  setVal('ca-adj', '$0');
-  setVal('ca-taxable', formatCurrency(caTaxable));
-  setVal('ca-tax', formatCurrency(caTax));
-  setVal('ca-withheld', formatCurrency(totalStateWithheld));
-  const caEl = document.getElementById('ca-result');
-  caEl.textContent = caResult >= 0 ? '+' + formatCurrency(caResult) : '−' + formatCurrency(Math.abs(caResult));
-  caEl.className = 'value ' + (caResult >= 0 ? 'refund' : 'owed');
-
-  // Store filing state for compliance
-  state.filing = {
-    filingStatus: 'Single',
+  // Filing state base
+  const filingBase = {
+    filingStatus: state.filingStatus || 'single',
     totalW2Wages: totalW2,
     totalIncome,
     adjustments,
@@ -875,55 +979,61 @@ function updateFilingOverview() {
     totalFedTax,
     totalFedWithheld,
     fedResult,
-    caTaxableIncome: caTaxable,
-    caTax,
     totalStateWithheld,
-    caResult
   };
+
+  // California
+  if (state.stateId === 'california') {
+    const caStdDeduction = sc ? sc.stdDeduction : 5540;
+    const caTaxable = Math.max(0, agi - caStdDeduction);
+    let caTax = sc ? computeTaxFromBrackets(caTaxable, sc.brackets) : computeCaliforniaTax(caTaxable);
+    if (caTaxable > (sc ? sc.mentalHealthThreshold : 1000000)) {
+      caTax += Math.round((caTaxable - (sc ? sc.mentalHealthThreshold : 1000000)) * (sc ? sc.mentalHealthRate : 0.01));
+    }
+    const caResult = totalStateWithheld - caTax;
+
+    setVal('ca-agi', formatCurrency(agi));
+    setVal('ca-adj', '$0');
+    setVal('ca-taxable', formatCurrency(caTaxable));
+    setVal('ca-tax', formatCurrency(caTax));
+    setVal('ca-withheld', formatCurrency(totalStateWithheld));
+    const caEl = document.getElementById('ca-result');
+    caEl.textContent = caResult >= 0 ? '+' + formatCurrency(caResult) : '−' + formatCurrency(Math.abs(caResult));
+    caEl.className = 'value ' + (caResult >= 0 ? 'refund' : 'owed');
+
+    filingBase.caTaxableIncome = caTaxable;
+    filingBase.caTax = caTax;
+    filingBase.caResult = caResult;
+  }
+
+  // New York
+  if (state.stateId === 'newYork') {
+    const nyStdDeduction = sc ? sc.stdDeduction : 8000;
+    const nyTaxable = Math.max(0, agi - nyStdDeduction);
+    const nyTax = sc ? computeTaxFromBrackets(nyTaxable, sc.brackets) : computeNYTax(nyTaxable, null);
+    const nyResult = totalStateWithheld - nyTax;
+
+    setVal('ny-agi', formatCurrency(agi));
+    setVal('ny-adj', '$0');
+    setVal('ny-taxable', formatCurrency(nyTaxable));
+    setVal('ny-tax', formatCurrency(nyTax));
+    setVal('ny-withheld', formatCurrency(totalStateWithheld));
+    const nyEl = document.getElementById('ny-result');
+    nyEl.textContent = nyResult >= 0 ? '+' + formatCurrency(nyResult) : '−' + formatCurrency(Math.abs(nyResult));
+    nyEl.className = 'value ' + (nyResult >= 0 ? 'refund' : 'owed');
+
+    filingBase.nyTaxableIncome = nyTaxable;
+    filingBase.nyTax = nyTax;
+    filingBase.nyResult = nyResult;
+  }
+
+  state.filing = filingBase;
 }
 
 function setVal(id, text) {
   const el = document.getElementById(id);
   el.textContent = text;
   el.classList.remove('pending');
-}
-
-// 2025 Federal brackets (single)
-function computeFederalTax(taxable) {
-  const brackets = [
-    [11925, 0.10], [48475 - 11925, 0.12], [103350 - 48475, 0.22],
-    [197300 - 103350, 0.24], [250525 - 197300, 0.32],
-    [626350 - 250525, 0.35], [Infinity, 0.37]
-  ];
-  let tax = 0, remaining = taxable;
-  for (const [width, rate] of brackets) {
-    if (remaining <= 0) break;
-    const amount = Math.min(remaining, width);
-    tax += amount * rate;
-    remaining -= amount;
-  }
-  return Math.round(tax);
-}
-
-// 2025 California brackets (single)
-function computeCaliforniaTax(taxable) {
-  const brackets = [
-    [10412, 0.01], [24684 - 10412, 0.02], [38959 - 24684, 0.04],
-    [54081 - 38959, 0.06], [68350 - 54081, 0.08],
-    [349137 - 68350, 0.093], [418961 - 349137, 0.103],
-    [698271 - 418961, 0.113], [Infinity, 0.123]
-  ];
-  let tax = 0, remaining = taxable;
-  for (const [width, rate] of brackets) {
-    if (remaining <= 0) break;
-    const amount = Math.min(remaining, width);
-    tax += amount * rate;
-    remaining -= amount;
-  }
-  if (taxable > 1000000) {
-    tax += (taxable - 1000000) * 0.01;
-  }
-  return Math.round(tax);
 }
 
 // ── RULES ENGINE ──
@@ -933,7 +1043,9 @@ function runCompliance() {
   const rulesState = {
     documents: state.documents,
     incomes: state.incomes,
-    filing: state.filing
+    filing: state.filing,
+    taxYear: state.taxYear,
+    stateId: state.stateId,
   };
 
   const { results, summary, complianceSummary, savingsSummary, stages, scenarios } = runRulesEngine(rulesState);

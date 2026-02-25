@@ -1,0 +1,482 @@
+/* Tax Interview — Styles (extends shared.css + taxes.css patterns) */
+
+/* ── PROGRESS BAR ── */
+.interview-progress {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 24px 0 32px;
+  overflow-x: auto;
+}
+
+.progress-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  min-width: 90px;
+}
+
+.progress-step::after {
+  content: '';
+  position: absolute;
+  top: 16px;
+  right: -2px;
+  width: calc(100% - 36px);
+  height: 2px;
+  background: var(--border);
+  transform: translateX(50%);
+}
+
+.progress-step:last-child::after { display: none; }
+
+.progress-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: all 0.3s;
+  position: relative;
+  z-index: 2;
+}
+
+.progress-step.done .progress-dot {
+  border-color: var(--accent);
+  background: rgba(192,255,84,0.1);
+  color: var(--accent);
+}
+
+.progress-step.done::after {
+  background: var(--accent);
+}
+
+.progress-step.active .progress-dot {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(192,255,84,0.15);
+  color: var(--accent);
+}
+
+.progress-step.active::after {
+  background: var(--accent);
+  opacity: 0.4;
+}
+
+.progress-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+.progress-step.done .progress-label,
+.progress-step.active .progress-label {
+  color: var(--text-dim);
+}
+
+/* ── SECTION CONTAINER ── */
+.interview-section {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.interview-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-question {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.section-help {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+/* ── OPTION CARDS (radio-style) ── */
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.option-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.option-card:hover {
+  border-color: var(--border-glow);
+}
+
+.option-card.selected {
+  border-color: var(--accent);
+  background: rgba(192,255,84,0.04);
+}
+
+.option-card .option-label {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.option-card .option-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.option-card.selected .option-label {
+  color: var(--accent);
+}
+
+/* ── YES/NO TOGGLES ── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
+
+.toggle-row:hover {
+  border-color: var(--border-glow);
+}
+
+.toggle-row.active {
+  border-color: var(--accent);
+  background: rgba(192,255,84,0.03);
+}
+
+.toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.toggle-sublabel {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.toggle-btn {
+  display: flex;
+  gap: 4px;
+}
+
+.toggle-btn button {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn button.active {
+  border-color: var(--accent);
+  background: rgba(192,255,84,0.1);
+  color: var(--accent);
+}
+
+.toggle-btn button:hover:not(.active) {
+  border-color: var(--border-glow);
+  color: var(--text-dim);
+}
+
+/* ── INPUT FIELDS ── */
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.input-field::placeholder {
+  color: var(--text-muted);
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ── 1099 REPEATING CARDS ── */
+.income-entry-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.income-entry-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.income-entry-card .card-title {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.income-entry-card .card-title .type-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(179,136,255,0.12);
+  color: var(--purple);
+}
+
+.remove-card-btn {
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.remove-card-btn:hover {
+  color: var(--warn);
+  background: rgba(255,107,74,0.1);
+}
+
+.add-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 24px;
+}
+
+.add-card-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(192,255,84,0.03);
+}
+
+/* ── UPLOAD MINI ── */
+.upload-mini {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  margin-top: 12px;
+}
+
+.upload-mini:hover {
+  border-color: var(--accent);
+  background: rgba(192,255,84,0.02);
+}
+
+.upload-mini input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-mini .upload-mini-text {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ── NAVIGATION ── */
+.interview-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 32px;
+}
+
+.nav-btn {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 28px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover {
+  border-color: var(--border-glow);
+  color: var(--text);
+}
+
+.nav-btn.primary {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.nav-btn.primary:hover {
+  background: #d4ff7a;
+}
+
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── REVIEW SECTION ── */
+.review-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.review-group-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.review-edit-btn {
+  font-size: 12px;
+  color: var(--teal);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.review-edit-btn:hover {
+  color: var(--accent);
+}
+
+.review-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(37,37,48,0.3);
+}
+
+.review-row:last-child {
+  border-bottom: none;
+}
+
+.review-label {
+  color: var(--text-muted);
+}
+
+.review-value {
+  font-family: 'Space Mono', monospace;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── NUMBER INPUT ── */
+.input-field.money {
+  font-family: 'Space Mono', monospace;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .option-grid {
+    grid-template-columns: 1fr;
+  }
+  .input-row {
+    grid-template-columns: 1fr;
+  }
+  .progress-step {
+    min-width: 60px;
+  }
+  .progress-label {
+    font-size: 8px;
+  }
+  .section-question {
+    font-size: 18px;
+  }
+}
